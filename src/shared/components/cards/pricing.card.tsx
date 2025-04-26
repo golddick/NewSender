@@ -61,7 +61,7 @@ const PricingCard = ({ active }: { active: string }) => {
           Get Started
         </Button>
         <p className="pt-1 opacity-[.7] text-center">
-          30-day free trial of Scale features, then free forever
+           Free forever
         </p>
         </motion.div>
 
