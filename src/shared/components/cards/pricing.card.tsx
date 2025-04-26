@@ -61,7 +61,7 @@ const PricingCard = ({ active }: { active: string }) => {
           Get Started
         </Button>
         <p className="pt-1 opacity-[.7] text-center">
-           Free forever
+           Free 4 ever
         </p>
         </motion.div>
 
