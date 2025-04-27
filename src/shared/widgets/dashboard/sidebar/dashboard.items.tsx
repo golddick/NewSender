@@ -88,11 +88,8 @@ const DashboardItems = ({ bottomContent }: { bottomContent?: boolean }) => {
           {/* footer */}
           <br />
           <br />
-          <div className="w-full flex justify-center cursor-pointer">
-            <SidebarFotterLogo />
-          </div>
           <p className="text-sm text-center pt-5 pb-10">
-            © 2024 Becodemy, Inc. All rights reserved.
+            © 2024 SIXTHGRID. All rights reserved.
           </p>
         </>
       )}

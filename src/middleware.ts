@@ -33,10 +33,68 @@
 
 
 
-import { clerkMiddleware } from '@clerk/nextjs/server'
+// import { clerkMiddleware } from '@clerk/nextjs/server'
 
-export default clerkMiddleware()
+// export default clerkMiddleware()
 
+// export const config = {
+//   matcher: [
+//     // Skip Next.js internals and all static files, unless found in search params
+//     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+//     // Always run for API routes
+//     '/(api|trpc)(.*)',
+//   ],
+// }
+
+
+
+
+
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse, NextFetchEvent } from 'next/server';
+
+// Create a route matcher to define public routes
+const isPublicRoute = createRouteMatcher([
+  "/sign-in", "/sign-up", "/api/webhook", "/", "/api/subscribe"
+]);
+
+// Clerk middleware for authentication
+export default clerkMiddleware(async (auth, request) => {
+  if (!isPublicRoute(request)) {
+    const authObject = await auth();
+    
+    // Check if the user is authenticated
+    if (!authObject.userId) {
+      throw new Error("Unauthorized access");
+    }
+  }
+});
+
+// Custom middleware to handle CORS and other custom logic
+export function middleware(req: NextRequest, event: NextFetchEvent) {
+  let response =
+    req.method === "OPTIONS"
+      ? new NextResponse(null, {
+          status: 204,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          },
+        })
+      : NextResponse.next();
+
+  // Ensure CORS headers are applied to all responses, not just OPTIONS
+  if (req.method !== "OPTIONS") {
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+    response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  }
+
+  return response;
+}
+
+// Configuration for the middleware
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
@@ -44,4 +102,4 @@ export const config = {
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
-}
+};

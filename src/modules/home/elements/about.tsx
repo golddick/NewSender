@@ -64,7 +64,7 @@ export function About() {
                 About TheNews
               </span>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 font-heading">
-                Revolutionizing Newsletter Creation Since 2023
+                Revolutionizing DeNews Creation Since 2023
               </h2>
 
               <div className="space-y-4 md:space-y-6 text-neutral-600">
