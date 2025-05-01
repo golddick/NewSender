@@ -29,7 +29,7 @@ const Page = () => {
   }, []);
 
   const generateApiKeyHandler = async () => {
-    await generateApiKey().then((res) => {
+    await generateApiKey().then((res) => { 
       Cookies.set("api_key", res);
       setApiKey(res);
     });
@@ -63,7 +63,7 @@ const Page = () => {
       )}
       {activeItem === "API Access" && (
         <div>
-          {data?.plan === "LAUNCH" ? (
+          {data?.plan === "lunch" ? (
             <div className="w-full h-[90vh] flex items-center justify-center">
               <h3>
                 Please update your subscription plan to get access of API.
@@ -72,7 +72,7 @@ const Page = () => {
           ) : (
             <div className="p-4 w-full overflow-hidden">
               <h3>API KEY:</h3>
-              <p className="whitespace-pre-line overflow-hidden break-words copy-text">
+              <p className="whitespace-pre-line overflow-hidden break-words copy-text max-h-50">
                 {apiKey}
               </p>
               <div className="flex items-center">

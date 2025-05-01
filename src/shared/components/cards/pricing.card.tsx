@@ -9,13 +9,31 @@ import { motion, useInView } from "framer-motion"
 const PricingCard = ({ active }: { active: string }) => {
   const { user } = useUser();
   const history = useRouter();
+
+
   const handleSubscription = async ({ price }: { price: string }) => {
-    await stripeSubscribe({ price: price, userId: user?.id! }).then(
-      (res: any) => {
-        history.push(res);
+    if (!user || !user.id) {
+      history.push("/sign-in");
+      return;
+    }
+  
+    try {
+      const res = await stripeSubscribe({ price: price, userId: user?.id! });
+  
+      // Ensure res is valid and contains a URL
+      if (res && typeof res === "string") {
+        console.log(res, "res"); // Log the response for debugging
+        history.push(res);  // Push the URL to history for navigation
+      } else {
+        console.error("Invalid response from stripeSubscribe:", res);
+        // Handle invalid response, maybe notify the user
       }
-    );
+    } catch (error) {
+      console.error("Error during subscription:", error);
+      // Handle errors (e.g., show an error message to the user)
+    }
   };
+  
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -78,7 +96,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <br />
         <div className="border-b pb-8 border-black">
           <h5 className="font-clashDisplay uppercase text-cyber-ink text-3xl">
-            N{active === "Monthly" ? "59,999" : "45,000"} /month
+            N{active === "Monthly" ? "45,000" : "45,000"} /month
           </h5>
           <p className="text-lg">Billed {active}</p>
         </div>
@@ -99,8 +117,8 @@ const PricingCard = ({ active }: { active: string }) => {
             handleSubscription({
               price:
                 active === "Monthly"
-                  ? "price_1RICNw07CMWYBxaprPBPYKvx"
-                  : "price_1RICCq07CMWYBxap68NwbYrQ",
+                  ? "price_1RICCq07CMWYBxap68NwbYrQ"
+                  : "price_1RJWKK07CMWYBxap5Cxm7SZR",
             })
           }
         >
@@ -108,7 +126,7 @@ const PricingCard = ({ active }: { active: string }) => {
         </Button>
         <p className="pt-1 opacity-[.7] text-center">
           30-day free trial of Scale features, then $
-          {active === "Monthly" ? "42" : "49"}/mo
+          {/* {active === "Monthly" ? "42" : "49"}/mo */}
         </p>
         </motion.div>
 
@@ -145,7 +163,7 @@ const PricingCard = ({ active }: { active: string }) => {
               price:
                 active === "Monthly"
                   ? "price_1RICQ607CMWYBxapvAMn5mRS"
-                  : "price_1RICKT07CMWYBxapmdfhd3LQ",
+                  : "price_1RJXq707CMWYBxapGufdOYF4",
             })
           }
         >
@@ -153,7 +171,7 @@ const PricingCard = ({ active }: { active: string }) => {
         </Button>
         <p className="pt-1 opacity-[.7] text-center">
           30-day free trial of Scale features, then $
-          {active === "Monthly" ? "120,000" : "100,000"}/mo
+          {/* {active === "Monthly" ? "120,000" : "100,000"}/mo */}
         </p>
         </motion.div>
     </div>

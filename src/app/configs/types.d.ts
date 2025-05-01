@@ -1,3 +1,4 @@
+
 type NavItems = {
   title: String;
   link: string;
@@ -23,3 +24,16 @@ type subscribersDataTypes = {
   source: string;
   status?: string;
 };
+
+
+type MembershipTypes = {
+  _id: string,
+  userId: string,
+  stripeCustomerId: string,
+  plan: string,
+  createdAt: Date | string,
+  updatedAt: Date | string,
+}
+
+
+// export Membership

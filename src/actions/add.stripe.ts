@@ -29,7 +29,7 @@
 //           await Membership.create({
 //             userId: user?.id,
 //             stripeCustomerId: customer.id,
-//             plan: "LAUNCH",
+//             plan: "lunch",
 //           });
 //         });
 //     }
@@ -56,6 +56,8 @@ export const addStripe = async () => {
     // Get the authenticated user's ID and info
     const { userId } = await auth();
     const user = await currentUser();
+
+    console.log(userId, user, "userId and user")
 
     if (!userId || !user) {
       throw new Error("User not authenticated");

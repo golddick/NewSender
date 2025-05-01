@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import DashboardSidebar from "@/shared/widgets/dashboard/sidebar/dashboard.sidebar";
 import { Toaster } from "react-hot-toast";
 import { addStripe } from "@/actions/add.stripe";
+import { useEffect } from "react";
 
 interface ProviderProps {
   children: React.ReactNode;
@@ -26,6 +27,17 @@ export default function Providers({ children }: ProviderProps) {
   //     isStripeCustomerIdHas();
   //   }
   // }
+
+
+  useEffect(() => {
+    const isStripeCustomerIdHas = async () => {
+      await addStripe();
+    };
+  
+    if (isLoaded && user) {
+      isStripeCustomerIdHas();
+    }
+  }, [isLoaded, user]);
 
   return (
     <NextUIProvider>

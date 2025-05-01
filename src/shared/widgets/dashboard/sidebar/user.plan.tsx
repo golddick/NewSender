@@ -11,13 +11,55 @@ const UserPlan = () => {
     useGetMembership();
   const history = useRouter();
 
+  console.log(data, "data from user plan");
+  console.log(membershipData, "mem from user plan");
+
+  // const handleManage = async () => {
+  //   try {
+  //     const res = await manageSubscription({
+  //       customerId: membershipData?.stripeCustomerId,
+  //     });
+  
+  //     if ("url" in res) {
+  //       history.push(res.url);
+  //     } else {
+  //       console.error("Stripe error:", res.error);
+  //       // Optionally show a toast or alert here
+  //     }
+  //   } catch (error) {
+  //     console.error("Unexpected error during subscription:", error);
+  //   }
+  // };
+
+
   const handleManage = async () => {
-    await manageSubscription({
-      customerId: membershipData?.stripeCustomerId,
-    }).then((res: any) => {
-      history.push(res);
-    });
+    const customerId = membershipData?.stripeCustomerId;
+
+    if (!customerId) {
+      console.error("Missing Stripe customer ID");
+      // Optionally show a toast or message to the user
+      return;
+    }
+
+    try {
+      const res = await manageSubscription({ customerId });
+
+      console.log(res, "res from manage subscription");
+
+      if ("url" in res) {
+        console.log("Redirecting to Stripe billing portal:", res.url);
+        history.push(res.url); // or window.location.href = res.url
+      
+      } else {
+        console.error("Stripe error:", res.error);
+        // Optionally notify user here
+      }
+    } catch (error) {
+      console.error("Unexpected error during subscription:", error);
+      // Optionally notify user here
+    }
   };
+  
 
   return (
     <div className="w-full my-3 p-3 bg-red-700 rounded hover:shadow-xl cursor-pointer">
@@ -42,7 +84,7 @@ const UserPlan = () => {
       />
       <h6 className="text-white">
         {loading ? "..." : data?.length} of{" "}
-        {membershipData?.plan === "LAUNCH"
+        {membershipData?.plan === "lunch"
           ? "2500"
           : membershipData?.plan === "SCALE"
           ? "10,000"
