@@ -13,6 +13,7 @@ import {
 import { Snippet } from "@nextui-org/react";
 import { ICONS } from "@/shared/utils/icons";
 import toast from "react-hot-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Page = () => {
   const { activeItem } = useSettingsFilter();
@@ -72,9 +73,13 @@ const Page = () => {
           ) : (
             <div className="p-4 w-full overflow-hidden">
               <h3>API KEY:</h3>
-              <p className="whitespace-pre-line overflow-hidden break-words copy-text max-h-50">
+              <ScrollArea className="max-h-[200px] w-full rounded-md border p-4 whitespace-pre-line break-words copy-text flex-wrap flex">
                 {apiKey}
-              </p>
+              </ScrollArea>
+
+              {/* <p className="whitespace-pre-line max-h-[200px]  overflow-hidden break-words copy-text h-50 rounded-md border p-4 ">
+                {apiKey}
+              </p> */}
               <div className="flex items-center">
                 <div
                   className="h-[38px] w-[90px] rounded my-3 cursor-pointer bg-[#DFE7FF] flex items-center justify-center"

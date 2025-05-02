@@ -11,6 +11,8 @@ export async function POST(req: NextRequest, res: any) {
 
     const decoded: any = jwt.verify(apiKey, process.env.JWT_SECRET_KEY!);
 
+    // console.log("Decoded API Key:", decoded);
+
     await connectDb();
     // check if subscribers already exists
     const isSubscriberExist = await Subscriber.findOne({
@@ -19,13 +21,19 @@ export async function POST(req: NextRequest, res: any) {
     });
 
     if (isSubscriberExist) {
-      return NextResponse.json({ error: "Email already exists!" });
+      return NextResponse.json(
+        { error: "Email already exists!" },
+        { status: 409 } // Conflict
+      );
     }
 
     // Validate email
     const validationResponse = await validateEmail({ email: data.email });
     if (validationResponse.status === "invalid") {
-      return NextResponse.json({ error: "Email not valid!" });
+      return NextResponse.json(
+        { error: "Email not valid!" },
+        { status: 400 } // Bad Request
+      );
     }
 
     // Create new subscriber

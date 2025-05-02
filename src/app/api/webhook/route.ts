@@ -150,6 +150,8 @@ const webhookHandler = async (req: NextRequest) => {
     if (event.type.startsWith("customer.subscription.")) {
       const subscription = event.data.object as Stripe.Subscription;
       const customerId = subscription.customer;
+
+      console.log(subscription, 'customerId', customerId);
       
       // Get the first product from subscription
       const productId = subscription.items.data[0]?.price?.product;
