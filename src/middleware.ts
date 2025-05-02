@@ -1,44 +1,48 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse, NextFetchEvent } from "next/server";
+// middleware.ts or src/middleware.ts
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest, event: NextFetchEvent) {
-  // Create a response object for OPTIONS requests or a default response for others
-  let response = req.method === "OPTIONS" ? new NextResponse(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*", // Adjust as necessary
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    },
-  }) : NextResponse.next();
-
-  // Ensure CORS headers are applied to all responses, not just OPTIONS
-  if (req.method !== "OPTIONS") {
-    response.headers.set("Access-Control-Allow-Origin", "*");
-    response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-    response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  }
-
-  return response;
-}
-
-import { createRouteMatcher } from "@clerk/nextjs/server";
-
+// Define your public routes (Clerk shouldn't protect these)
 const isPublicRoute = createRouteMatcher([
-  "/sign-in", "/sign-up", "/api/webhook", "/", "/api/subscribe"
+  "/sign-in", 
+  "/sign-up", 
+  "/api/webhook", 
+  "/", 
+  "/api/subscribe"
 ]);
 
-export default clerkMiddleware((auth, req) => {
-  if (isPublicRoute(req)) {
-    return NextResponse.next();
+const middleware = clerkMiddleware(async (auth, req) => {
+  // Handle CORS
+  if (req.method === "OPTIONS") {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      },
+    });
   }
-  return auth().then(() => NextResponse.next());
+
+  // Set CORS headers on all responses
+  const res = NextResponse.next();
+  res.headers.set("Access-Control-Allow-Origin", "*");
+  res.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  // Bypass Clerk auth for public routes
+  if (isPublicRoute(req)) return res;
+
+  await auth(); // Will throw if not authenticated
+  return res;
 });
 
-export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)",  "/(api|trpc)(.*)"],
-};
+export default middleware;
 
+export const config = {
+  matcher: ["/((?!_next|.*\\..*).*)", "/(api|trpc)(.*)"],
+};
 
 
 

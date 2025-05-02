@@ -6,7 +6,8 @@ interface MonthData {
 }
 
 export async function generateAnalyticsData<T extends Document>(
-  model: Model<T>
+  model: Model<T>,
+  ownerId: string
 ): Promise<{ last7Months: MonthData[] }> {
   const last7Months: MonthData[] = [];
   const currentDate = new Date();
@@ -36,6 +37,7 @@ export async function generateAnalyticsData<T extends Document>(
         $gte: startDate,
         $lt: endDate,
       },
+      newsLetterOwnerId: ownerId,
     });
 
     last7Months.push({ month: monthYear, count });

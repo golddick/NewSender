@@ -103,7 +103,7 @@ const DashboardOverViewCard = () => {
       100;
   } else {
     comparePercentage = 100;
-  }
+  } 
 
   return (
     <div className="w-full xl:py-4 flex bg-white border rounded">

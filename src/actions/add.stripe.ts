@@ -2,16 +2,17 @@
 
 // import Membership from "@/models/membership.model";
 // import { connectDb } from "@/shared/libs/db";
-// import { auth, currentUser } from "@clerk/nextjs/server";
+// import { currentUser } from "@clerk/nextjs/server";
 // import Stripe from "stripe";
 
 // export const addStripe = async () => {
 //   try {
 //     await connectDb();
-//      const { userId } = await auth();
 //     const user = await currentUser();
 
-//     const membership = await Membership.findOne({  userId });
+//     console.log(user, "user");
+
+//     const membership = await Membership.findOne({  userId: user?.id });
 
 //     if (membership) {
 //       return;
@@ -54,17 +55,17 @@ export const addStripe = async () => {
     await connectDb();
 
     // Get the authenticated user's ID and info
-    const { userId } = await auth();
     const user = await currentUser();
 
-    console.log(userId, user, "userId and user")
+    console.log( user, "userId and user")
+    // console.log(userId, user, "userId and user")
 
-    if (!userId || !user) {
+    if ( !user) {
       throw new Error("User not authenticated");
     }
 
     // Check if the user already has a membership
-    const existingMembership = await Membership.findOne({ userId });
+    const existingMembership = await Membership.findOne({ userId: user.id });
 
     if (existingMembership) {
       return { message: "Membership already exists." };
@@ -83,7 +84,7 @@ export const addStripe = async () => {
 
     // Create membership in the database
     await Membership.create({
-      userId,
+      userId: user.id,
       stripeCustomerId: customer.id,
       plan: "lunch",
     });
