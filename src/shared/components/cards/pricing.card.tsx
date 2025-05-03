@@ -5,34 +5,63 @@ import { useUser } from "@clerk/nextjs";
 import { Button } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
 import { motion, useInView } from "framer-motion"
+import { paystackSubscribe } from "@/actions/paystack.subscribe";
+import { toast } from "sonner";
+
 
 const PricingCard = ({ active }: { active: string }) => {
+  
   const { user } = useUser();
   const history = useRouter();
 
 
-  const handleSubscription = async ({ price }: { price: string }) => {
+  const handleSubscription = async ({ planCode }: { planCode: string }) => {
     if (!user || !user.id) {
       history.push("/sign-in");
       return;
     }
-  
+
     try {
-      const res = await stripeSubscribe({ price: price, userId: user?.id! });
-  
-      // Ensure res is valid and contains a URL
-      if (res && typeof res === "string") {
-        console.log(res, "res"); // Log the response for debugging
-        history.push(res);  // Push the URL to history for navigation
+      const authorizationUrl = await paystackSubscribe({ 
+        planCode,
+        userId: user.id 
+      });
+
+      if (authorizationUrl) {
+        window.location.href = authorizationUrl;
+        // history.push(authorizationUrl);
       } else {
-        console.error("Invalid response from stripeSubscribe:", res);
-        // Handle invalid response, maybe notify the user
+        console.error("Invalid response from stripeSubscribe:", authorizationUrl);
+        toast.error("Failed to initiate payment");
       }
-    } catch (error) {
-      console.error("Error during subscription:", error);
-      // Handle errors (e.g., show an error message to the user)
-    }
+    } catch (error: any) {
+      toast.error(error.message || "Payment failed");
+    } 
   };
+
+
+  // const handleSubscription = async ({ price }: { price: string }) => {
+  //   if (!user || !user.id) {
+  //     history.push("/sign-in");
+  //     return;
+  //   }
+  
+  //   try {
+  //     const res = await stripeSubscribe({ price: price, userId: user?.id! });
+  
+  //     // Ensure res is valid and contains a URL
+  //     if (res && typeof res === "string") {
+  //       console.log(res, "res"); // Log the response for debugging
+  //       history.push(res);  // Push the URL to history for navigation
+  //     } else {
+  //       console.error("Invalid response from stripeSubscribe:", res);
+  //       // Handle invalid response, maybe notify the user
+  //     }
+  //   } catch (error) {
+  //     console.error("Error during subscription:", error);
+  //     // Handle errors (e.g., show an error message to the user)
+  //   }
+  // };
   
 
   const itemVariants = {
@@ -56,7 +85,7 @@ const PricingCard = ({ active }: { active: string }) => {
           className={`bg-dark-700 border border-dark-600 text-white hover:shadow-gold/10 transition-all md:w-[400px]  rounded p-5 my-5 md:my-0  shadow-gold-700 shadow-sm`}
         >
         <h5 className="font-clashDisplay uppercase text-cyber-ink text-3xl pb-8 border-b border-[#000]">
-          Lunch
+          FREE
         </h5>
         <br />
         <div className="border-b pb-8 border-[#000] flex gap-4 items-center">
@@ -91,7 +120,7 @@ const PricingCard = ({ active }: { active: string }) => {
 
        
         <h5 className="font-clashDisplay uppercase text-cyber-ink text-3xl pb-8 border-b border-[#000]">
-          GROW
+          LUNCH
         </h5>
         <br />
         <div className="border-b pb-8 border-black">
@@ -115,10 +144,9 @@ const PricingCard = ({ active }: { active: string }) => {
           className="w-full text-xl !py-6"
           onClick={() =>
             handleSubscription({
-              price:
-                active === "Monthly"
-                  ? "price_1RICCq07CMWYBxap68NwbYrQ"
-                  : "price_1RJWKK07CMWYBxap5Cxm7SZR",
+              planCode: active === "Monthly" 
+                ? "PLN_qqs88g3s909068i" 
+                : "PLN_zpaqmox70eunvd9",
             })
           }
         >
@@ -160,10 +188,9 @@ const PricingCard = ({ active }: { active: string }) => {
           className="w-full text-xl !py-6"
           onClick={() =>
             handleSubscription({
-              price:
-                active === "Monthly"
-                  ? "price_1RICQ607CMWYBxapvAMn5mRS"
-                  : "price_1RJXq707CMWYBxapGufdOYF4",
+              planCode: active === "Monthly" 
+                ? "PLN_4idp8h4m8ptak6k" 
+                : "PLN_l1ck8bvf49k9nhx",
             })
           }
         >

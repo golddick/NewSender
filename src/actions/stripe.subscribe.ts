@@ -11,7 +11,7 @@ export const stripeSubscribe = async ({
   price,
   userId,
 }: {
-  price: string;
+  price: string; 
   userId: string;
 }) => {
   try {

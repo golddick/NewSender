@@ -27,12 +27,18 @@ type subscribersDataTypes = {
 
 
 type MembershipTypes = {
-  _id: string,
-  userId: string,
-  stripeCustomerId: string,
-  plan: string,
-  createdAt: Date | string,
-  updatedAt: Date | string,
+  _id: string;
+  userId: string;
+  email?: string; 
+  paystackCustomerId: string; 
+  paystackSubscriptionId?: string; 
+  plan: "FREE" | "LUNCH" | "GROW" | "SCALE"; 
+  subscriptionStatus?: "active" | "inactive" | "past_due" | "cancelled";
+  currentPeriodEnd?: Date | string;
+  lastPaymentDate?: Date | string;
+  cancellationDate?: Date | string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 

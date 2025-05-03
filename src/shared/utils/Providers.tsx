@@ -6,6 +6,7 @@ import DashboardSidebar from "@/shared/widgets/dashboard/sidebar/dashboard.sideb
 import { Toaster } from "react-hot-toast";
 import { addStripe } from "@/actions/add.stripe";
 import { useEffect } from "react";
+import { addPaystack } from "@/actions/add.paystack";
 
 interface ProviderProps {
   children: React.ReactNode;
@@ -16,26 +17,26 @@ export default function Providers({ children }: ProviderProps) {
 
   const { isLoaded, user } = useUser();
 
-  // const isStripeCustomerIdHas = async () => {
-  //   await addStripe();
-  // };
 
-  // if (!isLoaded) {
-  //   return null;
-  // } else {
-  //   if (user) {
+
+  // useEffect(() => {
+  //   const isStripeCustomerIdHas = async () => {
+  //     await addStripe();
+  //   };
+  
+  //   if (isLoaded && user) {
   //     isStripeCustomerIdHas();
   //   }
-  // }
+  // }, [isLoaded, user]);
 
 
   useEffect(() => {
-    const isStripeCustomerIdHas = async () => {
-      await addStripe();
+    const isPaystackCustomerIdHas = async () => {
+      await addPaystack();
     };
   
     if (isLoaded && user) {
-      isStripeCustomerIdHas();
+      isPaystackCustomerIdHas();
     }
   }, [isLoaded, user]);
 
