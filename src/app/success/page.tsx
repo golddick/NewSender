@@ -1,18 +1,12 @@
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import React from 'react'
+// app/success/page.tsx
+import { Suspense } from "react";
+import SuccessPage from "./_component/SuccessPage";
+import { Loader } from "lucide-react";
 
-const Page = () => {
+export default function Page() {
   return (
-    <div className='w-full h-screen grid place-items-center'>
-        <h5>Congratulation you subscribed successfully!</h5>
-        <Link href={'/'}>
-        <Button>
-          Return Home
-        </Button>
-        </Link>
-    </div>
-  )
+    <Suspense fallback={<div className="grid place-items-center h-screen"><Loader className=" size-6 animate-spin"/></div>}>
+      <SuccessPage />
+    </Suspense>
+  );
 }
-
-export default Page

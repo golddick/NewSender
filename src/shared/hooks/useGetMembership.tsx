@@ -1,37 +1,3 @@
-// "use client";
-
-// import { getMemberShip } from "@/actions/get.membership";
-// import { useEffect, useState } from "react";
-
-// const useGetMembership = () => {
-//   const [data, setData] = useState<MembershipTypes[]>([]);
-//   const [loading, setLoading] = useState(true);
-
-//   console.log(data, "data from useGetMembership");
-
-//   useEffect(() => {
-//     handleGetMembership();
-//   }, []);
-
-//   const handleGetMembership = async () => {
-//     await getMemberShip()
-//       .then((res) => {
-//         setData(res);
-//         setLoading(false);
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//         setLoading(false);
-//       });
-//   };
-
-//   return { data, loading };
-// };
-
-// export default useGetMembership;
-
-
-
 
 import { useEffect, useState } from "react";
 import { getMemberShip } from "@/actions/get.membership";

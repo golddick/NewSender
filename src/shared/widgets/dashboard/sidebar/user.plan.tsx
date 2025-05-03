@@ -99,8 +99,7 @@
 // export default UserPlan;
 
 
-
-
+"use client";
 
 import { managePaystackSubscription } from "@/actions/manage.paystack.subcription";
 import useGetMembership from "@/shared/hooks/useGetMembership";
@@ -113,6 +112,7 @@ import { toast } from "sonner";
 const UserPlan = () => {
   const { data: subscribers, loading: subscribersLoading } = useSubscribersData();
   const { data: membership, loading: membershipLoading } = useGetMembership();
+
   const router = useRouter();
 
   const handleManageSubscription = async () => {
@@ -130,8 +130,7 @@ const UserPlan = () => {
 
       toast.dismiss("manage-sub");
 
-      if ('url' in result) {
-        // For external URLs, use window.location
+      if ("url" in result) {
         window.location.href = result.url;
       } else {
         toast.error(result.error || "Failed to access payment portal");
@@ -144,26 +143,17 @@ const UserPlan = () => {
   };
 
   const getSubscriberLimit = () => {
-    if (!membership) return "0";
-    switch (membership.plan.toLowerCase()) {
-      case "lunch":
-        return "2,500";
-      case "grow":
-        return "10,000";
-      case "scale":
-        return "100,000";
-      default:
-        return "500"; // Free plan limit
-    }
+    if (!membership) return 500;
+    return membership.subscriberLimit || 500; // fallback to FREE limit
   };
 
   return (
     <div className="w-full my-3 p-4 bg-red-700 rounded-lg hover:shadow-xl transition-shadow">
       <div className="w-full flex items-center justify-between">
         <h5 className="text-lg font-medium text-white">
-          {membershipLoading ? "Loading..." : `${membership?.plan || 'FREE'} Plan`}
+          {membershipLoading ? "Loading..." : `${membership?.plan || "FREE"} Plan`}
         </h5>
-        
+
         {membership?.subscriptionStatus === "active" && (
           <button
             className="flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 hover:bg-red-600 transition-colors"
@@ -172,7 +162,7 @@ const UserPlan = () => {
           >
             <span className="text-white text-xl">{ICONS.electric}</span>
             <span className="text-white text-sm">
-              {membership?.plan === "FREE" ? "Upgrade" : "Manage"}
+              {membership?.plan?.toUpperCase() === "FREE" ? "Upgrade" : "Manage"}
             </span>
           </button>
         )}
@@ -183,7 +173,7 @@ const UserPlan = () => {
         <Slider
           aria-label="Subscriber usage"
           value={subscribers?.length || 0}
-          maxValue={parseInt(getSubscriberLimit().replace(/,/g, '')) || 1}
+          maxValue={getSubscriberLimit()}
           hideThumb={true}
           classNames={{
             base: "max-w-md",
@@ -192,7 +182,7 @@ const UserPlan = () => {
           }}
         />
         <h6 className="text-white mt-1">
-          {subscribersLoading ? "Loading..." : subscribers?.length || 0} of {getSubscriberLimit()} used
+          {subscribersLoading ? "Loading..." : subscribers?.length || 0} of {getSubscriberLimit().toLocaleString()} used
         </h6>
       </div>
     </div>

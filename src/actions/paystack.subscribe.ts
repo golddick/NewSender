@@ -6,10 +6,10 @@ import { currentUser } from "@clerk/nextjs/server";
 import axios from "axios";
 
 const PLAN_CONFIG = {
-  "PLN_qqs88g3s909068i": { amount: 45000, name: "Lunch Monthly" },
-  "PLN_zpaqmox70eunvd9": { amount: 45000, name: "Lunch Yearly" },
-  "PLN_4idp8h4m8ptak6k": { amount: 120000, name: "Scale Monthly" },
-  "PLN_l1ck8bvf49k9nhx": { amount: 100000, name: "Scale Yearly" },
+  "PLN_qqs88g3s909068i": { amount: 50000, name: "LUNCH" },
+  "PLN_zpaqmox70eunvd9": { amount: 540000, name: "LUNCH" },
+  "PLN_4idp8h4m8ptak6k": { amount: 120000, name: "SCALE" },
+  "PLN_l1ck8bvf49k9nhx": { amount: 1000000, name: "SCALE" },
 };
 
 export const paystackSubscribe = async ({

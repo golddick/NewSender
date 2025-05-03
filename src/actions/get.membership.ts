@@ -3,30 +3,6 @@
 import Membership from "@/models/membership.model";
 import { connectDb } from "@/shared/libs/db";
 import { currentUser } from "@clerk/nextjs/server";
-// import { currentUser } from "@clerk/nextjs";
-
-// export const getMemberShip = async () => {
-//   try {
-//     await connectDb().then(async (res) => {
-//       const user = await currentUser();
-
-//       // console.log(user, "user server")
-//       console.log(user?.id, "user id server")
-//       if (user) {
-//         const membership = await Membership.findOne({
-//           userId: user?.id,
-//         });
-//         console.log(membership, 'mem server')
-//         return membership;
-
-//       }
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
-
 
 export const getMemberShip = async () => {
   try {
@@ -50,28 +26,3 @@ export const getMemberShip = async () => {
   }
 };
 
-
-
-// "use server";
-
-// import Membership from "@/models/membership.model";
-// import { connectDb } from "@/shared/libs/db";
-// import { auth } from "@clerk/nextjs/server";
-
-// export const getMemberShip = async () => {
-//   try {
-//     await connectDb();
-
-//     const { userId } = await auth();
-//     if (userId) {
-//       const membership = await Membership.findOne({ userId });
-//       console.log(membership, "membership")
-//       return membership;
-//     }
-
-//     return null;
-//   } catch (error) {
-//     console.error("Failed to get membership:", error);
-//     return null;
-//   }
-// };

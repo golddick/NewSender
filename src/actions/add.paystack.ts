@@ -57,6 +57,8 @@ export const addPaystack = async () => {
       email: email,
       plan: "FREE",
       subscriptionStatus: "inactive",
+      subscriberLimit: 500, // FREE plan limit
+      emailLimit: 2,        // FREE plan email limit
     };
 
     let result;
@@ -66,7 +68,6 @@ export const addPaystack = async () => {
       result = await Membership.create(membershipData);
     }
 
-    // ✅ Final log after successful DB operation
     console.log("Membership saved or updated:", result);
 
     return {
