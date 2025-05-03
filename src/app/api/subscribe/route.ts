@@ -9,9 +9,11 @@ export async function POST(req: NextRequest, res: any) {
     const data = await req.json();
     const apiKey = data.apiKey;
 
+    console.log(data, "API Key Data")
+
     const decoded: any = jwt.verify(apiKey, process.env.JWT_SECRET_KEY!);
 
-    // console.log("Decoded API Key:", decoded);
+    console.log("Decoded API Key:", decoded);
 
     await connectDb();
     // check if subscribers already exists
@@ -26,6 +28,7 @@ export async function POST(req: NextRequest, res: any) {
         { status: 409 } // Conflict
       );
     }
+
 
     // Validate email
     const validationResponse = await validateEmail({ email: data.email });

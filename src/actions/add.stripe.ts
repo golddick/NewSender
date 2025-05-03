@@ -58,7 +58,6 @@ export const addStripe = async () => {
     const user = await currentUser();
 
     console.log( user, "userId and user")
-    // console.log(userId, user, "userId and user")
 
     if ( !user) {
       throw new Error("User not authenticated");
@@ -81,7 +80,7 @@ export const addStripe = async () => {
       email: user.emailAddresses?.[0]?.emailAddress,
       name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
     });
-
+ 
     // Create membership in the database
     await Membership.create({
       userId: user.id,
