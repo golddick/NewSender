@@ -133,7 +133,7 @@ async function handleSubscriptionActivation(data: PaystackEventData["data"]) {
       {
         $set: {
           plan: planName,
-          paystackSubscriptionId: data.subscription_code,
+          paystackSubscriptionId: data.subscription_code || data.subscription?.subscription_code,
           subscriptionStatus: "active",
           currentPeriodEnd: new Date(data.next_payment_date),
           lastPaymentDate: new Date(),

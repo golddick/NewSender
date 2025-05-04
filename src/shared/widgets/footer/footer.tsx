@@ -33,7 +33,7 @@ export function XFooter() {
   }
 
   return (
-    <footer className="bg-dark-800 text-white border-t border-dark-700 pt-16 pb-8">
+    <footer className="bg-black text-white  border-none pt-16 pb-8">
       <div className="container mx-auto px-4">
         <motion.div
           variants={containerVariants}
@@ -63,7 +63,7 @@ export function XFooter() {
           <motion.div variants={itemVariants}>
             <h4 className="text-lg font-bold mb-5 text-white">Company</h4>
             <ul className="space-y-3">
-              <FooterLink href="#about">About</FooterLink>
+              <FooterLink href="/about">About</FooterLink>
               <FooterLink href="#features">Features</FooterLink>
               <FooterLink href="#pricing">Pricing</FooterLink>
             </ul>

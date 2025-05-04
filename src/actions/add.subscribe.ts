@@ -1,10 +1,12 @@
+
 "use server";
 
 import Subscriber from "@/models/subscriber.model";
+import Membership from "@/models/membership.model";
+import MembershipUsage from "@/models/membershipUsage.model";
 import { connectDb } from "@/shared/libs/db";
 import { validateEmail } from "@/shared/utils/ZeroBounceApi";
 import { clerkClient } from "@clerk/nextjs/server";
-
 
 export const subscribe = async ({
   email,
@@ -16,26 +18,41 @@ export const subscribe = async ({
   try {
     await connectDb();
 
-    const client = await clerkClient()
-
-    // first we need to fetch all users
+    const client = await clerkClient();
     const allUsersResponse = await client.users.getUserList();
     const allUsers = allUsersResponse.data;
 
-    console.log("allUsers", allUsers);
-    console.log(allUsersResponse,'allUsersResponse')
-
-    // now we need to find our newsletter owner
     const newsletterOwner = allUsers.find((i) => i.username === username);
-
     if (!newsletterOwner) {
-      throw Error("Username is not vaild!");
+      throw Error("Username is not valid!");
     }
 
-    // check if subscribers already exists
+    console.log("Newsletter Owner ID:", newsletterOwner.id);
+
+    // Fetch Membership
+    const membership = await Membership.findOne({ userId: newsletterOwner.id });
+    if (!membership) {
+      return { error: "No active plan found for this user." };
+    }
+
+    const currentMonth = new Date().toISOString().slice(0, 7); // e.g. "2025-05"
+
+    // Get current usage
+    const usage = await MembershipUsage.findOne({
+      userId: newsletterOwner.id,
+      month: currentMonth,
+    });
+
+    const subscriberCount = usage?.subscribersAdded ?? 0;
+
+    if (subscriberCount >= (membership.subscriberLimit ?? 0)) {
+      return { error: "Monthly subscriber limit reached." };
+    }
+
+    // Check for duplicate subscriber
     const isSubscriberExist = await Subscriber.findOne({
       email,
-      newsLetterOwnerId: newsletterOwner?.id,
+      newsLetterOwnerId: newsletterOwner.id,
     });
 
     if (isSubscriberExist) {
@@ -51,15 +68,22 @@ export const subscribe = async ({
     // Create new subscriber
     const subscriber = await Subscriber.create({
       email,
-      newsLetterOwnerId: newsletterOwner?.id,
+      newsLetterOwnerId: newsletterOwner.id,
       source: "By TheNews website",
       status: "Subscribed",
     });
+
+    // Increment usage
+    await MembershipUsage.updateOne(
+      { userId: newsletterOwner.id, month: currentMonth },
+      { $inc: { subscribersAdded: 1 } },
+      { upsert: true }
+    );
+
     return subscriber;
+
   } catch (error) {
     console.error(error);
     return { error: "An error occurred while subscribing." };
   }
 };
-
-

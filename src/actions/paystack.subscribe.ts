@@ -70,6 +70,7 @@ export const paystackSubscribe = async ({
         metadata: {
           userId,
           planName: planConfig.name,
+          planCode
         },
         callback_url: `${websiteUrl}/success`,
       },

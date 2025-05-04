@@ -44,7 +44,7 @@ import type React from "react"
 
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
-import { PaintBucket, Wand2, LayoutTemplate, Clock, Zap, Users } from "lucide-react"
+import { PaintBucket, Wand2, LayoutTemplate, Clock, Zap, Users, CheckCircle, ArrowRight, Code } from "lucide-react"
 import Image from "next/image"
 
 export function FeatureHighlight() {
@@ -87,9 +87,9 @@ export function FeatureHighlight() {
       description: "Create beautiful newsletters with our intuitive drag-and-drop editor. No coding required.",
     },
     {
-      icon: <Users />,
-      title: "Audience Segmentation",
-      description: "Target specific segments of your audience based on their behavior and preferences.",
+      icon: <Code />,
+      title: "Developer API",
+      description: "Integrate email marketing into your applications with our easy-to-use RESTful API.",
     },
   ]
 
@@ -113,8 +113,8 @@ export function FeatureHighlight() {
   ]
 
   return (
-    <section id="features" className="py-16 md:py-24 bg-dark-800 text-white relative">
-      <div className="absolute left-0 top-1/4 w-1/3 h-1/2 bg-gradient-to-r from-gold-500/10 to-transparent"></div>
+    <section id="features" className="py-16 md:py-24 bg-black text-white relative">
+      {/* <div className="absolute left-0 top-1/4 w-1/3 h-1/2 bg-gradient-to-r from-gold-500/10 to-transparent"></div> */}
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -171,7 +171,7 @@ export function FeatureHighlight() {
           </motion.div>
 
           <motion.div variants={itemVariants} className="mt-16 md:mt-20 relative">
-            <div className="bg-dark-700 border border-dark-600 rounded-xl p-6 md:p-10 overflow-hidden shadow-dark">
+            {/* <div className="bg-dark-700 border border-dark-600 rounded-xl p-6  overflow-hidden shadow-dark">
               <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
                 <div>
                   <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6 font-heading text-white">
@@ -197,19 +197,118 @@ export function FeatureHighlight() {
                   </ul>
                 </div>
                 <div className="relative">
-                  <div className="rounded-xl border border-dark-500 shadow-dark overflow-hidden">
-                    <Image
-                      src="/GeeLogo.png"
-                      width={600}
-                      height={400}
-                      alt="Analytics Dashboard"
-                      className="w-full h-auto"
-                    />
+                   <div className="w-full">
+              <div className="bg-gray-800 rounded-lg p-4  shadow-xl">
+                <div className="flex items-center mb-4">
+                  <div className="flex space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   </div>
+                  <div className="ml-4 text-gray-400 text-sm">Code Example</div>
+                </div>
+                        <pre className="bg-gray-900 p-4 rounded-md text-green-400 overflow-x-auto">
+              {`// Initialize the theNews client
+              const theNews = require('thenews-sdk');
+              const client = new theNews('YOUR_API_KEY');
+
+              // Create a newsletter campaign
+              async function createCampaign() {
+                try {
+                  const campaign = await client.campaigns.create({
+                    name: 'Product Launch Newsletter',
+                    subject: 'Introducing Our New Product!',
+                    fromName: 'Your Company',
+                    fromEmail: 'news@yourcompany.com',
+                    listId: 'list_123',
+                    content: {
+                      html: '<h1>Hello!</h1><p>Check out our new product...</p>',
+                      text: 'Hello! Check out our new product...'
+                    }
+                  });
+                  
+                  console.log('Campaign created:', campaign.id);
+                  return campaign;
+                } catch (error) {
+                  console.error('Error creating campaign:', error);
+                }
+              }`}
+                              </pre>
+                            </div>
+                          </div>
                   <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-gold-500/20 rounded-full blur-2xl opacity-70 hidden md:block"></div>
                 </div>
               </div>
-            </div>
+            </div> */}
+            
+             <div className="flex flex-col gap-4 items-center">
+                        <div className="w-full mb-8 md:mb-0">
+                          <h2 className="text-3xl md:text-4xl font-bold mb-4">Built for <span className="text-gold-700">Developers</span></h2>
+                          <p className="text-xl text-gray-300 mb-6">Integrate newsletter functionality into your applications with our simple and powerful API.</p>
+                          
+                          <ul className="space-y-4 mb-8">
+                            <li className="flex items-start">
+                              <CheckCircle className="h-6 w-6 text-gold-700 mr-2 mt-1 flex-shrink-0" />
+                              <span>RESTful API with comprehensive documentation</span>
+                            </li>
+                            <li className="flex items-start">
+                              <CheckCircle className="h-6 w-6 text-gold-700 mr-2 mt-1 flex-shrink-0" />
+                              <span>Detailed API logs and error reporting</span>
+                            </li>
+                          </ul>
+                          
+                          <a href="/documentation" className="inline-flex items-center bg-gold-700 hover:bg-gold-700 text-black font-medium py-3 px-6 rounded-md transition-colors text-lg">
+                            Explore API Documentation
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                          </a>
+                        </div>
+
+                        <div className="  hidden md:block md:w-full md:pl-8">
+                          <div className="bg-gray-800 rounded-lg p-4 shadow-xl">
+                            <div className="flex items-center mb-4">
+                              <div className="flex space-x-2">
+                                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                              </div>
+                              <div className="ml-4 text-gray-400 text-sm">Code Example</div>
+                            </div>
+                            <pre className="bg-gray-900 p-2 rounded-md text-green-400 overflow-x-auto ">
+                              {
+                              `
+            // Import the necessary libraries      
+
+                    fetch("https://yourdomain.com/api/subscribe", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                          email: "user@example.com",
+                          apiKey: "YOUR_GENERATED_API_KEY"
+                        })
+                      })
+                      .then(response => {
+                        if (!response.ok) {
+                          return response.json().then(err => {
+                            throw new Error(err.error || "Subscription failed");
+                          });
+                        }
+                        return response.json();
+                      })
+                      .then(data => {
+                        console.log("✅ Subscribed successfully:", data);
+                      })
+                      .catch(error => {
+                        console.error("❌ Error subscribing:", error.message);
+                      });
+
+                                `
+                              }
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
           </motion.div>
         </motion.div>
       </div>
@@ -233,7 +332,7 @@ function FeatureCard({
   return (
     <motion.div
       variants={variants}
-      className="bg-dark-700 border border-dark-600 rounded-xl p-6 md:p-7 hover:border-gold-500/30 transition-all shadow-dark group hover:shadow-gold/10 relative h-full"
+      className="bg-dark-600/50 border border-dark-600 rounded-xl p-6 md:p-7 hover:border-gold-500/30 transition-all shadow-dark group hover:shadow-gold/10 relative h-full"
     >
       {comingSoon && (
         <div className="absolute top-3 right-3 bg-gold-500/20 text-gold-300 text-xs font-medium py-1 px-2 rounded">

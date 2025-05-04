@@ -7,8 +7,8 @@ export const navItems: NavItems[] = [
     link: "/",
   },
   {
-    title: "Pricing",
-    link: "/pricing",
+    title: "About",
+    link: "/about",
   },
   {
     title: "Resources",
@@ -16,7 +16,7 @@ export const navItems: NavItems[] = [
   },
   {
     title: "Docs",
-    link: "/",
+    link: "/documentation",
   },
 ];
 

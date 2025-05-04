@@ -5,6 +5,7 @@ import { useRef } from "react"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@nextui-org/react"
+import Link from "next/link"
 
 export function About() {
   const ref = useRef(null)
@@ -64,13 +65,13 @@ export function About() {
                 About TheNews
               </span>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 font-heading">
-                Revolutionizing DeNews Creation Since 2023
+                Revolutionizing TheNews Creation Sine 2025
               </h2>
 
               <div className="space-y-4 md:space-y-6 text-neutral-600">
                 <p className="leading-relaxed">
-                  TheNews was born from a simple observation: creating professional newsletters was too complicated and
-                  time-consuming for most creators and businesses. We set out to change that.
+                TheNews was born to make it easy for developers and creators to build and manage newsletters through a custom, developer-friendly platform.
+                We set out to change that.
                 </p>
 
                 <p className="leading-relaxed">
@@ -80,15 +81,15 @@ export function About() {
                 </p>
 
                 <p className="leading-relaxed">
-                  Founded by a team of marketing experts and developers, TheNews is committed to helping creators,
-                  businesses, and organizations build meaningful connections with their audiences through engaging
-                  newsletters.
+                  Founder by SIXTHGRID, TheNews bridges simplicity and power—helping users connect with their audiences effortlessly.
                 </p>
 
                 <div className="pt-2">
+                  <Link href="/about" passHref>
                   <Button className="bg-gold-700 text-white hover:bg-gold-500">
                     Learn More <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
+                  </Link>
                 </div>
               </div>
             </motion.div>

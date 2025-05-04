@@ -6,6 +6,7 @@ const subscriberShema = new Schema(
   {
     email: {
       type: String,
+      unique: true,
     },
     newsLetterOwnerId: {
       type: String,

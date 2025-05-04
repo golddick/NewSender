@@ -75,7 +75,7 @@ export function Banner() {
   return (
     <section
       ref={targetRef}
-      className="relative h-[calc(100vh-100px)] flex items-center justify-center overflow-hidden bg-dark-800 text-white"
+      className="relative h-[calc(100vh-100px)] flex items-center justify-center overflow-hidden bg-black text-white"
     >
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">

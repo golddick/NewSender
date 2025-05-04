@@ -44,6 +44,8 @@ export default function Providers({ children }: ProviderProps) {
     <NextUIProvider>
       {pathname !== "/dashboard/new-email" &&
       pathname !== "/" &&
+      pathname !== "/about" &&
+      pathname !== "/documentation" &&
       pathname !== "/sign-up" &&
       pathname !== "/subscribe" &&
       pathname !== "/success" &&

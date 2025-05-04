@@ -1,14 +1,31 @@
+
+
+"use client";
+
 import { navItems } from "@/app/configs/constants";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const NavItems = () => {
+  const pathname = usePathname();
+
   return (
     <div className="w-full hidden md:flex items-center">
-      {navItems.map((i: NavItems, index: number) => (
-        <Link key={index} href={i.link} className="px-5 text-lg">
-          {i.title}
-        </Link>
-      ))}
+      {navItems.map((item, index) => {
+        const isActive = pathname === item.link;
+
+        return (
+          <Link
+            key={index}
+            href={item.link}
+            className={`px-5 text-lg transition-colors duration-200 ${
+              isActive ? "text-gold-700 font-semibold" : "text-gray-700 hover:text-red-600"
+            }`}
+          >
+            {item.title}
+          </Link>
+        );
+      })}
     </div>
   );
 };

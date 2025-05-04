@@ -32,7 +32,7 @@ const Pricing = () => {
     },
   }
   return (
-    <div className="w-full py-24 bg-dark-800 text-white  relative">
+    <div className="w-full py-24 bg-black text-white  relative">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-gold-500/10 via-transparent to-transparent opacity-50"></div>
 
 
