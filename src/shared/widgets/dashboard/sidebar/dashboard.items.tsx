@@ -7,7 +7,12 @@ import { redirect, usePathname } from "next/navigation";
 import SidebarFotterLogo from "./sidebar.fotter.logo";
 import { useEffect } from "react";
 
-const DashboardItems = ({ bottomContent }: { bottomContent?: boolean }) => {
+interface DashboardSideBarProps {
+  onNavigate?: () => void;
+  bottomContent?: boolean;
+}
+
+const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
   const { activeRoute, setActiveRoute } = useRouteChange();
   const { signOut, user } = useClerk();
   const pathName = usePathname();
@@ -29,9 +34,10 @@ const DashboardItems = ({ bottomContent }: { bottomContent?: boolean }) => {
           <Link
           key={index}
           href={item.url}
+          onClick={onNavigate}
           // className="p-2 py-5 flex items-center"
           className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair  ${
-            item.url === activeRoute ? 'bg-amber-100 text-amber-800' : 'hover:bg-gray-200'
+            item.url === activeRoute ? 'bg-gold-300 text-gold-700' : 'hover:bg-gray-200'
           }`}
         >
           <span

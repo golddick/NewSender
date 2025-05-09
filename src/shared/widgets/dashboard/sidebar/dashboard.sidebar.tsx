@@ -5,7 +5,11 @@ import { useUser } from "@clerk/nextjs";
 import DashboardItems from "./dashboard.items";
 import UserPlan from "./user.plan";
 
-const DashboardSideBar = () => {
+interface DashboardSideBarProps {
+  onNavigate?: () => void;
+}
+
+const DashboardSideBar = ({onNavigate}:DashboardSideBarProps) => {
   const { user } = useUser();
 
   return (
@@ -15,7 +19,7 @@ const DashboardSideBar = () => {
         <h5 className="pl-2 pt-1 capitalize">{user?.username} Newsletter</h5>
       </div>
       <div>
-        <DashboardItems />
+        <DashboardItems  onNavigate={onNavigate}/>
         <UserPlan />
         <DashboardItems bottomContent={true} />
       </div>

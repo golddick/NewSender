@@ -54,11 +54,12 @@ export const sendCampaignEmail = async ({
 
     // Send the email
     const sendResult = await sendEmail({
-      userEmail: recipientEmails,
+      userEmail: recipientEmails, 
       subject,
       content,
       contentJson,
       newsLetterOwnerId: campaign.newsLetterOwnerId,
+      category: campaign.category,
       campaign: campaignId,
       emailId: emailRecord._id.toString(),
     });

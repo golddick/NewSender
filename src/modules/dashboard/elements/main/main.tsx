@@ -8,6 +8,7 @@ import { ICONS } from "@/shared/utils/icons";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { MobileNav } from "@/shared/components/dashboard/MobileNav";
 
 const Main = () => {
   const { user } = useUser();
@@ -28,29 +29,26 @@ const Main = () => {
   };
 
   return (
-    <div className="p-5 w-full h-screen bg-[#f9fafb]">
-      <h1 className="text-2xl text-surface-900 font-medium">
+    <div className="p-5 w-full h-screen bg-[#f9fafb] ">
+      <div className="  w-full flex items-center justify-between  border-none">
+        <div>
+        <h1 className="text-2xl text-surface-900 font-medium">
         Hi {user?.fullName} 👋
       </h1>
       <p className="opacity-[.7] text-sm pt-2">
         Here&apos;s how your publication is doing
       </p>
-      <div className="w-full flex">
-        <div className="w-[65%] min-h-[88vh] pr-5">
+        </div>
+
+      </div>
+      <div className="w-full grid grid-cols-1 md:grid-cols-[2fr_1fr] lg:grid-cols-[3fr_1fr] gap-5 ">
+        <div className="w-full lg:p-5">
           <br />
           <DashboardOverViewCard />
           <br />
           <SubscribersChart />
         </div>
-        <div className="w-[35%] p-5">
-          {/* create newsletter button */}
-          <div className="w-full flex justify-end">
-            <Button className="bg-black text-white text-lg rounded !px-6">
-              <span className="mr-1 ml-[-5px]">{ICONS.write}</span>
-              Start Writing
-            </Button>
-          </div>
-          <br />
+        <div className="w-full lg:p-5">
           {/* resources */}
           <div>
             <h5 className="text-xl font-medium">Resources</h5>
@@ -65,7 +63,7 @@ const Main = () => {
                 >
                   <small
                     className={`w-[70%] text-sm overflow-hidden overflow-ellipsis whitespace-nowrap copy-text ${
-                      copied ? "bg-blue-200" : "bg-transparent"
+                      copied ? "bg-gold-300 text-gold-700" : "bg-transparent"
                     }`}
                   >
                     {process.env.NEXT_PUBLIC_WEBSITE_URL}/subscribe?username=
