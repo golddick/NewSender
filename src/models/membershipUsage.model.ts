@@ -1,11 +1,12 @@
-// models/membershipUsage.model.ts
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IMembershipUsage extends Document {
   userId: string;
-  month: string; // e.g. "2025-05"
+  month: string; // e.g., "2025-05"
   emailsSent: number;
   subscribersAdded: number;
+  campaignsCreated: number; 
+  categoriesCreated: number;
 }
 
 const membershipUsageSchema = new Schema<IMembershipUsage>(
@@ -17,7 +18,7 @@ const membershipUsageSchema = new Schema<IMembershipUsage>(
     },
     month: {
       type: String,
-      required: true, // e.g., "2025-05"
+      required: true,
       index: true,
     },
     emailsSent: {
@@ -27,6 +28,14 @@ const membershipUsageSchema = new Schema<IMembershipUsage>(
     subscribersAdded: {
       type: Number,
       default: 0,
+    },
+    campaignsCreated: {
+      type: Number,
+      default: 0, 
+    },
+    categoriesCreated: {
+      type: Number,
+      default: 0, 
     },
   },
   { timestamps: true }

@@ -112,8 +112,8 @@ export const sideBarItems: DashboardSideBarTypes[] = [
     icon: ICONS.write,
   },
   {
-    title: "Grow",
-    url: "/dashboard/grow",
+    title: "Campaigns",
+    url: "/dashboard/campaigns",
     icon: ICONS.analytics,
   },
   {
@@ -128,6 +128,11 @@ export const sideBarBottomItems: DashboardSideBarTypes[] = [
     title: "Settings",
     url: "/dashboard/settings",
     icon: ICONS.settings,
+  },
+  {
+    title: "Generated URL",
+    url: "/dashboard/url",
+    icon: ICONS.world,
   },
   {
     title: "View Site",

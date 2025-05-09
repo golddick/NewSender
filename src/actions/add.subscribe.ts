@@ -1,89 +1,92 @@
-
 "use server";
 
 import Subscriber from "@/models/subscriber.model";
-import Membership from "@/models/membership.model";
-import MembershipUsage from "@/models/membershipUsage.model";
+import NewsLetterCategory from "@/models/newsLetterCategory.model";
+import Campaign from "@/models/newsLetterCampaign.model";
 import { connectDb } from "@/shared/libs/db";
 import { validateEmail } from "@/shared/utils/ZeroBounceApi";
 import { clerkClient } from "@clerk/nextjs/server";
+import { checkUsageLimit, incrementUsage } from "@/lib/checkAndUpdateUsage";
 
 export const subscribe = async ({
   email,
   username,
+  categoryId,
+  campaign,
 }: {
   email: string;
   username: string;
+  categoryId: string;
+  campaign: string;
 }) => {
   try {
     await connectDb();
 
+    // Get user details from Clerk
     const client = await clerkClient();
-    const allUsersResponse = await client.users.getUserList();
-    const allUsers = allUsersResponse.data;
+    const allUsers = (await client.users.getUserList()).data;
+    const newsletterOwner = allUsers.find((u) => u.username === username);
+    if (!newsletterOwner) return { error: "Invalid username." };
+    const ownerId = newsletterOwner.id;
 
-    const newsletterOwner = allUsers.find((i) => i.username === username);
-    if (!newsletterOwner) {
-      throw Error("Username is not valid!");
-    }
+    // 1. Check if the subscriber already exists
+    const exists = await Subscriber.findOne({ email, newsLetterOwnerId: ownerId });
+    if (exists) return { error: "Email already subscribed." };
 
-    console.log("Newsletter Owner ID:", newsletterOwner.id);
+    // 2. Validate email
+    const validation = await validateEmail({ email });
+    if (validation.status === "invalid") return { error: "Invalid email." };
 
-    // Fetch Membership
-    const membership = await Membership.findOne({ userId: newsletterOwner.id });
-    if (!membership) {
-      return { error: "No active plan found for this user." };
-    }
-
-    const currentMonth = new Date().toISOString().slice(0, 7); // e.g. "2025-05"
-
-    // Get current usage
-    const usage = await MembershipUsage.findOne({
-      userId: newsletterOwner.id,
-      month: currentMonth,
+    // 3. Validate category
+    const category = await NewsLetterCategory.findOne({
+      _id: categoryId,
+      newsLetterOwnerId: ownerId,
     });
+    if (!category) return { error: "Invalid or unauthorized category." };
 
-    const subscriberCount = usage?.subscribersAdded ?? 0;
-
-    if (subscriberCount >= (membership.subscriberLimit ?? 0)) {
-      return { error: "Monthly subscriber limit reached." };
+    // 4. Check usage limit
+    const usageCheck = await checkUsageLimit(ownerId, "subscribersAdded");
+    if (!usageCheck.success) {
+      return { error: usageCheck.message };
     }
 
-    // Check for duplicate subscriber
-    const isSubscriberExist = await Subscriber.findOne({
-      email,
-      newsLetterOwnerId: newsletterOwner.id,
-    });
-
-    if (isSubscriberExist) {
-      return { error: "Email already exists!" };
-    }
-
-    // Validate email
-    const validationResponse = await validateEmail({ email });
-    if (validationResponse.status === "invalid") {
-      return { error: "Email not valid!" };
-    }
-
-    // Create new subscriber
+    // 5. Create the subscriber
     const subscriber = await Subscriber.create({
       email,
-      newsLetterOwnerId: newsletterOwner.id,
+      newsLetterOwnerId: ownerId,
       source: "By TheNews website",
       status: "Subscribed",
+      category: categoryId,
+      metadata: {
+        campaign: campaign || "TheNews website general campaign",
+        pageUrl: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/subscribe?username=${username}`,
+        formId: "TheNews website general sub page",
+      },
     });
 
-    // Increment usage
-    await MembershipUsage.updateOne(
-      { userId: newsletterOwner.id, month: currentMonth },
-      { $inc: { subscribersAdded: 1 } },
-      { upsert: true }
-    );
+    // 6. Update campaign subscriber count if campaign exists
+    if (campaign) {
+      await Campaign.findOneAndUpdate(
+        { name: campaign, newsLetterOwnerId: ownerId },
+        { 
+          $inc: { subscribers: 1 },
+          $push: { subscriberIds: subscriber._id },
+        }
+      );
+    }
 
-    return subscriber;
+    // 7. Increment usage
+    await incrementUsage(ownerId, "subscribersAdded");
 
-  } catch (error) {
-    console.error(error);
-    return { error: "An error occurred while subscribing." };
+    return {
+      _id: subscriber._id.toString(),
+      email: subscriber.email,
+      status: subscriber.status,
+      source: subscriber.source,
+      createdAt: subscriber.createdAt,
+    };
+  } catch (err: any) {
+    console.error("Subscribe error:", err);
+    return { error: err.message || "Subscription failed." };
   }
 };

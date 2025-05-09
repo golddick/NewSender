@@ -1,3 +1,6 @@
+
+
+
 "use server";
 
 import Email from "@/models/email.model";
@@ -7,21 +10,28 @@ export const saveEmail = async ({
   title,
   content,
   newsLetterOwnerId,
+  category,
+  campaign,
 }: {
   title: string;
   content: string;
   newsLetterOwnerId: string;
+  category?: string;
+  campaign?: string;
 }) => {
   try {
     await connectDb();
-    const email = await Email.findOne({
+
+    const existingEmail = await Email.findOne({
       title,
       newsLetterOwnerId,
     });
 
-    if (email) {
-      await Email.findByIdAndUpdate(email._id, {
+    if (existingEmail) {
+      await Email.findByIdAndUpdate(existingEmail._id, {
         content,
+        category,
+        campaign,
       });
       return { message: "Email updated successfully!" };
     } else {
@@ -29,10 +39,20 @@ export const saveEmail = async ({
         title,
         content,
         newsLetterOwnerId,
+        category,
+        campaign,
       });
       return { message: "Email saved successfully!" };
     }
   } catch (error) {
-    console.log(error);
+    console.error("Failed to save email:", error);
+    throw new Error("Could not save email.");
   }
 };
+
+
+
+
+
+
+

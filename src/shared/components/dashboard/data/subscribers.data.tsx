@@ -2,34 +2,63 @@
 
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Papa from "papaparse";
 import useSubscribersData from "@/shared/hooks/useSubscribersData";
 import { format } from "timeago.js";
-import { Box, Button } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { getCategoryByOwnerId } from "@/actions/get.category";
 
 type Subscriber = {
   email: string;
   newsLetterOwnerId: string;
   source: string;
   status: string;
+  category: string;
 };
 
 const SubscribersData = () => {
   const { data, loading, refetch } = useSubscribersData();
   const { user } = useUser();
+
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Array<{ _id: string; name: string }>>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [categoryName, setCategoryName] = useState<string | null>(null); 
 
-  // Get the logged-in user's newsletterOwnerId (Clerk user ID)
-  const newsletterOwnerId = user?.id;
+  const newsLetterOwnerId = user?.id;
 
-  if (!newsletterOwnerId) {
+  console.log(data, "Data from subscribers data");
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        if (!newsLetterOwnerId) throw new Error("Newsletter owner ID is undefined.");
+        const res = await getCategoryByOwnerId({ newsLetterOwnerId });
+
+        if (Array.isArray(res) && res.length > 0) {
+          setCategories(res);
+          setSelectedCategory(res[0]._id); 
+          setCategoryName(res[0].name); 
+        } else {
+          toast.warning("No categories found. Please create one.");
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        toast.error("Failed to load categories");
+      }
+    };
+
+    if (user) fetchCategories();
+  }, [user, newsLetterOwnerId]);
+
+  if (!newsLetterOwnerId) {
     toast.error("No newsletter owner ID found for the logged-in user.");
     return null;
   }
@@ -47,111 +76,70 @@ const SubscribersData = () => {
       complete: async (results: any) => {
         try {
           const parsed = results.data.map((row: any) => ({
-            email: row.email,
-            newsLetterOwnerId : newsletterOwnerId,
+            email: row.email.toLowerCase().trim(),
+            newsLetterOwnerId,
             source: row.source || "CSV Import",
             status: row.status || "Subscribed",
+            category: setCategoryName || null,
+            metadata: {
+              campaign: row.campaign || null,
+              pageUrl: "CSV Import",
+              formId: "csv_upload_form"
+            }
           }));
 
-          // Validate emails in the CSV first
           const emailSet = new Set();
-            const csvDuplicates = parsed.filter((subscriber: Subscriber) => {
-            const emailKey: string = subscriber.email.toLowerCase().trim();
-            if (emailSet.has(emailKey)) return true;
-            emailSet.add(emailKey);
+          const csvDuplicates = parsed.filter((subscriber: Subscriber) => {
+            if (emailSet.has(subscriber.email)) return true;
+            emailSet.add(subscriber.email);
             return false;
-            });
-
-            console.log("CSV Duplicates:", csvDuplicates);
-            console.log("Parsed CSV Data:", parsed);
-            
+          });
 
           if (csvDuplicates.length > 0) {
-            // toast.error(
-            //   `CSV contains ${csvDuplicates.length} duplicate emails. Please fix before importing.`,
-            //   {
-            //   description: `Duplicates: ${csvDuplicates.slice(0, 3).map((d: Subscriber) => d.email).join(', ')}${csvDuplicates.length > 3 ? '...' : ''}`
-            //   }
-            // );
-            toast.error('error')
-            setError(`CSV contains ${csvDuplicates.length} duplicate emails. Please fix before importing.`);
-            setErrorDetails(`Duplicates: ${csvDuplicates.slice(0, 3).map((d: Subscriber) => d.email).join(', ')}${csvDuplicates.length > 3 ? '...' : ''}`);
+            toast.error(`CSV contains ${csvDuplicates.length} duplicate emails.`);
+            setError(`Duplicate emails in file.`);
+            setErrorDetails(`Examples: ${csvDuplicates.slice(0, 3).map((d: Subscriber) => d.email).join(", ")}`);
             return;
           }
 
           toast.info("Importing subscribers...");
           const res = await axios.post("/api/import", { subscribers: parsed });
-          console.log("CSV Import Response:", res.data);
 
-          if (res.status === 200) {
-            if (res.data.success) {
-              const successMsg = res.data.duplicateCount > 0
-                ? `Imported ${res.data.createdCount} subscribers (${res.data.duplicateCount} duplicates skipped)`
-                : `Successfully imported ${res.data.createdCount} subscribers`;
-              
-              toast.success(successMsg, {
-                action: {
-                  label: 'View',
-                  onClick: () => refetch()
-                }
+          if (res.data.success) {
+            toast.success(`Imported ${res.data.count} subscribers`, {
+              action: {
+                label: "View",
+                onClick: () => refetch(),
+              },
+            });
+
+            if (res.data.duplicates?.length > 0) {
+              toast.warning(`${res.data.duplicates.length} duplicate emails found`, {
+                description: res.data.duplicates.slice(0, 3).join(", ") + (res.data.duplicates.length > 3 ? "..." : ""),
               });
-
-              if (res.data.duplicates && res.data.duplicates.length > 0) {
-                toast.warning(
-                  `${res.data.duplicates.length} duplicate emails found in database`,
-                  {
-                    description: `Existing emails: ${res.data.duplicates.slice(0, 3).join(', ')}${res.data.duplicates.length > 3 ? '...' : ''}`
-                  }
-                );
-              }
-
-              await refetch();
-            } else if (res.data.error) {
-              toast.error(res.data.error, {
-                description: res.data.details || 'Please check your CSV file'
-              });
-              setError(res.data.error);
-              setErrorDetails(res.data.details || 'Please check your CSV file');
             }
+
+            setError(null);
+            setErrorDetails(null);
+            await refetch();
+          } else {
+            toast.error(res.data.error || "Import failed", {
+              description: res.data.details || "Check CSV",
+            });
+            setError(res.data.error);
+            setErrorDetails(res.data.details);
           }
         } catch (err: any) {
-          console.error("CSV Import Failed:", err);
-          
-          if (err.response) {
-            const { data } = err.response;
-            if (data.error === "Some emails already exist" && data.duplicates) {
-              toast.error(
-                `${data.count} duplicate emails found in database`,
-                {
-                  description: `Existing emails: ${data.duplicates.slice(0, 3).join(', ')}${data.duplicates.length > 3 ? '...' : ''}`
-                }
-              );
-              setError(data.error);
-              setErrorDetails(`Existing emails ${data.duplicateCount}: ${data.duplicates.slice(0, 3).join(', ')}${data.duplicates.length > 3 ? '...' : ''}`);
-            } else {
-              toast.error(data.error || "Import failed", {
-                description: data.details || 'Please try again'
-              });
-              setError(data.error || 'Import failed');
-              setErrorDetails(`Existing emails ${data.duplicateCount}: ${data.duplicates.slice(0, 3).join(', ')}${data.duplicates.length > 3 ? '...' : ''}`);
-            }
-          } else {
-            toast.error("Import failed", {
-              description: err.message || 'An unknown error occurred'
-            });
-            setError(err.message || 'An unknown error occurred');
-          }
+          toast.error("Import failed", { description: err.message });
+          setError(err.message);
         } finally {
           setIsImporting(false);
-          // Reset input
           if (e.target) e.target.value = '';
         }
       },
       error: (error: any) => {
         setIsImporting(false);
-        toast.error("CSV parsing failed", {
-          description: error.message || 'Invalid CSV format'
-        });
+        toast.error("CSV parsing failed", { description: error.message });
       }
     });
   };
@@ -161,13 +149,19 @@ const SubscribersData = () => {
     { field: "email", headerName: "Email", flex: 0.8 },
     { field: "createdAt", headerName: "Subscribed At", flex: 0.5 },
     { field: "source", headerName: "Source", flex: 0.5 },
+    { field: "category", headerName: "Category", flex: 0.5 },
     {
       field: "status",
       headerName: "Status",
       flex: 0.5,
-      renderCell: (params: any) => <h1>{params.row.status}</h1>,
+      renderCell: (params: any) => <span>{params.row.status}</span>,
     },
   ];
+
+  console.log("Rows data:", data);
+  console.log("Categories data:", categories);
+  console.log("Selected category:", selectedCategory);
+  console.log("Category name:", categoryName);
 
   const rows = data?.map((i: any) => ({
     id: i._id,
@@ -175,30 +169,56 @@ const SubscribersData = () => {
     createdAt: format(i.createdAt),
     source: i.source,
     status: i.status,
+    category:i.category
   })) || [];
 
   return (
     <Box m="20px">
+     
+
+      {/* Upload button */}
       <Box mb={2}>
-        <Button 
-          variant="contained" 
-          component="label" 
+        <div className="flex justify-between items-center w-full gap-8 p-2">
+
+        <Button
+          variant="contained"
+          component="label"
           color="error"
           disabled={isImporting}
-        >
+          >
           {isImporting ? "Importing..." : "Import CSV File"}
-          <input 
-            type="file" 
-            accept=".csv" 
-            hidden 
-            onChange={handleCSVUpload} 
+          <input
+            type="file"
+            accept=".csv"
+            hidden
+            onChange={handleCSVUpload}
             disabled={isImporting}
-          />
+            />
         </Button>
-        {error && <p className=" mt-2" style={{ color: 'red' }}>{error}</p>}
-        {errorDetails && <p className=" mt-2" style={{ color: 'red' }}>{errorDetails}</p>}
+
+
+         {/* Category dropdown */}
+      <FormControl fullWidth sx={{ mb: 2 }} className=" border-none">
+        <InputLabel id="category-label">Select Category</InputLabel>
+        <Select
+          labelId="category-label"
+          value={selectedCategory}
+          label="Select Category"
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          {categories.map((cat) => (
+            <MenuItem key={cat._id} value={cat._id}>
+              {cat.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+            </div>
+        {error && <p className="mt-2" style={{ color: "red" }}>{error}</p>}
+        {errorDetails && <p className="mt-2" style={{ color: "red" }}>{errorDetails}</p>}
       </Box>
 
+      {/* Data Table */}
       <Box
         height="80vh"
         sx={{

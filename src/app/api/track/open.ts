@@ -1,31 +1,33 @@
-// This will just load the pixel and update the DB
-import { NextRequest, NextResponse } from "next/server";
-import Email from "@/models/email.model";
-import { connectDb } from "@/shared/libs/db";
+// pages/api/track/open.ts
 
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export async function GET(req: NextRequest) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { emailId } = req.query;
+
+  if (!emailId) {
+    return res.status(400).json({ error: 'Missing emailId parameter' });
+  }
+
   try {
-    await connectDb();
+    // TODO: Optional - Save open tracking data to your database
+    console.log(`Email opened. Email ID: ${emailId}`);
 
-    const emailId = req.nextUrl.searchParams.get("emailId");
-    if (emailId) {
-      await Email.findByIdAndUpdate(emailId, { $set: { opened: true } });
-    }
-
+    // Return a 1x1 transparent pixel
     const pixel = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=",
-      "base64"
+      'R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
+      'base64'
     );
 
-    return new NextResponse(pixel, {
-      headers: {
-        "Content-Type": "image/png",
-        "Content-Length": pixel.length.toString(),
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-      },
-    });
-  } catch (err) {
-    return NextResponse.json({ error: "Error tracking open" }, { status: 500 });
+    res.setHeader('Content-Type', 'image/gif');
+    res.setHeader('Content-Length', pixel.length.toString());
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    return res.status(200).end(pixel);
+  } catch (error) {
+    console.error('Error in open tracking:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }

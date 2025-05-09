@@ -39,6 +39,8 @@ export const getSubscribers = async ({
       newsLetterOwnerId,
     });
 
+    console.log(subscribers, 'ssssll')
+
     // ✅ Convert to plain JSON-serializable data
     const plainSubscribers = JSON.parse(JSON.stringify(subscribers));
     return plainSubscribers;

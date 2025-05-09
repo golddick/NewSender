@@ -2,27 +2,30 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
-// const emailSchema = new Schema(
-//   {
-//     title: {
-//       type: String,
-//     },
-//     content: {
-//       type: String,
-//     },
-//     newsLetterOwnerId: {
-//       type: String,
-//     },
-//   },
-//   { timestamps: true }
-// );
-
 const emailSchema = new Schema(
   {
-    title: String,
-    content: String,
-    newsLetterOwnerId: String,
-
+    title: {
+      type: String,
+      required: true,
+    },
+    content: {
+      type: String,
+      required: true,
+    },
+    newsLetterOwnerId: {
+      type: String,
+      required: true,
+    },
+    campaign: {
+      type: Schema.Types.ObjectId,
+      ref: "Campaign",
+      required: true,
+    },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "NewsLetterCategory",
+      required: true, // Ensures each email is linked to a category
+    },
     isOpened: {
       type: Boolean,
       default: false,
@@ -41,6 +44,6 @@ const emailSchema = new Schema(
   { timestamps: true }
 );
 
+const Email = mongoose.models.Email || mongoose.model("Email", emailSchema);
 
-const Email = mongoose.models.Emails || mongoose.model("Emails", emailSchema);
 export default Email;

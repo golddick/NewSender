@@ -1,20 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
-import Email from "@/models/email.model";
-import { connectDb } from "@/shared/libs/db";
+// pages/api/track/click.ts
 
-export async function GET(req: NextRequest) {
+import { NextApiRequest, NextApiResponse } from 'next';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { emailId, url } = req.query;
+
+  if (!emailId || !url) {
+    return res.status(400).json({ error: 'Missing emailId or url parameter' });
+  }
+
   try {
-    await connectDb();
+    // Decode the URL parameter
+    const decodedUrl = decodeURIComponent(url as string);
 
-    const url = req.nextUrl.searchParams.get("url");
-    const emailId = req.nextUrl.searchParams.get("emailId");
+    // Optional: Log the click event (e.g., to a database or analytics service)
+    console.log(`Email ID: ${emailId}, Clicked URL: ${decodedUrl}`);
 
-    if (emailId) {
-      await Email.findByIdAndUpdate(emailId, { $set: { clicked: true } });
-    }
-
-    return NextResponse.redirect(url || "https://yourdomain.com");
-  } catch (err) {
-    return NextResponse.json({ error: "Click tracking failed" }, { status: 500 });
+    // Redirect the user to the original URL
+    res.redirect(decodedUrl);
+  } catch (error) {
+    console.error('Error processing click:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 }
