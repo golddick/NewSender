@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: result.message }, { status: 200 });
+    return NextResponse.json({ success: true, messageId: result.messageId }, { status: 200 });
 
   } catch (err) {
     console.error('Error sending bulk email:', err);

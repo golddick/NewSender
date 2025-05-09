@@ -1,41 +1,25 @@
-// // File: app/api/track/click/route.ts
-
-// import { NextRequest, NextResponse } from "next/server";
-
-// export async function GET(req: NextRequest) {
-//   const { searchParams } = new URL(req.url);
-//   const emailId = searchParams.get("emailId");
-//   const url = searchParams.get("url");
-
-//   if (!emailId || !url) {
-//     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
-//   }
-
-//   // Log the click here (to DB, analytics, etc.)
-//   console.log(`Click tracked for emailId: ${emailId}, redirecting to: ${url}`);
-
-//   // Then redirect the user
-//   return NextResponse.redirect(url);
-// }
 
 
-// src/app/api/track/click/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+// app/api/track/click/route.ts
+import { NextResponse } from 'next/server';
+import { recordClick } from '@/lib/trackingService';
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const emailId = searchParams.get("emailId");
-  const url = searchParams.get("url");
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const emailId = searchParams.get('emailId');
+  const url = searchParams.get('url');
 
   if (!emailId || !url) {
-    return NextResponse.json({ error: "Missing emailId or url" }, { status: 400 });
+    return new NextResponse('Missing parameters', { status: 400 });
   }
 
-  // Log the click (optional: save to DB)
-  console.log(`Email clicked - ID: ${emailId}, URL: ${url}`);
-
-  // Redirect to the target URL
-  return NextResponse.redirect(url, { status: 302 });
+  try {
+    const decodedUrl = decodeURIComponent(url);
+    await recordClick(emailId, decodedUrl);
+    return NextResponse.redirect(decodedUrl, 302);
+  } catch (error) {
+    console.error('Error processing click:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 }
-
