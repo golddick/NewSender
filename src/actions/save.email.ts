@@ -32,15 +32,17 @@ export const saveEmail = async ({
         content,
         category,
         campaign,
+        status: "SAVED"
       });
       return { message: "Email updated successfully!" };
-    } else {
+    } else { 
       await Email.create({
         title,
         content,
         newsLetterOwnerId,
         category,
         campaign,
+        status:'SAVED'
       });
       return { message: "Email saved successfully!" };
     }

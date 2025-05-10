@@ -134,11 +134,11 @@ export const sideBarBottomItems: DashboardSideBarTypes[] = [
     url: "/dashboard/url",
     icon: ICONS.world,
   },
-  {
-    title: "View Site",
-    url: "/",
-    icon: ICONS.world,
-  },
+  // {
+  //   title: "View Site",
+  //   url: "/",
+  //   icon: ICONS.world,
+  // },
 ];
 
 // export const subscribersData: subscribersDataTypes[] = [

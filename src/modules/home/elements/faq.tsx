@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export function FAQ() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, amount: 0.2 })
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -16,7 +16,7 @@ export function FAQ() {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -29,30 +29,40 @@ export function FAQ() {
         damping: 10,
       },
     },
-  }
+  };
 
   const faqItems = [
     {
-      question: "How does TheNews compare to other newsletter platforms?",
+      question: "How does TheNews help marketers and bloggers?",
       answer:
-        "TheNews stands out with its intuitive design tools, powerful analytics, and focus on deliverability. Unlike other platforms, we offer a true drag-and-drop editor that requires no technical skills, comprehensive performance tracking, and industry-leading delivery rates. Our platform is designed specifically for creators and businesses who want professional newsletters without the complexity.",
+        "TheNews provides powerful tools for creating, automating, and sending captivating newsletters and blog posts. With intuitive design tools, analytics, and powerful integration options, TheNews helps marketers and bloggers grow their audience and drive engagement effortlessly.",
+    },
+    {
+      question: "Can I automate my content with TheNews?",
+      answer:
+        "Yes! TheNews offers advanced automation tools that let you schedule and automate your content campaigns. With features like automated workflows and content delivery based on your audience's behavior, you can save time while maximizing engagement. Our AI-powered features are coming in the next update to further enhance automation.",
+    },
+    {
+      question: "What API features does TheNews offer for developers?",
+      answer:
+        "TheNews provides a robust API for developers to integrate content management, automate workflows, track performance metrics, and scale email campaigns. The API is designed to make it easy for developers to manage and optimize newsletters and blog posts seamlessly.",
+    },
+    {
+      question: "Is there a way to track the performance of my newsletters?",
+      answer:
+        "Yes! TheNews offers detailed analytics and tracking features. You can monitor open rates, click-through rates, engagement, and more to measure the effectiveness of your campaigns and optimize your content strategy.",
     },
     {
       question: "Can I migrate my existing subscribers to TheNews?",
       answer:
-        "We make migration simple with our easy-to-use import tools. You can import subscribers from CSV files or directly from other popular platforms. Our migration wizard guides you through the process step by step, ensuring your subscriber data transfers correctly. We also provide dedicated migration support for Professional and Business plan subscribers.",
+        "Yes, migrating your existing subscriber list to TheNews is easy. You can import subscribers from CSV files or other platforms using our simple migration tools, ensuring a smooth transition.",
     },
     {
       question: "What kind of support does TheNews offer?",
       answer:
-        "We provide comprehensive support across all plans. Starter plan subscribers receive email support with 24-hour response times. Professional plan users get priority email support with 12-hour response times. Business plan subscribers enjoy 24/7 priority support and a dedicated account manager. Additionally, all users have access to our extensive knowledge base, video tutorials, and regular webinars.",
+        "TheNews provides comprehensive support. Starter plan users get email support, while Professional and Business plan users receive priority support with faster response times and a dedicated account manager for personalized assistance.",
     },
-    {
-      question: "When will the AI-powered features be available?",
-      answer:
-        "We're currently in the final stages of developing our AI-powered content generation, scheduled sending, and automation features. These advanced capabilities are scheduled for release in Q3 2023. Beta access will be available to Professional and Business plan subscribers starting next month. If you'd like early access, you can join our waiting list through your account dashboard.",
-    },
-  ]
+  ];
 
   return (
     <section className="py-16 md:py-24 bg-white relative">
@@ -108,5 +118,5 @@ export function FAQ() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

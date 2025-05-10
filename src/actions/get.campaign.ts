@@ -29,9 +29,12 @@ interface ISubscriber {
 
 interface IEmail {
   _id: Types.ObjectId;
-  subject: string;
+  title: string;
   sentAt: Date;
+  createdAt: Date;
   status: string;
+  openCount:number;
+  clickCount:number;
 }
 
 interface CampaignResponse {
@@ -105,6 +108,10 @@ export const getAllCampaignsByOwnerId = async ({
   }
 };
 
+
+
+
+
 // Get a single campaign by ID
 export const getCampaignById = async ({
   campaignId,
@@ -118,11 +125,18 @@ export const getCampaignById = async ({
       .populate("subscriberIds")
       .lean<ICampaign | null>();
 
+      console.log(campaign, 'server camp')
+
+
     if (!campaign) {
       return { error: "Campaign not found" };
     }
 
-    const emails = await Email.find({ campaignId: campaign._id }).lean<IEmail[]>();
+    const emails = await Email.find({ campaign: campaign._id }).lean<IEmail[]>();
+
+    
+
+    console.log(emails, 'server emails')
 
     const subscribers =
       (campaign.subscriberIds || []).map((sub: any) => ({
@@ -132,6 +146,24 @@ export const getCampaignById = async ({
         createdAt: sub.createdAt?.toISOString() || "",
         status: sub.status || "active",
       })) || [];
+
+    // return {
+    //   _id: campaign._id.toString(),
+    //   name: campaign.name,
+    //   description: campaign.description,
+    //   category: campaign.category || null,
+    //   subscribers,
+    //   emailsSent: emails.length,
+    //   startDate: campaign.startDate?.toISOString() || null,
+    //   endDate: campaign.endDate?.toISOString() || null,
+    //   subscriberCount: subscribers.length,
+    //   emails: emails.map((email) => ({
+
+    //     _id: email._id.toString(),
+    //     subject: email.title || "No Subject",
+    //     sentAt: email.createdAt?.toISOString() || "",
+    //     status: email.status || "sent",
+    //   })),
 
     return {
       _id: campaign._id.toString(),
@@ -143,13 +175,28 @@ export const getCampaignById = async ({
       startDate: campaign.startDate?.toISOString() || null,
       endDate: campaign.endDate?.toISOString() || null,
       subscriberCount: subscribers.length,
-      emails: emails.map((email) => ({
-        _id: email._id.toString(),
-        subject: email.subject || "No Subject",
-        sentAt: email.sentAt?.toISOString() || "",
-        status: email.status || "sent",
-      })),
+      emails: emails.map((email) => {
+        const totalSubscribers = subscribers.length || 1; // Prevent division by zero
+        const openRate = totalSubscribers
+        ? Math.min(100, parseFloat(((email.openCount / totalSubscribers) * 100).toFixed(2)))
+        : 0;
+      
+      const clickRate = totalSubscribers
+        ? Math.min(100, parseFloat(((email.clickCount / totalSubscribers) * 100).toFixed(2)))
+        : 0;
+      
+        return {
+          _id: email._id.toString(),
+          subject: email.title || "No Subject",
+          sentAt: email.createdAt?.toISOString() || "",
+          status: email.status || "sent",
+          openRate,
+          clickRate
+        };
+      }),
     };
+    
+    
   } catch (error) {
     console.error("Error fetching campaign by ID:", error);
     return { error: "Failed to load campaign" };

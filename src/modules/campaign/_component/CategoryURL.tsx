@@ -61,7 +61,7 @@ const MyCategories = () => {
                 </div>
                 <button
                   onClick={() => handleCopy(subscribeUrl, category.name)}
-                  className="mt-3 md:mt-0 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="mt-3 md:mt-0 bg-gold-100 text-gold-700 px-4 py-2 rounded hover:bg-gold-500"
                 >
                   {copied === category.name ? <CopyCheckIcon/> : <CopyIcon/>}
                 </button>

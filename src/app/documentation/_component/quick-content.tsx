@@ -19,7 +19,7 @@ interface QuickContentProps {
 export function QuickContent({ activeSection, setActiveSection }: QuickContentProps) {
   return (
     <main className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-10">
-      <div className="mx-auto max-w-3xl space-y-16">
+      <div className=" md:container mx-auto space-y-8">
         {/* General Documentation */}
         <section id="introduction" className={activeSection === "introduction" ? "" : "hidden"}>
           <QuickIntroduction />

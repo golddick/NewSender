@@ -78,11 +78,11 @@ const PricingCard = ({ active }: { active: string }) => {
   }
 
   return (
-    <div className="w-full md:flex items-start justify-around py-8 ">
+    <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 ">
       {/* free plan */}
         <motion.div
           variants={itemVariants}
-          className={`bg-dark-700 border border-dark-600 text-white hover:shadow-gold/10 transition-all md:w-[400px]  rounded p-5 my-5 md:my-0  shadow-gold-700 shadow-sm`}
+          className={`bg-dark-600/50 border border-dark-600 text-white hover:shadow-gold/10 transition-all md:w-full  rounded p-5 my-5 md:my-0  shadow-gold-700 shadow-sm`}
         >
         <h5 className="font-clashDisplay uppercase text-cyber-ink text-3xl pb-8 border-b border-[#000]">
           FREE
@@ -104,18 +104,15 @@ const PricingCard = ({ active }: { active: string }) => {
           </div>
         ))}
         <br />
-        <Button color="primary" className="w-full text-xl !py-6">
+        <Button color="primary" className="w-full text-xl !py-6 bg-gold-700">
           Get Started
         </Button>
-        <p className="pt-1 opacity-[.7] text-center">
-           Free 4 ever
-        </p>
         </motion.div>
 
       {/* grow plan */}
       <motion.div
           variants={itemVariants}
-          className={`bg-dark-700 border border-dark-600 text-white hover:shadow-gold-700 transition-all md:w-[400px]  rounded p-5 my-5 md:my-0 shadow-gold-700 shadow-sm`}
+          className={`bg-dark-600/50 border border-dark-600 text-white hover:shadow-gold/10 transition-all md:w-full  rounded p-5 my-5 md:my-0  shadow-gold-700 shadow-sm`}
         >
 
        
@@ -141,7 +138,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <br />
         <Button
           color="primary"
-          className="w-full text-xl !py-6"
+          className="w-full text-xl !py-6 bg-gold-700"
           onClick={() =>
             handleSubscription({
               planCode: active === "Monthly" 
@@ -152,16 +149,12 @@ const PricingCard = ({ active }: { active: string }) => {
         >
           Get Started
         </Button>
-        <p className="pt-1 opacity-[.7] text-center">
-          30-day free trial of Scale features, then $
-          {/* {active === "Monthly" ? "42" : "49"}/mo */}
-        </p>
         </motion.div>
 
       {/* scale plan */}
       <motion.div
           variants={itemVariants}
-          className={`bg-dark-700 border border-dark-600 text-white hover:shadow-gold/10  transition-all md:w-[400px]  rounded p-5 my-5 md:my-0 shadow-gold-700 shadow-sm`}
+          className={`bg-dark-600/50 border border-dark-600 text-white hover:shadow-gold/10 transition-all md:w-full  rounded p-5 my-5 md:my-0  shadow-gold-700 shadow-sm`}
         >
         <h5 className="font-clashDisplay uppercase text-cyber-ink text-3xl pb-8 border-b border-[#000]">
           SCALE
@@ -185,7 +178,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <br />
         <Button
           color="primary"
-          className="w-full text-xl !py-6"
+          className="w-full text-xl !py-6 bg-gold-700"
           onClick={() =>
             handleSubscription({
               planCode: active === "Monthly" 
@@ -196,10 +189,6 @@ const PricingCard = ({ active }: { active: string }) => {
         >
           Get Started
         </Button>
-        <p className="pt-1 opacity-[.7] text-center">
-          30-day free trial of Scale features, then $
-          {/* {active === "Monthly" ? "120,000" : "100,000"}/mo */}
-        </p>
         </motion.div>
     </div>
   );

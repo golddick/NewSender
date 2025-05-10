@@ -28,3 +28,13 @@ export async function GET(request: Request) {
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
+
+
+
+
+
+
+
+
+
+// https://yourdomain.com/api/track/open?emailId=YOUR_VALID_ID testing

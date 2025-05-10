@@ -37,7 +37,7 @@ const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
           onClick={onNavigate}
           // className="p-2 py-5 flex items-center"
           className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair  ${
-            item.url === activeRoute ? 'bg-gold-300 text-gold-700' : 'hover:bg-gray-200'
+            item.url === activeRoute ? 'bg-gold-100 text-gold-700' : 'hover:bg-gray-200'
           }`}
         >
           <span
@@ -57,26 +57,18 @@ const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
           {sideBarBottomItems.map(
             (item: DashboardSideBarTypes, index: number) => (
               <Link
+                href={item.url }
                 key={index}
-                className="p-2 py-5 flex items-center"
                 onClick={onNavigate}
-                href={
-                  item.url === "/"
-                    ? `/subscribe?username=${user?.username}`
-                    : item.url
-                }
+                className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair  ${
+                  item.url === activeRoute ? 'bg-gold-100 text-gold-700' : 'hover:bg-gray-200'
+                }`}
               >
                 <span
-                  className={`text-3xl mr-2 ${
-                    item.url === activeRoute && "text-gold-400"
-                  }`}
                 >
                   {item.icon}
                 </span>
                 <span
-                  className={`text-xl mr-2 ${
-                    item.url === activeRoute && "text-gold-400"
-                  }`}
                 >
                   {item.title}
                 </span>

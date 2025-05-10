@@ -48,7 +48,7 @@ export function AboutMission() {
             <motion.div variants={itemVariants} className="order-2 md:order-1">
               <div className="relative">
                 <Image
-                  src="/placeholder.svg?height=600&width=600"
+                  src="/gnb.png"
                   width={600}
                   height={600}
                   alt="TheNews Mission"
@@ -68,9 +68,8 @@ export function AboutMission() {
 
               <div className="space-y-6 text-neutral-600">
                 <p className="leading-relaxed">
-                  At TheNews, we believe that effective communication is the foundation of successful businesses. Our
-                  mission is to provide powerful, intuitive tools that enable creators and businesses to build
-                  meaningful connections with their audiences through engaging newsletters.
+                At TheNews, we empower businesses and creators to build stronger connections with their audiences through seamless newsletter tools, 
+                cutting-edge automation, and real-time performance tracking.
                 </p>
 
                 <div className="space-y-4">
@@ -81,8 +80,7 @@ export function AboutMission() {
                     <div>
                       <h3 className="font-bold text-lg mb-1">Our Mission</h3>
                       <p className="text-neutral-600">
-                        To democratize email marketing by making professional newsletter tools accessible to businesses
-                        of all sizes, complementing our streaming solution Xonnect.
+                      To make powerful communication tools accessible to businesses of all sizes, enabling them to build meaningful relationships with their audience.
                       </p>
                     </div>
                   </div>
@@ -94,8 +92,7 @@ export function AboutMission() {
                     <div>
                       <h3 className="font-bold text-lg mb-1">Our Vision</h3>
                       <p className="text-neutral-600">
-                        To build a suite of software solutions that empower businesses to connect with their audiences
-                        across multiple channels, starting with Xonnect and TheNews.
+                      To create an ecosystem of innovative tools that empowers businesses to engage with their audiences across multiple platforms, starting with TheNews and Xonnect.
                       </p>
                     </div>
                   </div>
@@ -107,8 +104,7 @@ export function AboutMission() {
                     <div>
                       <h3 className="font-bold text-lg mb-1">Our Values</h3>
                       <p className="text-neutral-600">
-                        Innovation, accessibility, reliability, and customer success drive everything we do at Sithgrid
-                        Technology and across our product offerings.
+                      We prioritize innovation, accessibility, reliability, and customer success. These core values guide every product decision and service we offer at SIXTHGRID
                       </p>
                     </div>
                   </div>
@@ -121,3 +117,6 @@ export function AboutMission() {
     </section>
   )
 }
+
+
+
