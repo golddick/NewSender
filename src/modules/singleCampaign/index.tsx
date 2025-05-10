@@ -616,7 +616,7 @@ export default function CampaignDetails() {
 
           setSubscribers(data.subscribers.map((s) => ({
             id: s._id,
-            name: s.name || 'Unknown', // Provide a default value for undefined names
+            name: s.source || 'Unknown', // Provide a default value for undefined names
             email: s.email,
             status: s.status,
             joinedAt: s.createdAt

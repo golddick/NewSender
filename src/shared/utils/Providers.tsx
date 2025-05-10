@@ -66,6 +66,8 @@
 
 
 
+
+
 "use client";
 
 import { NextUIProvider } from "@nextui-org/react";
@@ -94,33 +96,20 @@ export default function Providers({ children }: ProviderProps) {
     }
   }, [isLoaded, user]);
 
-  // Any route that starts with one of these paths should hide the sidebar
-  const publicPathPrefixes = [
-    "/",
-    "/about",
-    "/documentation",
-    "/sign-up",
-    "/sign-in",
-    "/subscribe",
-    "/success",
-    "/dashboard/new-email"
-  ];
-
-  const shouldHideSidebar = publicPathPrefixes.some((path) =>
-    pathname.startsWith(path)
-  );
+  // Sidebar is only visible for /dashboard routes
+  const shouldShowSidebar = pathname.startsWith("/dashboard");
 
   return (
     <NextUIProvider>
-      {shouldHideSidebar ? (
-        <main>{children}</main>
-      ) : (
+      {shouldShowSidebar ? (
         <div className="w-full flex">
           <aside className="w-[290px] min-h-screen overflow-y-scroll hidden lg:block border-r">
             <DashboardSidebar />
           </aside>
           <main className="flex-1">{children}</main>
         </div>
+      ) : (
+        <main>{children}</main>
       )}
       <Toaster position="bottom-center" reverseOrder={false} />
     </NextUIProvider>

@@ -41,16 +41,10 @@ const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
           }`}
         >
           <span
-            // className={`text-3xl mr-2 ${
-            //   item.url === activeRoute ? 'bg-amber-100 text-amber-800' : 'hover:bg-gray-200'
-            // }`}
           >
             {item.icon}
           </span>
           <span
-            // className={`text-xl mr-2 ${
-            //   item.url === activeRoute ? 'bg-amber-100 text-amber-800' : 'hover:bg-gray-200'
-            // }`}
           >
             {item.title}
           </span>
@@ -65,6 +59,7 @@ const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
               <Link
                 key={index}
                 className="p-2 py-5 flex items-center"
+                onClick={onNavigate}
                 href={
                   item.url === "/"
                     ? `/subscribe?username=${user?.username}`

@@ -61,7 +61,12 @@ interface TrendItem {
   clicked: number;
 }
 
-export const getEmailTrendsByDate = async (): Promise<TrendItem[]> => {
+export const getEmailTrendsByDate = async (newsLetterOwnerId: string): Promise<TrendItem[]> => {
+
+  if (!newsLetterOwnerId) {
+    throw new Error("Missing newsletter owner ID");
+  }
+
   await connectDb();
 
   const last30Days = new Date();
@@ -69,6 +74,7 @@ export const getEmailTrendsByDate = async (): Promise<TrendItem[]> => {
 
   const campaigns = await Campaign.find({
     createdAt: { $gte: last30Days },
+    newsLetterOwnerId,
   }).lean();
 
   const trendsMap = new Map<string, TrendItem>();
