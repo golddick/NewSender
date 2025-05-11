@@ -1239,6 +1239,8 @@ export default function CampaignDashboard() {
       if (res.data) {
         console.log("Category created:", res.data);
         toast.success(`Category "${res.data.name}" created successfully`, { id: toastId });
+
+        router.refresh();
       } else {
         toast.error("Failed to create category: No data returned");
         setError(`Category creation failed: ${JSON.stringify(res)}`);
@@ -1249,8 +1251,6 @@ export default function CampaignDashboard() {
       setNewCategory({ name: "", description: "" });
       setShowCategoryModal(false);
   
-      // Refresh page to get latest data
-      router.refresh();
     } catch (err) {
       console.error("Error creating category:", err);
       setError(err instanceof Error ? err.message : "Failed to create category");
