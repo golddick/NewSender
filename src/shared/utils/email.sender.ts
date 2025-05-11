@@ -67,7 +67,6 @@ export const sendEmail = async (formData: {
     }
 
     const actualEmailId = emailDoc._id.toString();
-
     // ✅ Logo and Tracking
     const logoUrl = `${domain}/logo.jpg`; // Make sure this is a valid public image
     const visibleLogo = `<div style="text-align: center; margin-bottom: 20px;">
