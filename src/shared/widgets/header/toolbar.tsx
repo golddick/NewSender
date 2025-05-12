@@ -23,10 +23,6 @@ const Toolbar = () => {
             />
           </Link>
 
-
-        {/* <Button color="primary" className="text-lg">
-        dashboard
-        </Button> */}
         </>
       ) : (
         <Link href={"/sign-in"}>Login</Link>
