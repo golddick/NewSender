@@ -44,6 +44,7 @@ export interface IMembership extends Document {
   emailLimit?: number;
   campaignLimit?: number; 
   categoryLimit?: number;
+  termsAndConditionsAccepted: boolean;
 }
 
 const membershipSchema = new Schema<IMembership>(
@@ -69,7 +70,7 @@ const membershipSchema = new Schema<IMembership>(
     },
     role: {
       type: String,
-      enum: ["USER", "NEWSLETTEROWNER", "THENEWS"],
+      enum: ["USER", "NEWSLETTEROWNER", "THENEWSADMIN"],
       default: "USER",
     },
     subscriptionStatus: {
@@ -110,7 +111,11 @@ const membershipSchema = new Schema<IMembership>(
     },
     campaignLimit: {
       type: Number,
-      default: 1, // Default for 'Free' plan
+      default: 1,
+    },
+    termsAndConditionsAccepted: { 
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

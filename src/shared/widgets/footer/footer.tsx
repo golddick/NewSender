@@ -4,8 +4,9 @@ import type React from "react"
 
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Twitter, Instagram, Linkedin, Github } from "lucide-react"
+import { Twitter, Instagram, Linkedin, Github, Youtube } from "lucide-react"
 import { Button, Input } from "@nextui-org/react"
+import FooterNewsLetter from "@/shared/newsLetter/FooterNewsLetter"
 
 
 export function XFooter() {
@@ -44,7 +45,7 @@ export function XFooter() {
           <motion.div variants={itemVariants} className="md:col-span-2">
             <Link href="/" className="inline-block mb-6">
               <span className="text-2xl font-bold">
-                <span className="text-gold-400 font-heading">The</span>
+                <span className="text-gold-700 font-heading">The</span>
                 <span className="text-white font-heading">News</span>
               </span>
             </Link>
@@ -55,8 +56,7 @@ export function XFooter() {
             <div className="flex space-x-4">
               <SocialLink href="#" icon={<Twitter size={18} />} />
               <SocialLink href="#" icon={<Instagram size={18} />} />
-              <SocialLink href="#" icon={<Linkedin size={18} />} />
-              <SocialLink href="#" icon={<Github size={18} />} />
+              <SocialLink href="#" icon={<Youtube size={18} />} />
             </div>
           </motion.div>
 
@@ -72,14 +72,7 @@ export function XFooter() {
           <motion.div variants={itemVariants}>
             <h4 className="text-lg font-bold mb-5 text-white">Subscribe</h4>
             <p className="text-neutral-300 mb-4">Get the latest news and updates from TheNews.</p>
-            <div className="flex flex-col space-y-3">
-              <Input
-                type="email"
-                placeholder="Your email"
-                className="border-dark-600 bg-dark-700 focus:border-gold-400 text-white"
-              />
-              <Button className="bg-gold-700 text-dark-900 hover:bg-gold-400 w-full">Subscribe</Button>
-            </div>
+           <FooterNewsLetter/>
           </motion.div>
         </motion.div>
 
@@ -91,14 +84,11 @@ export function XFooter() {
             © {new Date().getFullYear()} TheNews. All rights reserved.
           </p>
           <div className="flex space-x-6">
-            <Link href="#" className="text-neutral-400 text-sm hover:text-gold-300 transition-colors">
+            <Link href="/legal" className="text-neutral-400 text-sm hover:text-gold-300 transition-colors">
               Privacy Policy
             </Link>
-            <Link href="#" className="text-neutral-400 text-sm hover:text-gold-300 transition-colors">
+            <Link href="/legal" className="text-neutral-400 text-sm hover:text-gold-300 transition-colors">
               Terms of Service
-            </Link>
-            <Link href="#" className="text-neutral-400 text-sm hover:text-gold-300 transition-colors">
-              Cookie Policy
             </Link>
           </div>
         </motion.div>

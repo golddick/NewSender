@@ -71,12 +71,13 @@
 "use client";
 
 import { NextUIProvider } from "@nextui-org/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import DashboardSidebar from "@/shared/widgets/dashboard/sidebar/dashboard.sidebar";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import { addPaystack } from "@/actions/add.paystack";
+import { getMembershipStatus } from "@/actions/getTermsMembership";
 
 interface ProviderProps {
   children: React.ReactNode;
@@ -85,6 +86,7 @@ interface ProviderProps {
 export default function Providers({ children }: ProviderProps) {
   const pathname = usePathname();
   const { isLoaded, user } = useUser();
+  const router = useRouter()
 
   useEffect(() => {
     const isPaystackCustomerIdHas = async () => {
@@ -95,6 +97,24 @@ export default function Providers({ children }: ProviderProps) {
       isPaystackCustomerIdHas();
     }
   }, [isLoaded, user]);
+
+
+   // Check if user has accepted terms and redirect if not
+   useEffect(() => {
+    const checkUserTerms = async () => {
+      if (!isLoaded || !user) return;
+
+      const membershipStatus = await getMembershipStatus();
+
+      // If the user has not agreed to the terms, redirect them to the legal page
+      if (membershipStatus?.termsAccepted === false) {
+        toast.error('Accept our terms and conditions to continue ')
+        router.push("/legal"); // Redirect to legal page
+      }
+    };
+
+    checkUserTerms();
+  }, [isLoaded, user, router]);
 
   // Sidebar is only visible for /dashboard routes
   const shouldShowSidebar = pathname.startsWith("/dashboard");
