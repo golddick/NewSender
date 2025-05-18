@@ -116,7 +116,8 @@ const Write = () => {
             <Button
               color="primary"
               className="mt-4 w-full rounded text-md font-semibold"
-              onClick={handleCreate}
+              // onClick={handleCreate}
+              onPress={handleCreate}
             >
               Continue
             </Button>

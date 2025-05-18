@@ -1,6 +1,7 @@
 import MembershipUsage from "@/models/membershipUsage.model";
 import Membership from "@/models/membership.model";
 import dayjs from "dayjs";
+import mongoose from "mongoose";
 
 // Define the action keys that match the membership limits
 type ActionKey = 
@@ -80,8 +81,13 @@ export async function checkUsageLimit(userId: string, action: ActionKey) {
 
 /**
  * Increments the usage count for a specific action after successful operation.
+ * Now supports optional incrementBy parameter with proper TypeScript typing.
  */
-export async function incrementUsage(userId: string, action: ActionKey) {
+export async function incrementUsage(
+  userId: string, 
+  action: ActionKey,
+  incrementBy: number = 1
+) {
   const currentMonth = dayjs().format("YYYY-MM");
 
   try {
@@ -97,15 +103,27 @@ export async function incrementUsage(userId: string, action: ActionKey) {
       });
     }
 
-    usage[action] = (usage[action] ?? 0) + 1;
+    usage[action] = (usage[action] ?? 0) + incrementBy;
     await usage.save();
 
-    return { success: true };
+    return { 
+      success: true,
+      newCount: usage[action]
+    };
   } catch (error) {
-    console.error("Error incrementing usage:", error);
+    console.error("Error incrementing usage:", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      userId,
+      action,
+      incrementBy,
+      timestamp: new Date().toISOString()
+    });
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to increment usage."
     };
   }
 }
+
+// Update the sendEmail function call to use the new signature:
+// await incrementUsage(formData.newsLetterOwnerId, "emailsSent", formData.userEmail.length);

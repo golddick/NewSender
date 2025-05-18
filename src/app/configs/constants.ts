@@ -134,26 +134,43 @@ export const sideBarBottomItems: DashboardSideBarTypes[] = [
     url: "/dashboard/url",
     icon: ICONS.world,
   },
-  // {
-  //   title: "View Site",
-  //   url: "/",
-  //   icon: ICONS.world,
-  // },
+
 ];
 
-// export const subscribersData: subscribersDataTypes[] = [
-//   {
-//     _id: "64f717a45331088de2ce886c",
-//     email: "programmershahriarsajeeb@gmail.com",
-//     createdAt: "5Feb 2024",
-//     source: "Becodemy website",
-//     status: "subscribed",
-//   },
-//   {
-//     _id: "64f717a45331088de2ce886c",
-//     email: "support@becodemy.com",
-//     createdAt: "8Feb 2024",
-//     source: "External website",
-//     status: "subscribed",
-//   },
-// ];
+
+export const AdminsideBarItems: DashboardSideBarTypes[] = [
+  {
+    title: "Dashboard",
+    url: "/xontrol",
+    icon: ICONS.dashboard,
+  },
+  {
+    title: "Users",
+    url: "/xontrol/users",
+    icon: ICONS.profile,
+  },
+  {
+    title: "KYC",
+    url: "/xontrol/kyc",
+    icon: ICONS.form,
+  },
+  {
+    title: "Blog",
+    url: "/xontrol/Blog",
+    icon: ICONS.blog,
+  },
+];
+
+export const AdminsideBarBottomItems: DashboardSideBarTypes[] = [
+  {
+    title: "Settings",
+    url: "/xontrol/settings",
+    icon: ICONS.settings,
+  },
+  {
+    title: "Generated URL",
+    url: "/dashboard/url",
+    icon: ICONS.world,
+  },
+
+];

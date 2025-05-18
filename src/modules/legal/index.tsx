@@ -267,9 +267,10 @@ export default function LegalPage({membershipStatus}:LegalPageClientProps) {
           <button
             type="button"
             onClick={handleSubmit}
-            className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 rounded shadow-lg transition duration-300 border-2 border-gold-500"
+            disabled={disabled}
+            className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 rounded shadow-lg transition duration-300 border-2 border-gold-700"
           >
-            Accept All Terms
+            {isSubmitting ? "submitting..." : "Accept All Terms"}
           </button>
         </div>
       </main>

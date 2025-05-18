@@ -65,6 +65,10 @@ const subscriberSchema = new Schema(
   { timestamps: true }
 );
 
+
+// Ensure unique email per owner
+subscriberSchema.index({ email: 1, newsLetterOwnerId: 1 }, { unique: true });
+
 // Prevent model overwrite in dev
 const Subscriber =
   mongoose.models.Subscribers || mongoose.model("Subscribers", subscriberSchema);
