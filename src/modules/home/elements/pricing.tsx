@@ -70,7 +70,7 @@ const Pricing = () => {
             >
               Monthly
             </Button>
-            <Button
+            {/* <Button
               className={`${
                 active === "Yearly"
                   ? "bg-gold-700 text-white"
@@ -79,7 +79,7 @@ const Pricing = () => {
               onClick={() => setActive("Yearly")}
             >
               Yearly
-            </Button>
+            </Button> */}
           </motion.div>
         </motion.div>
 

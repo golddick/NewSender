@@ -44,7 +44,7 @@ import type React from "react"
 
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
-import { PaintBucket, Wand2, LayoutTemplate, Clock, Zap, Users, CheckCircle, ArrowRight, Code } from "lucide-react"
+import { PaintBucket, Wand2, LayoutTemplate, Clock, Zap, Users, CheckCircle, ArrowRight, Code, Mail, Upload, Activity } from "lucide-react"
 import Image from "next/image"
 
 export function FeatureHighlight() {
@@ -85,6 +85,21 @@ export function FeatureHighlight() {
       icon: <LayoutTemplate />,
       title: "Drag & Drop Editor",
       description: "Create beautiful newsletters with our intuitive drag-and-drop editor. No coding required.",
+    },
+    {
+    icon: <Mail />,
+    title: "Email Verifying",
+    description: "Verify user emails before allowing subscriptions to ensure a high-quality, engaged mailing list.",
+    },
+    {
+      icon: <Upload />,
+      title: "CSV Email Import & Verification",
+      description: "Easily import subscribers via CSV. All emails are automatically verified during import to maintain list quality.",
+    },
+    {
+      icon: <Activity />, 
+      title: "Click & Open Tracking",
+      description: "Track every email open and link click to measure engagement and improve your campaign performance.",
     },
     {
       icon: <Code />,
@@ -171,75 +186,7 @@ export function FeatureHighlight() {
           </motion.div>
 
           <motion.div variants={itemVariants} className="mt-16 md:mt-20 relative">
-            {/* <div className="bg-dark-700 border border-dark-600 rounded-xl p-6  overflow-hidden shadow-dark">
-              <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
-                <div>
-                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6 font-heading text-white">
-                    Powerful Analytics Dashboard
-                  </h3>
-                  <p className="text-neutral-300 mb-6 md:mb-8 leading-relaxed">
-                    Gain valuable insights into your newsletter performance with our comprehensive analytics dashboard.
-                    Track opens, clicks, subscriber growth, and more to optimize your content strategy.
-                  </p>
-                  <ul className="space-y-3 md:space-y-4">
-                    {[
-                      "Real-time performance tracking",
-                      "Subscriber growth analytics",
-                      "Content engagement metrics",
-                      "Geographical distribution data",
-                      "Conversion tracking",
-                    ].map((item, index) => (
-                      <li key={index} className="flex items-center">
-                        <span className="h-2 w-2 bg-gold-400 rounded-full mr-3"></span>
-                        <span className="text-neutral-200">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="relative">
-                   <div className="w-full">
-              <div className="bg-gray-800 rounded-lg p-4  shadow-xl">
-                <div className="flex items-center mb-4">
-                  <div className="flex space-x-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  </div>
-                  <div className="ml-4 text-gray-400 text-sm">Code Example</div>
-                </div>
-                        <pre className="bg-gray-900 p-4 rounded-md text-green-400 overflow-x-auto">
-              {`// Initialize the theNews client
-              const theNews = require('thenews-sdk');
-              const client = new theNews('YOUR_API_KEY');
-
-              // Create a newsletter campaign
-              async function createCampaign() {
-                try {
-                  const campaign = await client.campaigns.create({
-                    name: 'Product Launch Newsletter',
-                    subject: 'Introducing Our New Product!',
-                    fromName: 'Your Company',
-                    fromEmail: 'news@yourcompany.com',
-                    listId: 'list_123',
-                    content: {
-                      html: '<h1>Hello!</h1><p>Check out our new product...</p>',
-                      text: 'Hello! Check out our new product...'
-                    }
-                  });
-                  
-                  console.log('Campaign created:', campaign.id);
-                  return campaign;
-                } catch (error) {
-                  console.error('Error creating campaign:', error);
-                }
-              }`}
-                              </pre>
-                            </div>
-                          </div>
-                  <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-gold-500/20 rounded-full blur-2xl opacity-70 hidden md:block"></div>
-                </div>
-              </div>
-            </div> */}
+   
             
              <div className="flex flex-col gap-4 items-center">
                         <div className="w-full mb-8 md:mb-0">
@@ -273,39 +220,58 @@ export function FeatureHighlight() {
                               </div>
                               <div className="ml-4 text-gray-400 text-sm">Code Example</div>
                             </div>
-                            <pre className="bg-gray-900 p-2 rounded-md text-green-400 overflow-x-auto ">
-                              {
-                              `
-            // Import the necessary libraries      
+                        <pre className="bg-gray-900 p-4 rounded-md text-green-400 text-sm overflow-x-auto whitespace-pre-wrap">
+                          {`
+                            // Import the necessary libraries
 
-                    fetch("https://yourdomain.com/api/subscribe", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                          email: "user@example.com",
-                          apiKey: "YOUR_GENERATED_API_KEY"
-                        })
-                      })
-                      .then(response => {
-                        if (!response.ok) {
-                          return response.json().then(err => {
-                            throw new Error(err.error || "Subscription failed");
-                          });
-                        }
-                        return response.json();
-                      })
-                      .then(data => {
-                        console.log("✅ Subscribed successfully:", data);
-                      })
-                      .catch(error => {
-                        console.error("❌ Error subscribing:", error.message);
-                      });
+                            const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+                              e.preventDefault();
+                              setLoading(true);
+                              setMessage('');
 
-                                `
+                              try {
+                                const payload = {
+                                  email: value,
+                                  source: \`\${process.env.NEXT_PUBLIC_SOURCE}/category?\${selectedCategoryName}\`,
+                                  status: "Subscribed",
+                                  categoryId: selectedCategory,
+                                  metadata: {
+                                    campaign: selectedCampaignName || "thenews website landing page",
+                                    pageUrl: \`\${process.env.NEXT_PUBLIC_SOURCE}/\${selectedCategoryName}\`,
+                                    formId: "TheNews landing page",
+                                  },
+                                };
+
+                                const res = await axios.post(
+                                  "http://thenews.africa/api/subscribe",
+                                  payload,
+                                  {
+                                    headers: {
+                                      "TheNews-api-key": process.env.NEXT_PUBLIC_TheNews_API_KEY!,
+                                    },
+                                  }
+                                );
+
+                                if (res.status === 200) {
+                                  setMessage("✅ Successfully subscribed!");
+                                  toast.success("Successfully subscribed!");
+                                  setValue(''); // Reset email input
+                                } else {
+                                  toast.error("⚠️ Something went wrong. Please try again.");
+                                }
+                              } catch (err: any) {
+                                const customMessage =
+                                  err.response?.data?.error || "❌ Failed to subscribe. Please try again later.";
+                                setMessage(customMessage);
+                                toast.error(customMessage);
+                                console.error("Subscription error:", err);
+                              } finally {
+                                setLoading(false);
                               }
-                            </pre>
+                            };
+                          `}
+                          </pre>
+
                           </div>
                         </div>
                       </div>

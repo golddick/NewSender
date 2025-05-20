@@ -49,13 +49,13 @@ export function About() {
           <div className="grid md:grid-cols-2 gap-16 items-center">
             {/* Image */}
             <motion.div variants={itemVariants}>
-              <div className="relative">
+              <div className="relative ">
                 <Image
-                  src="/gnb.png"
+                  src="/logo.jpg"
                   width={640}
                   height={640}
                   alt="TheNews in action"
-                  className="rounded-xl shadow-xl w-full h-auto"
+                  className="rounded-xl shadow-xl w-full h-auto bg-black object-cover"
                 />
                 <div className="absolute -bottom-6 -right-6 w-36 h-36 bg-gold-100 rounded-full blur-2xl opacity-60 hidden md:block"></div>
               </div>

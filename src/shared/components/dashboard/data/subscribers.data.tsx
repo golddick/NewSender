@@ -12,6 +12,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { getCategoryByOwnerId } from "@/actions/get.category";
+import useGetAllSubscribersData from "@/shared/hooks/useGetAllSubscribersData";
 
 type Subscriber = {
   email: string;
@@ -22,7 +23,7 @@ type Subscriber = {
 };
 
 const SubscribersData = () => {
-  const { data, loading, refetch } = useSubscribersData();
+  const { data, loading, refetch } = useGetAllSubscribersData();
   const { user } = useUser();
 
   const [isImporting, setIsImporting] = useState(false);

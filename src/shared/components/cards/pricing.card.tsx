@@ -1,5 +1,5 @@
-import { stripeSubscribe } from "@/actions/stripe.subscribe";
-import { GrowPlan, freePlan, scalePlan } from "@/app/configs/constants";
+
+import { FreePlan, GrowPlan, ScalePlan } from "@/app/configs/constants";
 import { ICONS } from "@/shared/utils/icons";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@nextui-org/button";
@@ -97,7 +97,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <div className="pt-5">
           <p className="text-xl">What&apos;s included...</p>
         </div>
-        {freePlan.map((i: PlanType, index: number) => (
+        {FreePlan.map((i: PlanType, index: number) => (
           <div key={index} className="flex w-full items-center py-4">
             <span className="text-xl text-gold-400">{ICONS.right}</span>
             <p className="pl-2 text-lg">{i.title}</p>
@@ -122,7 +122,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <br />
         <div className="border-b pb-8 border-black">
           <h5 className="font-clashDisplay uppercase text-cyber-ink text-3xl">
-            N{active === "Monthly" ? "45,000" : "45,000"} /month
+            N{active === "Monthly" ? "30,000" : "45,000"} /month
           </h5>
           <p className="text-lg">Billed {active}</p>
         </div>
@@ -139,7 +139,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <Button
           color="primary"
           className="w-full text-xl !py-6 bg-gold-700"
-          onClick={() =>
+          onPress={() =>
             handleSubscription({
               planCode: active === "Monthly" 
                 ? "PLN_qqs88g3s909068i" 
@@ -169,7 +169,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <div className="pt-5">
           <p className="text-xl">Everything in Grow, plus...</p>
         </div>
-        {scalePlan.map((i: PlanType, index: number) => (
+        {ScalePlan.map((i: PlanType, index: number) => (
           <div key={index} className="flex w-full items-center py-4">
             <span className="text-xl text-gold-400">{ICONS.right}</span>
             <p className="pl-2 text-lg">{i.title}</p>
@@ -179,7 +179,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <Button
           color="primary"
           className="w-full text-xl !py-6 bg-gold-700"
-          onClick={() =>
+          onPress={() =>
             handleSubscription({
               planCode: active === "Monthly" 
                 ? "PLN_4idp8h4m8ptak6k" 

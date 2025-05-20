@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     await incrementUsage(userId, "subscribersAdded");
 
     return NextResponse.json({ success: true, data: subscriber }, { status: 200 });
-  } catch (err: any) {
+  } catch (err: any) { 
     console.error("Subscription Error:", err);
     return NextResponse.json(
       {

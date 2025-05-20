@@ -4,9 +4,10 @@ import type React from "react"
 
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Twitter, Instagram, Linkedin, Github, Youtube } from "lucide-react"
+import { Twitter, Instagram, Linkedin, Github, Youtube, Mail } from "lucide-react"
 import { Button, Input } from "@nextui-org/react"
 import FooterNewsLetter from "@/shared/newsLetter/FooterNewsLetter"
+import { FaWhatsapp } from "react-icons/fa6"
 
 
 export function XFooter() {
@@ -54,9 +55,9 @@ export function XFooter() {
               business.
             </p>
             <div className="flex space-x-4">
-              <SocialLink href="#" icon={<Twitter size={18} />} />
-              <SocialLink href="#" icon={<Instagram size={18} />} />
-              <SocialLink href="#" icon={<Youtube size={18} />} />
+              <SocialLink href="https://wa.me/+2347050998742" icon={<FaWhatsapp size={18} />} />
+              <SocialLink href="https://www.instagram.com/thenews.africa/" icon={<Instagram size={18} />} />
+              <SocialLink href="mailto:info@thenews.africa" icon={<Mail size={18} />} />
             </div>
           </motion.div>
 

@@ -48,7 +48,7 @@ export function AboutMission() {
             <motion.div variants={itemVariants} className="order-2 md:order-1">
               <div className="relative">
                 <Image
-                  src="/gnb.png"
+                  src="/logo.jpg"
                   width={600}
                   height={600}
                   alt="TheNews Mission"

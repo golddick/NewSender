@@ -1,206 +1,3 @@
-// "use server";
-
-// import * as nodemailer from "nodemailer";
-// import { revalidatePath } from "next/cache";
-// import Email from "@/models/email.model";
-// import mongoose from "mongoose";
-// import { checkUsageLimit, incrementUsage } from "@/lib/checkAndUpdateUsage";
-// import Campaign from "@/models/newsLetterCampaign.model";
-// import Category from "@/models/newsLetterCategory.model";
-
-// const BATCH_SIZE = 50;
-
-// const transporter = nodemailer.createTransport({
-//   host: process.env.SMTP_HOST,
-//   port: Number(process.env.SMTP_PORT),
-//   secure: true,
-//   auth: {
-//     user: process.env.SMTP_USER,
-//     pass: process.env.SMTP_PASS,
-//   },
-//   tls: {
-//     rejectUnauthorized: true,
-//   },
-// });
-
-// const verifyTransporter = async () => {
-//   try {
-//     await transporter.verify();
-//     return true;
-//   } catch (error) {
-//     console.error("SMTP connection verification failed:", error);
-//     return false;
-//   }
-// };
-
-// export const sendEmail = async (formData: {
-//   userEmail: string[];
-//   subject: string;
-//   content: string;
-//   emailId: string;
-//   category: string;
-//   campaign: string;
-//   newsLetterOwnerId: string;
-//   contentJson: string;
-//   adminEmail: string;
-// }) => {
-//   const startTime = Date.now();
-//   let emailDoc;
-
-//   try {
-//     // Basic validation
-//     if (!formData.newsLetterOwnerId || !formData.adminEmail) {
-//       return { error: "User not authenticated.", success: false };
-//     }
-
-//     if (!formData.campaign || !formData.category) {
-//       return { error: "Campaign or Category is missing.", success: false };
-//     }
-
-//     if (!formData.userEmail || formData.userEmail.length === 0) {
-//       return { error: "No recipients specified.", success: false };
-//     }
-
-//     // Usage Limit
-//     const usageCheck = await checkUsageLimit(formData.newsLetterOwnerId, "emailsSent");
-//     if (!usageCheck.success) {
-//       return { error: usageCheck.message, success: false };
-//     }
-
-//     const isTransporterReady = await verifyTransporter();
-//     if (!isTransporterReady) {
-//       return { error: "SMTP server is not ready.", success: false };
-//     }
-
-//     const categoryDetails = await Category.findById(formData.category);
-//     const categoryName = categoryDetails?.name || "Unknown";
-
-//     emailDoc = await Email.findOneAndUpdate(
-//       {
-//         title: formData.subject,
-//         newsLetterOwnerId: formData.newsLetterOwnerId,
-//       },
-//       {
-//         content: formData.contentJson,
-//         status: "PENDING",
-//         category: formData.category,
-//         campaign: formData.campaign,
-//         recipientCount: formData.userEmail.length,
-//         $setOnInsert: {
-//           title: formData.subject,
-//           newsLetterOwnerId: formData.newsLetterOwnerId,
-//         },
-//       },
-//       { upsert: true, new: true }
-//     );
-
-//     const actualEmailId = emailDoc._id.toString();
-    // // const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || "https://denews-xi.vercel.app";
-    // const domain =  "https://denews-xi.vercel.app";
-
-//     const processedContent = formData.content.replace(
-//       /href="([^"]+)"/g,
-//       (match, url) => `href="${domain}/api/track/click?emailId=${actualEmailId}&url=${encodeURIComponent(url)}"`
-//     );
-
-//     const htmlContent = `
-//       <div style="text-align: center; margin-bottom: 20px;">
-//         <img src="${domain}/logo.jpg" alt="Logo" width="120" style="display: block; margin: auto;" />
-//       </div>
-//       ${processedContent}
-//       <div style="text-align: center; margin-top: 30px;">
-//         <a href="${domain}/unsubscribe?emailId=${actualEmailId}" 
-//            style="padding: 10px 20px; background-color: #e63946; color: #fff; border-radius: 5px; text-decoration: none;">
-//           Unsubscribe
-//         </a>
-//       </div>
-//       <img src="${domain}/api/track/open?emailId=${actualEmailId}" width="1" height="1" style="opacity:0;" alt="tracker" />
-//     `;
-
-//     const batches = [];
-//     for (let i = 0; i < formData.userEmail.length; i += BATCH_SIZE) {
-//       batches.push(formData.userEmail.slice(i, i + BATCH_SIZE));
-//     }
-
-//     let totalAccepted = 0;
-//     let totalRejected = 0;
-//     let lastMessageId = "";
-
-//     for (const batch of batches) {
-//       const mailOptions = {
-//         from: `"Newsletter Service" <${process.env.SMTP_USER}>`,
-//         to: batch,
-//         cc: formData.adminEmail,
-//         subject: formData.subject,
-//         html: htmlContent,
-//         headers: {
-//           "X-Email-Campaign": formData.campaign,
-//           "X-Email-Category": formData.category,
-//           "X-Email-ID": actualEmailId,
-//         },
-//       };
-
-//       const result = await transporter.sendMail(mailOptions);
-//       console.log(`Batch result: ${result.accepted.length} accepted, ${result.rejected.length} rejected`);
-
-//       totalAccepted += result.accepted.length;
-//       totalRejected += result.rejected.length;
-//       lastMessageId = result.messageId || lastMessageId;
-
-//       if (!result.messageId || result.accepted.length === 0) {
-//         await Email.findByIdAndUpdate(emailDoc._id, { status: "FAILED" });
-//         return {
-//           error: "Email failed to send for one or more batches.",
-//           success: false,
-//         };
-//       }
-//     }
-
-//     await Email.findByIdAndUpdate(emailDoc._id, {
-//       status: "SENT",
-//       messageId: lastMessageId,
-//       sentAt: new Date(),
-//     });
-
-//     if (mongoose.Types.ObjectId.isValid(formData.campaign)) {
-//       await Campaign.findByIdAndUpdate(formData.campaign, {
-//         $inc: { emailsSent: formData.userEmail.length },
-//         $addToSet: { emails: emailDoc._id },
-//         lastSentAt: new Date(),
-//       });
-//     }
-
-//     await incrementUsage(formData.newsLetterOwnerId, "emailsSent", formData.userEmail.length);
-//     revalidatePath("/dashboard");
-
-//     const duration = Date.now() - startTime;
-//     return {
-//       success: true,
-//       messageId: lastMessageId,
-//       stats: {
-//         recipients: formData.userEmail.length,
-//         accepted: totalAccepted,
-//         rejected: totalRejected,
-//         processingTime: duration,
-//         batches: batches.length,
-//       },
-//     };
-//   } catch (error) {
-//     if (emailDoc) {
-//       await Email.findByIdAndUpdate(emailDoc._id, {
-//         status: "FAILED",
-//         error: error instanceof Error ? error.message : "Unknown error",
-//       });
-//     }
-
-//     return {
-//       error: "Failed to send email",
-//       success: false,
-//       details: error instanceof Error ? error.message : "Unknown error",
-//     };
-//   }
-// };
-
 
 
 "use server";
@@ -293,8 +90,7 @@ export const sendEmail = async (formData: {
     );
 
     const emailId = emailDoc._id.toString();
-    // const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || "https://denews-xi.vercel.app";
-    const domain =  "https://denews-xi.vercel.app";
+    const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || "https://denews-xi.vercel.app";
 
     const batches = [];
     for (let i = 0; i < formData.userEmail.length; i += BATCH_SIZE) {
@@ -315,11 +111,11 @@ export const sendEmail = async (formData: {
 
         const htmlContent = `
           <div style="text-align: center; margin-bottom: 20px;">
-            <img src="${domain}/logo.jpg" alt="Logo" width="120" />
+            <img src="${domain}/GeeLogo.png" alt="Logo" width="20"  />
           </div>
           ${trackedContent}
           <div style="text-align: center; margin-top: 30px;">
-            <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${formData.newsLetterOwnerId}" 
+            <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${formData.newsLetterOwnerId}?category=${categoryName}" 
               style="padding: 10px 20px; background-color: #e63946; color: #fff; border-radius: 5px; text-decoration: none;">
               Unsubscribe
             </a>
@@ -335,7 +131,7 @@ export const sendEmail = async (formData: {
           html: htmlContent,
           headers: {
             "X-Email-Campaign": formData.campaign,
-            "X-Email-Category": formData.category,
+            "X-Email-Category": categoryName,
             "X-Email-ID": emailId,
           },
         };
@@ -362,7 +158,8 @@ export const sendEmail = async (formData: {
       });
     }
 
-    await incrementUsage(formData.newsLetterOwnerId, "emailsSent", formData.userEmail.length);
+    // await incrementUsage(formData.newsLetterOwnerId, "emailsSent", formData.userEmail.length);
+    await incrementUsage(formData.newsLetterOwnerId, "emailsSent");
     revalidatePath("/dashboard");
 
     return {

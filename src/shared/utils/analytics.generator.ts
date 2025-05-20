@@ -1,8 +1,17 @@
+
+
 import { Document, Model } from "mongoose";
+
+
+
+interface StatusCount {
+  Subscribed: number;
+  Unsubscribed: number;
+}
 
 interface MonthData {
   month: string;
-  count: number;
+  counts: StatusCount;
 }
 
 export async function generateAnalyticsData<T extends Document>(
@@ -26,21 +35,32 @@ export async function generateAnalyticsData<T extends Document>(
       endDate.getDate() - 28
     );
 
-    const monthYear = endDate.toLocaleString("default", {
-      day: "numeric",
+    const monthLabel = endDate.toLocaleString("default", {
       month: "short",
       year: "numeric",
     });
 
-    const count = await model.countDocuments({
-      createdAt: {
-        $gte: startDate,
-        $lt: endDate,
-      },
+    // Use regular queries instead of aggregation
+    const subscribedCount = await model.countDocuments({
       newsLetterOwnerId: ownerId,
+      status: "Subscribed",
+      createdAt: { $gte: startDate, $lt: endDate }
     });
 
-    last7Months.push({ month: monthYear, count });
+    const unsubscribedCount = await model.countDocuments({
+      newsLetterOwnerId: ownerId,
+      status: "Unsubscribed",
+      createdAt: { $gte: startDate, $lt: endDate }
+    });
+
+    last7Months.push({
+      month: monthLabel,
+      counts: {
+        Subscribed: subscribedCount,
+        Unsubscribed: unsubscribedCount
+      }
+    });
   }
+
   return { last7Months };
 }

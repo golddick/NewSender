@@ -36,14 +36,14 @@ export function QuickSidebar({ isOpen, closeSidebar, activeSection, setActiveSec
   ]
 
   const subscribersEndpoints = [
-    { id: "subscribers-get", label: "GET /subscribers" },
-    { id: "subscribers-post", label: "POST /subscribers" },
-    { id: "subscribers-delete", label: "DELETE /subscribers/:id" },
+    { id: "subscribers-get", label: "GET /subscribe" },
+    { id: "subscribers-post", label: "POST /subscribe" },
+    // { id: "subscribers-delete", label: "DELETE /subscribers/:id" },
   ]
 
   const newslettersEndpoints = [
-    { id: "newsletters-get", label: "GET /newsletters" },
-    { id: "newsletters-post", label: "POST /newsletters" },
+    { id: "newsletters-get", label: "GET /category" },
+    // { id: "newsletters-post", label: "POST /newsletters" },
   ]
 
   const comingSoonEndpoints = [
@@ -143,13 +143,13 @@ export function QuickSidebar({ isOpen, closeSidebar, activeSection, setActiveSec
             )}
           </div>
 
-          {/* Newsletters API */}
+          {/* Category API */}
           <div>
             <button
               onClick={() => toggleCategory("newsletters")}
               className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-900 mb-2"
             >
-              <span>Newsletters API</span>
+              <span>Category API</span>
               {openCategories.newsletters ? (
                 <ChevronDown className="h-4 w-4 text-gray-500" />
               ) : (

@@ -52,7 +52,7 @@ const useSubscribersData = () => {
     setLoading(true);
     try {
       const res = await getSubscribers({ newsLetterOwnerId: user?.id! });
-      setData(res);
+      setData(res); 
     } catch (err) {
       console.error("Error fetching subscribers:", err);
     } finally {

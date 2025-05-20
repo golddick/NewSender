@@ -47,7 +47,7 @@ export function AboutParent() {
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <motion.div variants={itemVariants}>
               <span className="inline-block px-4 py-1.5 bg-gold-500/20 text-gold-700 rounded-full text-sm font-medium mb-4">
-                Part of Sithgrid Technology
+                Part of Sixthgrid Technology
               </span>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 font-heading">
                 Innovative Software Solutions for Modern Businesses
@@ -55,28 +55,28 @@ export function AboutParent() {
 
               <div className="space-y-6 text-neutral-300">
                 <p className="leading-relaxed text-neutral-600">
-                  TheNews is one of two flagship products developed by Sithgrid Technology, a growing software
-                  development company focused on creating innovative digital solutions. Sithgrid Technology is committed
+                  TheNews is one of two flagship products developed by Sixthgrid Technology, a growing software
+                  development company focused on creating innovative digital solutions. Sixthgrid Technology is committed
                   to building software that helps businesses connect with their audiences in meaningful ways.
                 </p>
 
                 <p className="leading-relaxed text-neutral-600">
-                  As part of the Sithgrid Technology portfolio, TheNews benefits from the company&lsquo;s expertise in
+                  As part of the Sixthgrid Technology portfolio, TheNews benefits from the company&lsquo;s expertise in
                   building scalable, user-friendly applications and its commitment to continuous innovation and
                   improvement.
                 </p>
 
                 <p className="leading-relaxed text-neutral-600">
-                  Sithgrid Technology currently offers two main products: Xonnect, a cutting-edge streaming platform,
+                  Sixthgrid Technology currently offers two main products: Xonnect, a cutting-edge streaming platform,
                   and TheNews, our comprehensive newsletter solution designed for the modern creator economy and
                   businesses of all sizes.
                 </p>
 
-                <div className="pt-2">
+                {/* <div className="pt-2">
                   <Button className="bg-gold-700 text-dark-900 hover:bg-gold-500">
                     Visit Sithgrid Technology <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                </div>
+                </div> */}
               </div>
             </motion.div>
 
@@ -101,7 +101,7 @@ export function AboutParent() {
                         <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-white">Sithgrid Technology</h3>
+                    <h3 className="text-xl font-bold text-white">Sixthgrid Technology</h3>
                   </div>
 
                   <p className="text-neutral-300 mb-6">
@@ -129,7 +129,7 @@ export function AboutParent() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-neutral-400">Sithgrid products:</span>
+                    <span className="text-sm text-neutral-400">Sixthgrid products:</span>
                     <div className="flex gap-2">
                       <span className="bg-dark-600 text-xs px-2 py-1 rounded text-neutral-300">Xonnect</span>
                       <span className="bg-dark-600 text-xs px-2 py-1 rounded text-neutral-300">TheNews</span>

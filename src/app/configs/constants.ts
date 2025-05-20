@@ -3,7 +3,7 @@ import { atom } from "jotai";
 
 export const navItems: NavItems[] = [
   {
-    title: "Features",
+    title: "Home",
     link: "/",
   },
   {
@@ -12,7 +12,11 @@ export const navItems: NavItems[] = [
   },
   {
     title: "Resources",
-    link: "/resources",
+    link: "/coming-soon",
+  },
+  {
+    title: "Blogs",
+    link: "/coming-soon",
   },
   {
     title: "Docs",
@@ -44,52 +48,32 @@ export const partners: PartnersTypes[] = [
   },
 ];
 
-export const freePlan: PlanType[] = [
-  {
-    title: "Up to 2,500 subscribers",
-  },
-  {
-    title: "Unlimited sends",
-  },
-  {
-    title: "Custom newsletter",
-  },
-  {
-    title: "Newsletter analytics",
-  },
+export const FreePlan: PlanType[] = [
+  { title: "Up to 500 subscribers" }, // matched with PLAN_LIMITS.FREE
+  { title: "Send up to 2 emails" },
+  { title: "1 campaign and 1 category" },
+  { title: "Custom subcribtion page" },
+  { title: "Newsletter analytics" },
 ];
+
+
 
 export const GrowPlan: PlanType[] = [
-  {
-    title: "Up to 10,000 subscribers",
-  },
-  {
-    title: "Custom domains",
-  },
-  {
-    title: "API access",
-  },
-  {
-    title: "Newsletter community",
-  },
+  { title: "Up to 2,000 subscribers" }, // matched with PLAN_LIMITS.LUNCH
+  { title: "Send up to 10 emails" },
+  { title: "5 campaigns and 2 categories" },
+  { title: "Custom subcribtion page" },
+  { title: "API access" },
+  // { title: "Blog access" },
+  { title: "Access to TheNews community" },
 ];
 
-export const scalePlan: PlanType[] = [
-  {
-    title: "Up to 100,000 subscribers",
-  },
-  {
-    title: "Referal program",
-  },
-  {
-    title: "AI support",
-  },
-  {
-    title: "Advanced support system",
-  },
-  {
-    title: "Ad Network",
-  },
+export const ScalePlan: PlanType[] = [
+  { title: "Up to 10,000 subscribers" }, 
+  { title: "Send up to 50 emails" },
+  { title: "10 campaigns and 5 categories" },
+  { title: "Advanced support system" },
+  { title: "Ad Network" },
 ];
 
 export const sideBarActiveItem = atom<string>("/dashboard");

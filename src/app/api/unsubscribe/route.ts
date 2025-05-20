@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const email = searchParams.get("email");
     const newsLetterOwnerId = searchParams.get("ownerId");
+    const category = searchParams.get("category");
 
     if (!email || !newsLetterOwnerId) {
       return NextResponse.json({ success: false, message: "Missing email or owner ID" }, { status: 400 });
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `You have been unsubscribed from ${email}`,
+      message: `You have been unsubscribed from ${category} Newsletter`,
     });
   } catch (error) {
     console.error("Unsubscribe error:", error);

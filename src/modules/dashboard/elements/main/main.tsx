@@ -41,7 +41,7 @@ const Main = () => {
         </div>
 
       </div>
-      <div className="w-full grid grid-cols-1 md:grid-cols-[2fr_1fr] lg:grid-cols-[3fr_1fr] gap-5 ">
+      <div className="w-full grid grid-cols-1 md:grid-cols-[3fr_0.5fr] lg:grid-cols-[4fr_1fr] gap-2 ">
         <div className="w-full lg:p-5">
           <br />
           <DashboardOverViewCard />

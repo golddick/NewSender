@@ -21,7 +21,7 @@ export function QuickRateLimits() {
         <p className="text-gray-600 mb-4">Rate limits vary based on your subscription plan:</p>
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse">
-            <thead>
+            <thead> 
               <tr className="border-b border-gray-200">
                 <th className="py-2 px-4 text-left text-sm font-medium text-gray-500">Plan</th>
                 <th className="py-2 px-4 text-left text-sm font-medium text-gray-500">Requests per Minute</th>
@@ -152,7 +152,7 @@ export function QuickRateLimits() {
 }
 
 // Example usage
-makeApiRequest('https://api.thenews.sixthgrid.com/v1/api/subscribe', {
+makeApiRequest('https://api.thenews.africca/api/subscribe', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',

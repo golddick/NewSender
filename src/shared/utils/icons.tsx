@@ -18,7 +18,7 @@ import { CgProfile } from "react-icons/cg";
 import { FiPlusCircle } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosRepeat } from "react-icons/io";
-import { FormInputIcon, PenBox } from "lucide-react";
+import { ArrowDown, FormInputIcon, PenBox } from "lucide-react";
 
 export const ICONS = {
   right: <IoMdCheckmark />,
@@ -42,5 +42,6 @@ export const ICONS = {
   delete: <MdDeleteOutline />,
   regenerate: <IoIosRepeat />,
   blog:<PenBox/>,
-  form:<FormInputIcon/>
+  form:<FormInputIcon/>,
+  bottomArrow:<ArrowDown/>
 };

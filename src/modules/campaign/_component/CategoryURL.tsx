@@ -11,8 +11,7 @@ const MyCategories = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
 
-  // const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "";
-  const baseUrl = "http://localhost:3003";
+  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "";
 
 
 

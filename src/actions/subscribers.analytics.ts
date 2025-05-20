@@ -15,7 +15,8 @@ export const subscribersAnalytics = async () => {
     const userId = user.id;
 
     const subscribers = await generateAnalyticsData(Subscriber, userId );
-    return subscribers;
+
+    return subscribers; 
   } catch (error) {
     console.log(error);
   }

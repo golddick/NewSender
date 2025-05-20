@@ -52,7 +52,7 @@ const Write = () => {
   };
 
   return (
-    <div className="w-full p-4 md:p-6">
+    <div className="w-full p-4 ">
       <div className="flex items-center gap-4 flex-wrap justify-center">
         {/* Create New */}
         <div
@@ -116,7 +116,6 @@ const Write = () => {
             <Button
               color="primary"
               className="mt-4 w-full rounded text-md font-semibold"
-              // onClick={handleCreate}
               onPress={handleCreate}
             >
               Continue
@@ -129,3 +128,7 @@ const Write = () => {
 };
 
 export default Write;
+
+
+
+

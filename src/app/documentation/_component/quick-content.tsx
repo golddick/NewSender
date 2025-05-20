@@ -8,7 +8,7 @@ import { QuickErrorCodes } from "./sections/quick-error-codes"
 import { QuickBestPractices } from "./sections/quick-best-practices"
 import { SubscribersPost } from "./sections/subscribers-post"
 import { SubscribersDelete } from "./sections/subscribers-delete"
-import { NewslettersGet } from "./sections/newsletters-get"
+import { CategoriesGet } from "./sections/newsletters-get"
 import { NewslettersPost } from "./sections/newsletters-post"
 
 interface QuickContentProps {
@@ -55,16 +55,16 @@ export function QuickContent({ activeSection, setActiveSection }: QuickContentPr
         </section>
 
         <section id="subscribers-delete" className={activeSection === "subscribers-delete" ? "" : "hidden"}>
-          <SubscribersDelete />
+          {/* <SubscribersDelete /> */}
         </section>
 
         {/* Newsletters API */}
         <section id="newsletters-get" className={activeSection === "newsletters-get" ? "" : "hidden"}>
-          <NewslettersGet />
+          <CategoriesGet />
         </section>
 
         <section id="newsletters-post" className={activeSection === "newsletters-post" ? "" : "hidden"}>
-          <NewslettersPost />
+          {/* <NewslettersPost /> */}
         </section>
       </div>
     </main>

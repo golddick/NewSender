@@ -213,7 +213,7 @@ export function QuickErrorCodes() {
         <p className="text-gray-600">Here&apos;s an example of how to handle errors in your code:</p>
         <ApiCodeBlock
           language="javascript"
-          code={`fetch('https://api.thenews.sixthgrid.com/v1/api/subscribe', {
+          code={`fetch('https://api.thenews.africa/api/subscribe', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',

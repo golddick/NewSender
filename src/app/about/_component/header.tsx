@@ -63,7 +63,7 @@ export function AboutHero() {
               Innovative Software Solutions by
             </span>{" "}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-gold-300 to-gold-700">
-              Sithgrid Technology
+              Sixthgrid Technology
             </span>
           </motion.h1>
 
@@ -73,7 +73,7 @@ export function AboutHero() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-lg md:text-xl text-neutral-300 max-w-3xl mx-auto leading-relaxed"
           >
-            Creators of Xonnect streaming platform and TheNews newsletter solution, Sithgrid Technology is dedicated to
+            Creators of Xonnect streaming platform and TheNews newsletter solution, Sixthgrid Technology is dedicated to
             building software that connects businesses with their audiences.
           </motion.p>
         </div>

@@ -13,6 +13,7 @@ const useSubscribersAnalytics = () => {
 
   const SubscribersAnalytics = async () => {
     await subscribersAnalytics().then((res: any) => {
+      console.log(res, 'res sub server')
       setSubscribersData(res);
       setLoading(false);
     });

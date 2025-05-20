@@ -38,9 +38,32 @@ export const getSubscribers = async ({
 
     const subscribers = await Subscriber.find({
       newsLetterOwnerId,
+      status: "Subscribed",
     });
 
     console.log(subscribers, 'ssssll')
+
+    // ✅ Convert to plain JSON-serializable data
+    const plainSubscribers = JSON.parse(JSON.stringify(subscribers));
+    return plainSubscribers;
+  } catch (error) {
+    console.log("Error fetching subscribers:", error);
+    return [];
+  }
+};
+
+export const getAllSubscribers = async ({
+  newsLetterOwnerId,
+}: {
+  newsLetterOwnerId: string;
+}) => {
+  try {
+    await connectDb();
+
+    const subscribers = await Subscriber.find({
+      newsLetterOwnerId,
+    });
+
 
     // ✅ Convert to plain JSON-serializable data
     const plainSubscribers = JSON.parse(JSON.stringify(subscribers));
@@ -78,6 +101,7 @@ export const getSubscribersByCategory = async ({
     const subscribers = await Subscriber.find({
       category: categoryId,
       newsLetterOwnerId: ownerId,
+      status: "Subscribed",
     }).select("email ");
 
     return {
