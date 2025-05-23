@@ -70,7 +70,7 @@ const Page = () => {
           {data?.plan === "FREE" ? (
             <div className="w-full h-[90vh] flex items-center justify-center">
               <h3>
-                Please update your subscription plan to get access of API.
+                Please update your subscription plan to get access of API...!
               </h3>
             </div>
           ) : (
