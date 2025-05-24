@@ -69,7 +69,7 @@ const SubscribersChart = () => {
       </div>
 
       <p className="text-sm text-gray-500 mb-3">
-        Showing last 7 months of subscriber activity.
+        Showing last 7 months of subscriber activity...
       </p>
 
       {loading ? (

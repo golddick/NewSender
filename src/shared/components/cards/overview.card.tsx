@@ -48,7 +48,7 @@ const DashboardOverViewCard = () => {
           </div>
         </div>
         <p className="text-sm text-gray-500 mt-2">
-          from {prevMonthSubs?.counts?.Subscribed || 0} (last 4 weeks)
+          from. {prevMonthSubs?.counts?.Subscribed || 0} (last 4 weeks)
         </p>
       </div>
 
