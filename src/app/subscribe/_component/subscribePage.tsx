@@ -5,7 +5,8 @@ import { subscribe } from "@/actions/add.subscribe";
 import { getCategoryById, getCategoryByName } from "@/actions/get.category";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
+
 
 const SubscribeFormPage = () => {
   const [email, setEmail] = useState("");

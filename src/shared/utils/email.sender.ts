@@ -126,13 +126,14 @@ export const sendEmail = async (formData: {
         const mailOptions = {
           from: `"Newsletter Service" <${process.env.SMTP_USER}>`,
           to: email,
-          cc: formData.adminEmail,
+          // cc: formData.adminEmail,
           subject: formData.subject,
           html: htmlContent,
           headers: {
             "X-Email-Campaign": formData.campaign,
             "X-Email-Category": categoryName,
             "X-Email-ID": emailId,
+            "List-Unsubscribe": `<${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${formData.newsLetterOwnerId}?category=${categoryName}>`,
           },
         };
 
