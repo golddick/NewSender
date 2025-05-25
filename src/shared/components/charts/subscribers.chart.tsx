@@ -78,7 +78,7 @@ const SubscribersChart = () => {
         </div>
       ) : processedData.length === 0 ? (
         <div className="h-56 flex items-center justify-center text-gray-400">
-          No subscriber data available.
+          No subscriber data available....
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={300}>
