@@ -1,25 +1,22 @@
-
-
-
-// app/api/track/click/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { recordClick } from '@/lib/trackingService';
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
   const emailId = searchParams.get('emailId');
   const url = searchParams.get('url');
 
   if (!emailId || !url) {
-    return new NextResponse('Missing parameters', { status: 400 });
+    return new NextResponse("Missing parameters", { status: 400 });
   }
 
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+
   try {
-    const decodedUrl = decodeURIComponent(url);
-    await recordClick(emailId, decodedUrl);
-    return NextResponse.redirect(decodedUrl, 302);
+    await recordClick(emailId, url, ip);
+    return NextResponse.redirect(url);
   } catch (error) {
-    console.error('Error processing click:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error("Error processing click:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

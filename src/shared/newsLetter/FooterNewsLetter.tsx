@@ -86,7 +86,7 @@ const FooterNewsLetter = () => {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Your email"
-        className="border-dark-600 bg-dark-700 focus:border-gold-400 text-white"
+        className="border-dark-600 bg-dark-700 focus:border-gold-400 text-black"
       />
       <Button
         isLoading={loading}

@@ -19,6 +19,8 @@ interface IEmail {
   }>;
   lastOpened?: Date;
   lastClicked?: Date;
+  openedByIps: string[];
+  clickedByIps: string[];
 }
 
 const emailSchema = new Schema<IEmail>({
@@ -39,7 +41,9 @@ const emailSchema = new Schema<IEmail>({
     timestamp: { type: Date, default: Date.now }
   }],
   lastOpened: Date,
-  lastClicked: Date
+  lastClicked: Date,
+  openedByIps: [{ type: String }],
+  clickedByIps: [{ type: String }],
 }, { timestamps: true });
 
 const Email = mongoose.models.Email || mongoose.model<IEmail>("Email", emailSchema);

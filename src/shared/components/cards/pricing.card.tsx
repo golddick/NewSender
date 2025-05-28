@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { motion, useInView } from "framer-motion"
 import { paystackSubscribe } from "@/actions/paystack.subscribe";
 import { toast } from "sonner";
+import Link from "next/link";
 
 
 const PricingCard = ({ active }: { active: string }) => {
@@ -104,9 +105,11 @@ const PricingCard = ({ active }: { active: string }) => {
           </div>
         ))}
         <br />
+        <Link href="/sign-up">
         <Button color="primary" className="w-full text-xl !py-6 bg-gold-700">
           Get Started
         </Button>
+        </Link>
         </motion.div>
 
       {/* grow plan */}
@@ -122,7 +125,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <br />
         <div className="border-b pb-8 border-black">
           <h5 className="font-clashDisplay uppercase text-cyber-ink text-3xl">
-            N{active === "Monthly" ? "30,000" : "45,000"} /month
+            N{active === "Monthly" ? "15,000" : "45,000"} /month
           </h5>
           <p className="text-lg">Billed {active}</p>
         </div>
@@ -142,8 +145,8 @@ const PricingCard = ({ active }: { active: string }) => {
           onPress={() =>
             handleSubscription({
               planCode: active === "Monthly" 
-                ? "PLN_qqs88g3s909068i" 
-                : "PLN_zpaqmox70eunvd9",
+                ? "PLN_xpxme65ldog950p" 
+                : " ",
             })
           }
         >
@@ -162,7 +165,7 @@ const PricingCard = ({ active }: { active: string }) => {
         <br />
         <div className="border-b pb-8 border-[#000]">
           <h5 className="font-clashDisplay uppercase text-cyber-ink text-3xl">
-            N{active === "Monthly" ? "120,000" : "100,000"} /month
+            N{active === "Monthly" ? "50,000" : "100,000"} /month
           </h5>
           <p className="text-lg">Billed {active}</p>
         </div>

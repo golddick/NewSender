@@ -95,7 +95,7 @@ export const sendEmail = async (formData: {
     const batches = [];
     for (let i = 0; i < formData.userEmail.length; i += BATCH_SIZE) {
       batches.push(formData.userEmail.slice(i, i + BATCH_SIZE));
-    }
+    } 
 
     let totalAccepted = 0;
     let totalRejected = 0;
