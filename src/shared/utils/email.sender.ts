@@ -1,5 +1,3 @@
-
-
 "use server";
 
 import * as nodemailer from "nodemailer";
@@ -61,6 +59,8 @@ export const sendEmail = async (formData: {
       return { error: "No recipients specified", success: false };
     }
 
+    console.log("Total recipients:", formData.userEmail.length);
+
     const usageCheck = await checkUsageLimit(formData.newsLetterOwnerId, "emailsSent");
     if (!usageCheck.success) return { error: usageCheck.message, success: false };
 
@@ -95,54 +95,65 @@ export const sendEmail = async (formData: {
     const batches = [];
     for (let i = 0; i < formData.userEmail.length; i += BATCH_SIZE) {
       batches.push(formData.userEmail.slice(i, i + BATCH_SIZE));
-    } 
+    }
 
     let totalAccepted = 0;
     let totalRejected = 0;
     let lastMessageId = "";
 
-    for (const batch of batches) {
-      // Send individually for unsubscribe link uniqueness
+    for (let i = 0; i < batches.length; i++) {
+      const batch = batches[i];
+      console.log(`Processing batch ${i + 1} of ${batches.length} (${batch.length} emails)`);
+
       for (const email of batch) {
-        const trackedContent = formData.content.replace(
-          /href="([^"]+)"/g,
-          (match, url) => `href="${domain}/api/track/click?emailId=${emailId}&url=${encodeURIComponent(url)}"`
-        );
+        try {
+          const trackedContent = formData.content.replace(
+            /href="([^"]+)"/g,
+            (_, url) => `href="${domain}/api/track/click?emailId=${emailId}&url=${encodeURIComponent(url)}"`
+          );
 
-        const htmlContent = `
-          <div style="text-align: center; margin-bottom: 20px;">
-            <img src="${domain}/GeeLogo.png" alt="Logo" width="20"  />
-          </div>
-          ${trackedContent}
-          <div style="text-align: center; margin-top: 30px;">
-            <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${formData.newsLetterOwnerId}?category=${categoryName}" 
-              style="padding: 10px 20px; background-color: #e63946; color: #fff; border-radius: 5px; text-decoration: none;">
-              Unsubscribe
-            </a>
-          </div>
-          <img src="${domain}/api/track/open?emailId=${emailId}" width="1" height="1" style="opacity:0;" />
-        `;
+          const htmlContent = `
+            <div style="text-align: center; margin-bottom: 20px;">
+              <img src="${domain}/2logo.jpg" alt="Logo" width="40" />
+            </div>
+            ${trackedContent}
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${formData.newsLetterOwnerId}&category=${categoryName}" 
+                style="padding: 10px 20px; background-color: #0000; color: #fff; border-radius: 5px; text-decoration: none;">
+                Unsubscribe
+              </a>
+            </div>
+            <img src="${domain}/api/track/open?emailId=${emailId}" width="1" height="1" style="opacity:0;" />
+          `;
 
-        const mailOptions = {
-          from: `"Newsletter Service" <${process.env.SMTP_USER}>`,
-          to: email,
-          // cc: formData.adminEmail,
-          subject: formData.subject,
-          html: htmlContent,
-          headers: {
-            "X-Email-Campaign": formData.campaign,
-            "X-Email-Category": categoryName,
-            "X-Email-ID": emailId,
-            "List-Unsubscribe": `<${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${formData.newsLetterOwnerId}?category=${categoryName}>`,
-          },
-        };
+          const mailOptions = {
+            from: `"Newsletter Service" <${process.env.SMTP_USER}>`,
+            to: email,
+            subject: formData.subject,
+            html: htmlContent,
+            headers: {
+              "X-Email-Campaign": formData.campaign,
+              "X-Email-Category": categoryName,
+              "X-Email-ID": emailId,
+              "List-Unsubscribe": `<${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${formData.newsLetterOwnerId}&category=${categoryName}>`,
+            },
+          };
 
-        const result = await transporter.sendMail(mailOptions);
+          const result = await transporter.sendMail(mailOptions);
 
-        if (result.accepted.length) totalAccepted++;
-        if (result.rejected.length) totalRejected++;
-        lastMessageId = result.messageId || lastMessageId;
+          console.log(`Sent to ${email}:`, result.messageId);
+
+          if (result.accepted.length) totalAccepted++;
+          if (result.rejected.length) totalRejected++;
+          lastMessageId = result.messageId || lastMessageId;
+        } catch (err) {
+          console.error(`Failed to send to ${email}:`, err);
+          totalRejected++;
+        }
       }
+
+      // Optional: rate limit between batches (uncomment to use)
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     await Email.findByIdAndUpdate(emailId, {
@@ -159,7 +170,6 @@ export const sendEmail = async (formData: {
       });
     }
 
-    // await incrementUsage(formData.newsLetterOwnerId, "emailsSent", formData.userEmail.length);
     await incrementUsage(formData.newsLetterOwnerId, "emailsSent");
     revalidatePath("/dashboard");
 
@@ -189,6 +199,7 @@ export const sendEmail = async (formData: {
     };
   }
 };
+
 
 
 
