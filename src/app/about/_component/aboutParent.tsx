@@ -4,6 +4,7 @@ import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 export function AboutParent() {
   const ref = useRef(null)
@@ -131,7 +132,9 @@ export function AboutParent() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-neutral-400">Sixthgrid products:</span>
                     <div className="flex gap-2">
+                      <Link href="https://xonnect.net" target="_blank"  className="  animate-pulse underline  text-red-700">
                       <span className="bg-dark-600 text-xs px-2 py-1 rounded text-neutral-300">Xonnect</span>
+                      </Link>
                       <span className="bg-dark-600 text-xs px-2 py-1 rounded text-neutral-300">TheNews</span>
                     </div>
                   </div>

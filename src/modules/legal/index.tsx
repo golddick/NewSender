@@ -184,12 +184,12 @@ export default function LegalPage({membershipStatus}:LegalPageClientProps) {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-black text-white py-6">
+      <div className="bg-black text-white py-6">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold text-gold-500">Legal Agreements</h1>
           <p className="mt-2">Please review and agree to the following legal documents</p>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">

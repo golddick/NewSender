@@ -110,9 +110,9 @@ export function FAQ() {
           <motion.div variants={itemVariants} className="mt-10 md:mt-12 text-center">
             <p className="text-neutral-600">
               Still have questions?{" "}
-              <a href="#" className="text-gold-600 font-medium hover:text-gold-700 underline">
-                Contact our support team
-              </a>
+              <p  className="text-gold-700 font-medium hover:text-gold-900 underline">
+                Contact us on any of our social media platforms
+              </p>
             </p>
           </motion.div>
         </motion.div>

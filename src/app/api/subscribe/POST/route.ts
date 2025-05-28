@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     await connectDb();
 
     // Check if subscriber already exists
-    const existing = await Subscriber.findOne({ email, newsLetterOwnerId: userId });
+    const existing = await Subscriber.findOne({ email, newsLetterOwnerId: userId, category: categoryId });
     if (existing) {
       return NextResponse.json(
         { error: "Subscriber already exists", code: "DUPLICATE_SUBSCRIBER" },

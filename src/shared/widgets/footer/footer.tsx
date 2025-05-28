@@ -65,7 +65,7 @@ export function XFooter() {
             <h4 className="text-lg font-bold mb-5 text-white">Company</h4>
             <ul className="space-y-3">
               <FooterLink href="/about">About</FooterLink>
-              <FooterLink href="#features">Features</FooterLink>
+              <FooterLink href="/coming-soon">Blog</FooterLink>
               <FooterLink href="#pricing">Pricing</FooterLink>
             </ul>
           </motion.div>

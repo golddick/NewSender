@@ -25,7 +25,14 @@ const Toolbar = () => {
 
         </>
       ) : (
-        <Link href={"/sign-in"}>Login</Link>
+        <Link href={"/sign-in"}>
+          <Button
+            color="primary"
+            className="bg-black text-white hover:bg-gray-800"
+          >
+            Sign In
+          </Button>
+        </Link>
       )}
     </>
   );

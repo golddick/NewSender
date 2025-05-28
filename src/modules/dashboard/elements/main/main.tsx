@@ -50,10 +50,10 @@ const Main = () => {
         </div>
         <div className="w-full lg:p-5">
           {/* resources */}
-          <div>
+          {/* <div>
             <h5 className="text-xl font-medium">Resources</h5>
             <div className="w-full bg-white border rounded p-5 my-3">
-              {/* home page url */}
+              home page url
               <div>
                 <h4 className="font-medium">Home page</h4>
 
@@ -76,7 +76,7 @@ const Main = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* tutorials */}
           <div className="w-full bg-white border rounded p-5 my-3">

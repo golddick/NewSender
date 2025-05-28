@@ -4,7 +4,6 @@ import { ICONS } from "@/shared/utils/icons";
 import { useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { redirect, usePathname } from "next/navigation";
-import SidebarFotterLogo from "./sidebar.fotter.logo";
 import { useEffect } from "react";
 
 interface DashboardSideBarProps {
@@ -19,7 +18,7 @@ const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
 
   const LogoutHandler = () => {
     signOut();
-    redirect("/sign-in");
+    redirect("/");
   };
 
   useEffect(() => {
@@ -35,7 +34,6 @@ const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
           key={index}
           href={item.url}
           onClick={onNavigate}
-          // className="p-2 py-5 flex items-center"
           className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair  ${
             item.url === activeRoute ? 'bg-gold-100 text-gold-700' : 'hover:bg-gray-200'
           }`}
@@ -86,7 +84,7 @@ const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
           <br />
           <br />
           <p className="text-sm text-center pt-5 pb-10">
-            © 2024 SIXTHGRID. All rights reserved.
+            © 2025 SIXTHGRID. All rights reserved.
           </p>
         </>
       )}
