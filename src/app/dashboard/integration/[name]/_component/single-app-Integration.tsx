@@ -134,7 +134,7 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
     console.log(integration , "Integration state before fetch")
 
     fetchIntegration()
-  }, [appName, router, campaigns, integration])
+  }, [appName, router])
 
   // fetch campaigns and recent activity
   useEffect(() => {
@@ -175,7 +175,7 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
     console.log(campaigns , "campaign state before fetch")
 
     fetchCampaigns()
-  }, [appName, router, campaigns, integration])
+  }, [appName, router])
 
   const handleToggleStatus = async () => {
     if (!integration) return

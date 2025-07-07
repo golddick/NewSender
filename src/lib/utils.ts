@@ -31,6 +31,14 @@ export function getCurrentMonthKey(): string {
 }
 
 
-
+export const calculatePercentage = (
+  numerator: number,
+  denominator: number,
+  decimalPlaces = 2
+): number => {
+  if (!denominator) return 0;
+  const percentage = (numerator / denominator) * 100;
+  return Math.min(100, parseFloat(percentage.toFixed(decimalPlaces)));
+};
 
 

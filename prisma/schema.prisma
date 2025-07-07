@@ -220,6 +220,8 @@ model Email {
   lastClicked       DateTime?
   sentAt            DateTime?
   openedByIps       String[]  @default([])
+  openedByEmails    String[] @default([])
+  clickedByEmails   String[] @default([])
   clickedByIps      String[]  @default([])
 
   emailType         String     //automated // instant 
