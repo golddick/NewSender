@@ -1,61 +1,97 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/shared/libs/database"; // Prisma client
+import { db } from "@/shared/libs/database";
 import { verifyApiKey } from "@/lib/sharedApi/auth";
 
-export async function DELETE(req: NextRequest) {
-  try {
-    const apiKey = req.headers.get("TheNews-api-key");
-    const { userId, error } = await verifyApiKey(apiKey);
-    if (error) return error;
+interface ErrorResponse {
+  error: string;
+  code: string;
+  details?: string;
+}
 
-    // ✅ Check active subscription
+export async function DELETE(req: NextRequest): Promise<NextResponse> {
+  try {
+    // ✅ API Key Verification
+    const apiKey = req.headers.get("TheNews-api-key");
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "API key required", code: "MISSING_API_KEY" },
+        { status: 401 }
+      );
+    }
+
+    const { userId, error: authError } = await verifyApiKey(apiKey);
+    if (authError) {
+      return authError;
+    }
+
+    // ✅ Subscription Check
     const membership = await db.membership.findUnique({
       where: { userId },
+      select: { subscriptionStatus: true }
     });
 
     if (!membership || membership.subscriptionStatus !== "active") {
       return NextResponse.json(
-        { error: "Access denied. Active subscription required.", code: "SUBSCRIPTION_REQUIRED" },
+        { 
+          error: "Active subscription required", 
+          code: "SUBSCRIPTION_REQUIRED",
+          details: "Upgrade your plan to access this feature"
+        },
         { status: 403 }
       );
     }
 
-    // ✅ Extract subscriberId from query params
+    // ✅ Subscriber ID Validation
     const { searchParams } = new URL(req.url);
     const subscriberId = searchParams.get("subscriberId");
-
+    
     if (!subscriberId) {
       return NextResponse.json(
-        { error: "Missing subscriber ID.", code: "MISSING_SUBSCRIBER_ID" },
+        { error: "Subscriber ID required", code: "MISSING_SUBSCRIBER_ID" },
         { status: 400 }
       );
     }
 
-    // ✅ Ensure the subscriber belongs to the user before deletion
-    const deleted = await db.subscriber.deleteMany({
+    // ✅ Subscriber Deletion with Ownership Check
+    const deleteResult = await db.subscriber.deleteMany({
       where: {
         id: subscriberId,
         newsLetterOwnerId: userId,
       },
     });
 
-    if (deleted.count === 0) {
+    if (deleteResult.count === 0) {
       return NextResponse.json(
-        { error: "Subscriber not found.", code: "SUBSCRIBER_NOT_FOUND" },
+        { 
+          error: "Subscriber not found or not owned by user",
+          code: "SUBSCRIBER_NOT_FOUND"
+        },
         { status: 404 }
       );
     }
 
+    // ✅ Success Response
     return NextResponse.json(
-      { success: true, message: "Subscriber deleted successfully." },
+      { 
+        success: true,
+        message: "Subscriber deleted successfully",
+        data: { subscriberId }
+      },
       { status: 200 }
     );
-  } catch (err: any) {
-    console.error("Delete Subscriber Error:", err);
+
+  } catch (error: unknown) {
+    console.error("Subscriber deletion error:", error);
+    
+    // ✅ Type-safe error handling
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    const errorCode = error instanceof Error && "code" in error ? error.code : "INTERNAL_SERVER_ERROR";
+
     return NextResponse.json(
       {
-        error: err.message || "Failed to delete subscriber.",
-        code: err.code || "DELETE_ERROR",
+        error: "Failed to delete subscriber",
+        code: errorCode,
+        details: errorMessage
       },
       { status: 500 }
     );
