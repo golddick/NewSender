@@ -11,9 +11,9 @@ interface DashboardSideBarProps {
   bottomContent?: boolean;
 }
 
-const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
+const DashboardItems = ({ onNavigate, bottomContent }: DashboardSideBarProps) => {
   const { activeRoute, setActiveRoute } = useRouteChange();
-  const { signOut, user } = useClerk();
+  const { signOut } = useClerk();
   const pathName = usePathname();
 
   const LogoutHandler = () => {
@@ -29,57 +29,54 @@ const DashboardItems = ({onNavigate, bottomContent}:DashboardSideBarProps) => {
     <>
       {!bottomContent ? (
         <>
-          {sideBarItems.map((item: DashboardSideBarTypes, index: number) => (
-          <Link
-          key={index}
-          href={item.url}
-          onClick={onNavigate}
-          className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair  ${
-            item.url === activeRoute ? 'bg-gold-100 text-gold-700' : 'hover:bg-gray-200'
-          }`}
-        >
-          <span
-          >
-            {item.icon}
-          </span>
-          <span
-          >
-            {item.title}
-          </span>
-        </Link>
-        
-          ))}
+          {sideBarItems.map((item, index) => {
+            const isExactMatch = pathName === item.url;
+            const isSubRoute = pathName.startsWith(item.url + "/");
+            const isActive = isExactMatch || (isSubRoute && item.url !== "/dashboard");
+
+            return (
+              <Link
+                key={index}
+                href={item.url}
+                onClick={onNavigate}
+                className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair ${
+                  isActive ? "bg-gold-100 text-gold-700" : "hover:bg-gray-200"
+                }`}
+              >
+                <span>{item.icon}</span>
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
         </>
       ) : (
         <>
-          {sideBarBottomItems.map(
-            (item: DashboardSideBarTypes, index: number) => (
+          {sideBarBottomItems.map((item, index) => {
+            const isExactMatch = pathName === item.url;
+            const isSubRoute = pathName.startsWith(item.url + "/");
+            const isActive = isExactMatch || (isSubRoute && item.url !== "/dashboard");
+
+            return (
               <Link
-                href={item.url }
                 key={index}
+                href={item.url}
                 onClick={onNavigate}
-                className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair  ${
-                  item.url === activeRoute ? 'bg-gold-100 text-gold-700' : 'hover:bg-gray-200'
+                className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair ${
+                  isActive ? "bg-gold-100 text-gold-700" : "hover:bg-gray-200"
                 }`}
               >
-                <span
-                >
-                  {item.icon}
-                </span>
-                <span
-                >
-                  {item.title}
-                </span>
+                <span>{item.icon}</span>
+                <span>{item.title}</span>
               </Link>
-            )
-          )}
+            );
+          })}
+
           {/* sign out */}
-          <div className="p-2 py-5 flex items-center cursor-pointer border-b"
-          onClick={LogoutHandler}
-          >
+          <div className="p-2 py-5 flex items-center cursor-pointer border-b" onClick={LogoutHandler}>
             <span className="text-3xl mr-2">{ICONS.logOut}</span>
             <span className="text-xl">Sign Out</span>
           </div>
+
           {/* footer */}
           <br />
           <br />

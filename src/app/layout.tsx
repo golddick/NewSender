@@ -21,7 +21,7 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: {
     template: "Thenews",
-    default: "TheNews - Email Newsletter Marketing Platform",
+    default: "Email Newsletter Marketing Platform",
   },
   icons: {
     icon: "/2logo.jpg",

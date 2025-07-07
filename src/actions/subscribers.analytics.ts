@@ -1,23 +1,25 @@
-"use server";
+'use server';
 
-import Subscriber from "@/models/subscriber.model";
-import { generateAnalyticsData } from "@/shared/utils/analytics.generator";
-import { currentUser } from "@clerk/nextjs/server";
+import { generateAnalyticsData } from '@/shared/utils/analytics.generator';
+import { currentUser } from '@clerk/nextjs/server';
 
 export const subscribersAnalytics = async () => {
   try {
-     const user = await currentUser();
+    const user = await currentUser();
 
-     if (!user) {
-        throw new Error("User not found");
-      }
-      
+    if (!user) {
+      throw new Error('User not found');
+    }
+
     const userId = user.id;
 
-    const subscribers = await generateAnalyticsData(Subscriber, userId );
+    // Generate analytics using Prisma (no need to pass model)
+    const subscribers = await generateAnalyticsData(userId);
 
-    return subscribers; 
+
+    return subscribers;
   } catch (error) {
-    console.log(error);
+    console.error('Subscribers analytics error:', error);
+    throw new Error('Failed to fetch subscriber analytics');
   }
 };

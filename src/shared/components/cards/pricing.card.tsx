@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { Button } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
 import { motion, useInView } from "framer-motion"
-import { paystackSubscribe } from "@/actions/paystack.subscribe";
+import { paystackSubscribe } from "@/actions/paystack/paystack.subscribe";
 import { toast } from "sonner";
 import Link from "next/link";
 

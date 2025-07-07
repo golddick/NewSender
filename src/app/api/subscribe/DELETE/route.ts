@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDb } from "@/shared/libs/db";
-import Subscriber from "@/models/subscriber.model";
-import Membership from "@/models/membership.model";
+import { db } from "@/shared/libs/database"; // Prisma client
 import { verifyApiKey } from "@/lib/sharedApi/auth";
 
 export async function DELETE(req: NextRequest) {
@@ -10,9 +8,11 @@ export async function DELETE(req: NextRequest) {
     const { userId, error } = await verifyApiKey(apiKey);
     if (error) return error;
 
-    await connectDb();
+    // ✅ Check active subscription
+    const membership = await db.membership.findUnique({
+      where: { userId },
+    });
 
-    const membership = await Membership.findOne({ userId });
     if (!membership || membership.subscriptionStatus !== "active") {
       return NextResponse.json(
         { error: "Access denied. Active subscription required.", code: "SUBSCRIPTION_REQUIRED" },
@@ -20,6 +20,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    // ✅ Extract subscriberId from query params
     const { searchParams } = new URL(req.url);
     const subscriberId = searchParams.get("subscriberId");
 
@@ -30,12 +31,15 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const deleted = await Subscriber.findOneAndDelete({
-      _id: subscriberId,
-      newsLetterOwnerId: userId,
+    // ✅ Ensure the subscriber belongs to the user before deletion
+    const deleted = await db.subscriber.deleteMany({
+      where: {
+        id: subscriberId,
+        newsLetterOwnerId: userId,
+      },
     });
 
-    if (!deleted) {
+    if (deleted.count === 0) {
       return NextResponse.json(
         { error: "Subscriber not found.", code: "SUBSCRIBER_NOT_FOUND" },
         { status: 404 }

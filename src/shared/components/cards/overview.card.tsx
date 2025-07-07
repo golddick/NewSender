@@ -8,6 +8,9 @@ const DashboardOverViewCard = () => {
   const { subscribersData, loading: loadingSubs } = useSubscribersAnalytics();
   const { analytics, loading: loadingEmails } = useEmailAnalytics();
 
+  console.log(analytics, 'email ana')
+  console.log(subscribersData, 'sub data cart')
+
   // Subscribers data
   const lastMonthSubs = !loadingSubs && subscribersData?.last7Months?.slice(-1)[0];
   const prevMonthSubs = !loadingSubs && subscribersData?.last7Months?.slice(-2)[0];

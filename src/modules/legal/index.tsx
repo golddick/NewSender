@@ -11,7 +11,7 @@ interface LegalDocument {
   sections: Array<{
     heading: string;
     content: string | React.ReactNode;
-    listItems?: string[];
+    listItems?: string[]; 
   }>;
 }
 

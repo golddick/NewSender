@@ -18,11 +18,11 @@ const NewEmailPage = () => {
   const subjectTitle = subject.replace(/-/g, " ");
 
   return (
-    <div className="w-full flex bg-[#F7F7F7]">
+    <div className="w-full flex bg-[#F7F7F7] max-h-screen">
       <div className="w-full p-5 bg-white rounded-r-xl"> 
         {/* back arrow */}
         <Link
-          href={"/dashboard/write"}
+          href={"/dashboard/auto-email"}
           className="opacity-[.7] w-min flex text-xl items-center"
         >
           <span>{ICONS.backArrow}</span>

@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
-import Membership from "@/models/membership.model";
-import { connectDb } from "@/shared/libs/db";
+import { db } from "@/shared/libs/database"; // your Prisma client
 import axios from "axios";
 
 export async function POST(request: Request) {
   try {
-    await connectDb();
     const { userId, planCode } = await request.json();
 
-    const membership = await Membership.findOne({ userId });
+    if (!userId || !planCode) {
+      return NextResponse.json(
+        { error: "Missing userId or planCode" },
+        { status: 400 }
+      );
+    }
+
+    const membership = await db.membership.findUnique({
+      where: { userId },
+    });
+
     if (!membership?.paystackCustomerId) {
       return NextResponse.json(
         { error: "User has no Paystack customer ID" },
@@ -16,7 +24,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create Paystack subscription
     const response = await axios.post(
       "https://api.paystack.co/subscription",
       {
@@ -35,7 +42,7 @@ export async function POST(request: Request) {
       authorizationUrl: response.data.data.authorization_url,
     });
   } catch (error: any) {
-    console.error("Subscription error:", error);
+    console.error("Subscription error:", error.response?.data || error);
     return NextResponse.json(
       { error: error.message || "Subscription failed" },
       { status: 500 }

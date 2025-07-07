@@ -1,72 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDb } from "@/shared/libs/db";
+import { db } from "@/shared/libs/database";
 import { verifyApiKey } from "@/lib/sharedApi/auth";
-import Campaign from "@/models/newsLetterCampaign.model";
-import NewsLetterCategory from "@/models/newsLetterCategory.model"; // For category validation
-import { checkUsageLimit, incrementUsage } from "@/lib/checkAndUpdateUsage"; // Custom functions to check and increment usage
+import { checkUsageLimit, incrementUsage } from "@/lib/checkAndUpdateUsage";
 
 export async function POST(req: NextRequest) {
   try {
-    // ✅ Verify API key
     const apiKey = req.headers.get("TheNews-api-key");
     const { userId, error } = await verifyApiKey(apiKey);
+
     if (error) {
       return NextResponse.json({ error }, { status: 403 });
     }
 
-    const { title, description, startDate, endDate, categoryId } = await req.json();
+    const { name, description, integrationId, trigger = "manual" } = await req.json();
 
-    // ✅ Validate input data
-    if (!title || !description || !startDate || !categoryId) {
+    // ✅ Validate required fields
+    if (!name || !integrationId || !trigger) {
       return NextResponse.json(
-        { error: "Title, description, startDate, endDate, and categoryId are required." },
+        { error: "Name, integrationId, and trigger are required." },
         { status: 400 }
       );
     }
 
-    // ✅ Connect to the DB
-    await connectDb();
-
-    // ✅ Check if category exists and belongs to the user
-    const category = await NewsLetterCategory.findOne({
-      _id: categoryId,
-      newsLetterOwnerId: userId,
-    });
-
-    if (!category) {
-      return NextResponse.json(
-        { error: "Invalid or unauthorized category.", code: "INVALID_CATEGORY" },
-        { status: 403 }
-      );
-    }
-
-    // ✅ Check the user's monthly campaign limit before proceeding
+    // ✅ Check usage limit
     const usageCheck = await checkUsageLimit(userId, "campaignsCreated");
     if (!usageCheck.success) {
       return NextResponse.json(
         { error: usageCheck.message, code: "USAGE_LIMIT_EXCEEDED" },
-        { status: 429 } // Too many requests
+        { status: 429 }
       );
     }
 
-    // ✅ Create and save the campaign
-    const campaign = await Campaign.create({
-      name: title,
-      description,
-      startDate: new Date(startDate),
-      endDate: endDate ? new Date(endDate) : undefined,
-      newsLetterOwnerId: userId,
-      status: "Active",
-      emails: [], // Initially no emails added
-      category: categoryId,
-      subscribers: 0, // Set the initial subscriber count to 0
-      emailsSent: 0, // Initially, no emails sent
+    // ✅ Check if integration exists and belongs to the user
+    const integration = await db.integration.findFirst({
+      where: {
+        id: integrationId,
+        userId,
+      },
     });
 
-    // ✅ Increment the user's usage after successfully creating the campaign
+    if (!integration) {
+      return NextResponse.json(
+        { error: "Invalid or unauthorized integration." },
+        { status: 403 }
+      );
+    }
+
+    // ✅ Create campaign
+    const campaign = await db.campaign.create({
+      data: {
+        name,
+        description,
+        integrationId,
+        userId,
+        trigger,
+        status: "active", // default, but explicit for clarity
+        recipients: 0,
+        emailsSent: 0,
+      },
+    });
+
+    // ✅ Update usage count
     await incrementUsage(userId, "campaignsCreated");
 
-    // ✅ Return the created campaign as a response
     return NextResponse.json({ data: campaign }, { status: 201 });
 
   } catch (error: any) {

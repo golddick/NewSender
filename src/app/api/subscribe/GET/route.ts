@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDb } from "@/shared/libs/db";
-import Subscriber from "@/models/subscriber.model";
-import Membership from "@/models/membership.model";
+import { db } from "@/shared/libs/database"; // Prisma client
 import { verifyApiKey } from "@/lib/sharedApi/auth";
 
 export async function GET(req: NextRequest) {
@@ -9,10 +7,11 @@ export async function GET(req: NextRequest) {
   const { userId, error } = await verifyApiKey(apiKey);
   if (error) return error;
 
-  await connectDb();
+  // ✅ Check for active membership subscription
+  const membership = await db.membership.findUnique({
+    where: { userId },
+  });
 
-  // Check if the user has an active subscription
-  const membership = await Membership.findOne({ userId });
   if (!membership || membership.subscriptionStatus !== "active") {
     return NextResponse.json(
       { error: "User does not have an active subscription." },
@@ -21,30 +20,39 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url);
-
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
   const limit = Math.min(Math.max(parseInt(searchParams.get("limit") || "20", 10), 1), 100);
   const status = searchParams.get("status");
   const search = searchParams.get("search");
 
-  const query: Record<string, any> = {
+  const where: any = {
     newsLetterOwnerId: userId,
+    ...(status && { status }),
+    ...(search && {
+      OR: [
+        { email: { contains: search, mode: "insensitive" } },
+        { source: { contains: search, mode: "insensitive" } },
+      ],
+    }),
   };
 
-  if (status) query.status = status;
-
-  if (search) {
-    const regex = { $regex: search, $options: "i" };
-    query.$or = [{ email: regex }, { source: regex }];
-  }
-
   const [total, subscribers] = await Promise.all([
-    Subscriber.countDocuments(query),
-    Subscriber.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .select("-newsLetterOwnerId -__v"),
+    db.subscriber.count({ where }),
+    db.subscriber.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        source: true,
+        status: true,
+        createdAt: true,
+        pageUrl: true,
+      },
+    }),
   ]);
 
   return NextResponse.json({

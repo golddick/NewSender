@@ -1,9 +1,10 @@
 import React, { Suspense } from 'react'
 import NewEmailPage from './_component/NewEmailPage'
+import Loader from '@/components/Loader'
 
 const page = () => {
   return (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Loader/>}>
           <NewEmailPage/>
       </Suspense>
   )

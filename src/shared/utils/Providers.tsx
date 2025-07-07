@@ -76,8 +76,8 @@ import { useUser } from "@clerk/nextjs";
 import DashboardSidebar from "@/shared/widgets/dashboard/sidebar/dashboard.sidebar";
 import toast, { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
-import { addPaystack } from "@/actions/add.paystack";
-import { getMembershipStatus } from "@/actions/getTermsMembership";
+import { addPaystack } from "@/actions/paystack/add.paystack";
+import { getMembershipStatus } from "@/actions/membership/getTermsMembership";
 
 interface ProviderProps {
   children: React.ReactNode;
@@ -123,7 +123,7 @@ export default function Providers({ children }: ProviderProps) {
     <NextUIProvider>
       {shouldShowSidebar ? (
         <div className="w-full flex">
-          <aside className="w-[290px] min-h-screen overflow-y-scroll hidden lg:block border-r">
+          <aside className="w-[290px] min-h-screen overflow-y-scroll hidden lg:block border-r relative">
             <DashboardSidebar />
           </aside>
           <main className="flex-1">{children}</main>

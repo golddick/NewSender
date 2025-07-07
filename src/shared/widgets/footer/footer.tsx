@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { Twitter, Instagram, Linkedin, Github, Youtube, Mail } from "lucide-react"
 import { Button, Input } from "@nextui-org/react"
-import FooterNewsLetter from "@/shared/newsLetter/FooterNewsLetter"
+import FooterNewsLetter from "@/shared/components/newsLetter/FooterNewsLetter"
 import { FaWhatsapp } from "react-icons/fa6"
 
 

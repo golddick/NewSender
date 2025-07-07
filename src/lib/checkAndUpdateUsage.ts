@@ -1,129 +1,305 @@
-import MembershipUsage from "@/models/membershipUsage.model";
-import Membership from "@/models/membership.model";
-import dayjs from "dayjs";
-import mongoose from "mongoose";
+// import { db } from "@/shared/libs/database"
+// import dayjs from "dayjs"
 
-// Define the action keys that match the membership limits
+// type ActionKey = 
+//   | "emailsSent"
+//   | "subscribersAdded"
+//   | "campaignsCreated"
+//   | "appIntegrated"
+
+// interface UsageResult {
+//   success: boolean
+//   message?: string
+//   newCount?: number
+// }
+
+// export async function checkUsageLimit(userId: string, action: ActionKey): Promise<UsageResult> {
+//   const currentMonth = dayjs().format("YYYY-MM")
+
+//   try {
+//     const membership = await db.membership.findUnique({
+//       where: { userId }
+//     })
+
+//     if (!membership) {
+//       return {
+//         success: false,
+//         message: "No active membership found"
+//       }
+//     }
+
+//     const limitFieldMap: Record<ActionKey, keyof typeof membership> = {
+//       emailsSent: "emailLimit",
+//       subscribersAdded: "subscriberLimit",
+//       campaignsCreated: "campaignLimit",
+//       appIntegrated: "appIntegratedLimit"
+//     }
+
+//     const limitField = limitFieldMap[action]
+//     const limit = membership[limitField]
+
+//     if (limit === null || limit === undefined) {
+//       return { success: true } // Unlimited
+//     }
+
+//     let usage = await db.membershipUsage.findUnique({
+//       where: {
+//         userId_month: {
+//           userId,
+//           month: currentMonth
+//         }
+//       }
+//     })
+
+//     if (!usage) {
+//       usage = await db.membershipUsage.create({
+//         data: {
+//           userId,
+//           month: currentMonth,
+//           emailsSent: 0,
+//           subscribersAdded: 0,
+//           campaignsCreated: 0,
+//           appIntegrated: 0
+//         }
+//       })
+//     }
+
+//     const currentCount = usage[action] || 0
+
+//     const numericLimit = typeof limit === "number" ? limit : Number(limit)
+//     if (currentCount >= numericLimit) {
+//       return {
+//         success: false,
+//         message: `You've reached your monthly limit of ${numericLimit} for ${action}.`
+//       }
+//     }
+
+//     return { success: true }
+
+//   } catch (error) {
+//     console.error("Usage check failed:", error)
+//     return {
+//       success: false,
+//       message: "Failed to check usage limits"
+//     }
+//   }
+// }
+
+// export async function incrementUsage(
+//   userId: string,
+//   action: ActionKey,
+//   incrementBy: number = 1
+// ): Promise<UsageResult> {
+//   const currentMonth = dayjs().format("YYYY-MM")
+
+//   try {
+//     let usage = await db.membershipUsage.findUnique({
+//       where: {
+//         userId_month: {
+//           userId,
+//           month: currentMonth
+//         }
+//       }
+//     })
+
+//     if (!usage) {
+//       usage = await db.membershipUsage.create({
+//         data: {
+//           userId,
+//           month: currentMonth,
+//           emailsSent: 0,
+//           subscribersAdded: 0,
+//           campaignsCreated: 0,
+//           appIntegrated: 0
+//         }
+//       })
+//     }
+
+//     const updatedUsage = await db.membershipUsage.update({
+//       where: { id: usage.id },
+//       data: {
+//         [action]: (usage[action] || 0) + incrementBy
+//       }
+//     })
+
+//     return {
+//       success: true,
+//       newCount: updatedUsage[action]
+//     }
+//   } catch (error) {
+//     console.error("Failed to increment usage:", error)
+//     return {
+//       success: false,
+//       message: "Failed to track usage"
+//     }
+//   }
+// }
+
+
+
+
+import { db } from "@/shared/libs/database";
+import dayjs from "dayjs";
+
+// 👇 Action keys match your MembershipUsage schema
 type ActionKey = 
   | "emailsSent"
   | "subscribersAdded"
   | "campaignsCreated"
-  | "categoriesCreated";
+  | "appIntegrated";
 
-// Map action keys to membership limit fields
-interface IMembership {
-  emailLimit?: number;
-  subscriberLimit?: number;
-  campaignLimit?: number;
-  categoryLimit?: number;
+interface UsageResult {
+  success: boolean;
+  message?: string;
+  newCount?: number;
 }
 
-const ACTION_TO_LIMIT_MAP: Record<ActionKey, keyof IMembership> = {
-  emailsSent: "emailLimit",
-  subscribersAdded: "subscriberLimit",
-  campaignsCreated: "campaignLimit",
-  categoriesCreated: "categoryLimit"
-};
+// ✅ Helper to generate current month key (e.g. "2025-07")
+function getCurrentMonthKey(): string {
+  return dayjs().format("YYYY-MM");
+}
 
-/**
- * Checks whether a user can perform a given action this month.
- * Does NOT increment usage.
- */
-export async function checkUsageLimit(userId: string, action: ActionKey) {
-  const currentMonth = dayjs().format("YYYY-MM");
+// ✅ Check if user is within limit
+export async function checkUsageLimit(userId: string, action: ActionKey): Promise<UsageResult> {
+  const currentMonth = getCurrentMonthKey();
 
   try {
-    const membership = await Membership.findOne({ userId });
+    const membership = await db.membership.findUnique({
+      where: { userId }
+    });
+
     if (!membership) {
       return {
         success: false,
-        message: "No active membership found for this user."
+        message: "No active membership found"
       };
     }
 
-    const limitField = ACTION_TO_LIMIT_MAP[action];
-    const limitValue = membership[limitField];
+    const limitFieldMap: Record<ActionKey, keyof typeof membership> = {
+      emailsSent: "emailLimit",
+      subscribersAdded: "subscriberLimit",
+      campaignsCreated: "campaignLimit",
+      appIntegrated: "appIntegratedLimit"
+    };
 
-    if (limitValue == null) {
-      return { success: true }; // No limit for this action
+    const limitField = limitFieldMap[action];
+    const limit = membership[limitField];
+
+    if (limit === null || limit === undefined) {
+      return { success: true }; // Unlimited
     }
 
-    let usage = await MembershipUsage.findOne({ userId, month: currentMonth });
+    let usage = await db.membershipUsage.findUnique({
+      where: {
+        userId_month: {
+          userId,
+          month: currentMonth
+        }
+      }
+    });
+
     if (!usage) {
-      usage = await MembershipUsage.create({
-        userId,
-        month: currentMonth,
-        emailsSent: 0,
-        subscribersAdded: 0,
-        campaignsCreated: 0,
-        categoriesCreated: 0,
+      usage = await db.membershipUsage.create({
+        data: {
+          userId,
+          month: currentMonth,
+          emailsSent: 0,
+          subscribersAdded: 0,
+          campaignsCreated: 0,
+          appIntegrated: 0
+        }
       });
     }
 
-    const currentCount = usage[action] ?? 0;
+    const currentCount = usage[action] || 0;
+    const numericLimit = typeof limit === "number" ? limit : Number(limit);
 
-    if (currentCount >= limitValue) {
+    if (currentCount >= numericLimit) {
       return {
         success: false,
-        message: `You have reached your monthly limit of ${limitValue} ${action.replace(/([A-Z])/g, ' $1').toLowerCase()}.`
+        message: `You've reached your monthly limit of ${numericLimit} for ${action}.`
       };
     }
 
     return { success: true };
+
   } catch (error) {
-    console.error("Error checking usage limit:", error);
+    console.error("Usage check failed:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Failed to check usage limit."
+      message: "Failed to check usage limits"
     };
   }
 }
 
-/**
- * Increments the usage count for a specific action after successful operation.
- * Now supports optional incrementBy parameter with proper TypeScript typing.
- */
+// ✅ Increment user usage by 1 (or custom)
 export async function incrementUsage(
-  userId: string, 
+  userId: string,
   action: ActionKey,
   incrementBy: number = 1
-) {
-  const currentMonth = dayjs().format("YYYY-MM");
+): Promise<UsageResult> {
+  const currentMonth = getCurrentMonthKey();
 
   try {
-    let usage = await MembershipUsage.findOne({ userId, month: currentMonth });
+    let usage = await db.membershipUsage.findUnique({
+      where: {
+        userId_month: {
+          userId,
+          month: currentMonth
+        }
+      }
+    });
+
     if (!usage) {
-      usage = await MembershipUsage.create({
-        userId,
-        month: currentMonth,
-        emailsSent: 0,
-        subscribersAdded: 0,
-        campaignsCreated: 0,
-        categoriesCreated: 0,
+      usage = await db.membershipUsage.create({
+        data: {
+          userId,
+          month: currentMonth,
+          emailsSent: 0,
+          subscribersAdded: 0,
+          campaignsCreated: 0,
+          appIntegrated: 0
+        }
       });
     }
 
-    usage[action] = (usage[action] ?? 0) + incrementBy;
-    await usage.save();
+    const updatedUsage = await db.membershipUsage.update({
+      where: { id: usage.id },
+      data: {
+        [action]: (usage[action] || 0) + incrementBy
+      }
+    });
 
-    return { 
+    return {
       success: true,
-      newCount: usage[action]
+      newCount: updatedUsage[action]
     };
   } catch (error) {
-    console.error("Error incrementing usage:", {
-      error: error instanceof Error ? error.message : "Unknown error",
-      userId,
-      action,
-      incrementBy,
-      timestamp: new Date().toISOString()
-    });
+    console.error("Failed to increment usage:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Failed to increment usage."
+      message: "Failed to track usage"
     };
   }
 }
 
-// Update the sendEmail function call to use the new signature:
-// await incrementUsage(formData.newsLetterOwnerId, "emailsSent", formData.userEmail.length);
+// ✅ Decrement subscriber count when user unsubscribes
+export async function decrementSubscriberUsage(userId: string, count: number = 1) {
+  const month = getCurrentMonthKey();
+
+  try {
+    await db.membershipUsage.updateMany({
+      where: {
+        userId,
+        month
+      },
+      data: {
+        subscribersAdded: {
+          decrement: count
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Failed to decrement subscriber usage:", error);
+  }
+}

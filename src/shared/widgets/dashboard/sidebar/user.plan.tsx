@@ -2,23 +2,25 @@
 
 "use client";
 
-import { managePaystackSubscription } from "@/actions/manage.paystack.subcription";
-import useGetMembership from "@/shared/hooks/useGetMembership";
 import useSubscribersData from "@/shared/hooks/useSubscribersData";
+import useGetMembership from "@/shared/hooks/useGetMembership";
 import { ICONS } from "@/shared/utils/icons";
 import { Slider } from "@nextui-org/slider";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { managePaystackSubscription } from "@/actions/paystack/manage.paystack.subcription";
 
 const UserPlan = () => {
   const { data: subscribers, loading: subscribersLoading } = useSubscribersData();
   const { data: membership, loading: membershipLoading } = useGetMembership();
 
+  console.log(subscribers, 'sub data cart')
+
   const router = useRouter();
 
   const handleManageSubscription = async () => {
     if (!membership?.paystackCustomerId) {
-      toast.error("No active subscription found");
+      toast.error("No active subscription found"); 
       return;
     }
 
@@ -49,7 +51,7 @@ const UserPlan = () => {
   };
 
   return (
-    <div className="w-full my-3 p-4 bg-red-700 rounded-lg hover:shadow-xl transition-shadow">
+    <div className="w-full my-3 p-4 bg-black text-white rounded-lg hover:shadow-xl transition-shadow">
       <div className="w-full flex items-center justify-between">
         <h5 className="text-lg font-medium text-white">
           {membershipLoading ? "Loading..." : `${membership?.plan || "FREE"} Plan`}
@@ -78,7 +80,7 @@ const UserPlan = () => {
           hideThumb={true}
           classNames={{
             base: "max-w-md",
-            track: "bg-red-800",
+            track: "bg-gold-700",
             filler: "bg-white"
           }}
         />

@@ -1,73 +1,75 @@
-// "use client";
-
-// import { getSubscribers } from "@/actions/get.subscribers";
-// import { useClerk } from "@clerk/nextjs";
-// import { useEffect, useState } from "react";
-
-// const useSubscribersData = () => {
-//   const [data, setData] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   const { user } = useClerk();
-
-//   useEffect(() => {
-//     GetSubscribers();
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [user]);
-
-//   const GetSubscribers = async () => {
-//     await getSubscribers({ newsLetterOwnerId: user?.id! })
-//       .then((res: any) => {
-//         setData(res);
-//         console.log("Fetched Subscribers:", data); // Log fetched data
-//         setLoading(false);
-//       })
-//       .catch((error) => {
-//         setLoading(false);
-//       });
-//   };
-
-//   return { data, loading };
-// };
-
-// export default useSubscribersData;
-
-
-
 "use client";
 
-
-
 import { useState, useEffect, useCallback } from "react";
-import { getSubscribers } from "@/actions/get.subscribers";
 import { useClerk } from "@clerk/nextjs";
+import { getSubscribers } from "@/actions/subscriber/get.subscribers";
+
+interface Subscriber {
+  id: string;
+  email: string;
+  name: string | null;
+  status: 'Subscribed' | 'Unsubscribed';
+  newsLetterOwnerId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  campaign: {
+    id: string;
+    name: string;
+    trigger: string;
+  } | null;
+  integration: {
+    id: string;
+    name: string;
+    logo: string | null;
+    url: string | null;
+  };
+}
+
+interface SubscribersResponse {
+  subscribers: Subscriber[] | null;
+  error: string | null;
+}
 
 const useSubscribersData = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useClerk();
 
-  // Use useCallback to memoize the refetch function
-  const refetch = useCallback(async () => {
+  const fetchSubscribers = useCallback(async () => {
+    if (!user) return;
+    
     setLoading(true);
+    setError(null);
+    
     try {
-      const res = await getSubscribers({ newsLetterOwnerId: user?.id! });
-      setData(res); 
+      const response = await getSubscribers();
+      
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      
+      setData(response.subscribers || []);
     } catch (err) {
       console.error("Error fetching subscribers:", err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch subscribers');
+      setData([]);
     } finally {
       setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      refetch(); // Trigger fetch on user change or component mount
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, refetch]);
+    fetchSubscribers();
+  }, [fetchSubscribers]);
 
-  return { data, loading, refetch };
+  return { 
+    data, 
+    loading, 
+    error,
+    refetch: fetchSubscribers 
+  };
 };
 
 export default useSubscribersData;
+
