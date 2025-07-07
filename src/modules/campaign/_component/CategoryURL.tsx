@@ -21,8 +21,8 @@ const MyCampaigns = () => {
   const [integrations, setIntegrations] = useState<IntegrationWithCampaigns[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:3003";
-  const baseUrl = "http://localhost:3003";
+  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:3003";
+  // const baseUrl = "http://localhost:3003";
 
   useEffect(() => {
     const fetchData = async () => { 

@@ -103,6 +103,10 @@ export const addSubscriber = async ({
       orderBy: { updatedAt: 'desc' },
     })
 
+    // if (!emailTemplate) {
+    //       return { error: 'Campaign or integration not found' }
+    // }
+
     // Send confirmation email if template exists
     if (emailTemplate) {
       await sendCampaignConfirmationEmail({
