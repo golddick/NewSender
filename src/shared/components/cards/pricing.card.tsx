@@ -41,28 +41,6 @@ const PricingCard = ({ active }: { active: string }) => {
   };
 
 
-  // const handleSubscription = async ({ price }: { price: string }) => {
-  //   if (!user || !user.id) {
-  //     history.push("/sign-in");
-  //     return;
-  //   }
-  
-  //   try {
-  //     const res = await stripeSubscribe({ price: price, userId: user?.id! });
-  
-  //     // Ensure res is valid and contains a URL
-  //     if (res && typeof res === "string") {
-  //       console.log(res, "res"); // Log the response for debugging
-  //       history.push(res);  // Push the URL to history for navigation
-  //     } else {
-  //       console.error("Invalid response from stripeSubscribe:", res);
-  //       // Handle invalid response, maybe notify the user
-  //     }
-  //   } catch (error) {
-  //     console.error("Error during subscription:", error);
-  //     // Handle errors (e.g., show an error message to the user)
-  //   }
-  // };
   
 
   const itemVariants = {
@@ -112,7 +90,7 @@ const PricingCard = ({ active }: { active: string }) => {
         </Link>
         </motion.div>
 
-      {/* grow plan */}
+      {/* launch plan */}
       <motion.div
           variants={itemVariants}
           className={`bg-dark-600/50 border border-dark-600 text-white hover:shadow-gold/10 transition-all md:w-full  rounded p-5 my-5 md:my-0  shadow-gold-700 shadow-sm`}
@@ -120,7 +98,7 @@ const PricingCard = ({ active }: { active: string }) => {
 
        
         <h5 className="font-clashDisplay uppercase text-cyber-ink text-3xl pb-8 border-b border-[#000]">
-          LUNCH
+          LAUNCH
         </h5>
         <br />
         <div className="border-b pb-8 border-black">

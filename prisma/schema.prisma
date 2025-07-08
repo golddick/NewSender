@@ -11,7 +11,7 @@ datasource db {
 // ========== ENUMS ==========
 enum Plan {
   FREE
-  LUNCH
+  LAUNCH
   SCALE
 }
 

@@ -164,7 +164,7 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
     }
 
     fetchCampaignData()
-  }, [campaignId, appName, router, campaign, jsonData, subjectTitle])
+  }, [campaignId, appName, ])
 
   const handleStatusChange = async (newStatus: "active" | "inactive") => {
     if (!campaign) return

@@ -28,7 +28,7 @@ const PLAN_LIMITS = {
     emailLimit: 5,
     subscriberLimit: 500,
   },
-  LUNCH: {
+  LAUNCH: {
     appIntegratedLimit: 2,
     campaignLimit: 5,
     emailLimit: 20,

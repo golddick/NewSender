@@ -228,7 +228,7 @@ import { db } from "@/shared/libs/database";
 // Plan Limits
 const PLAN_LIMITS = {
   FREE: { appIntegratedLimit: 2, campaignLimit: 3, emailLimit: 5, subscriberLimit: 500 },
-  LUNCH: { appIntegratedLimit: 2, campaignLimit: 5, emailLimit: 20, subscriberLimit: 2000 },
+  LAUNCH: { appIntegratedLimit: 2, campaignLimit: 5, emailLimit: 20, subscriberLimit: 2000 },
   SCALE: { appIntegratedLimit: 5, campaignLimit: 10, emailLimit: 50, subscriberLimit: 10000 },
 } as const;
 

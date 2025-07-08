@@ -111,10 +111,10 @@ import { currentUser } from '@clerk/nextjs/server';
 import axios from 'axios';
 
 const PLAN_CONFIG = {
-  "PLN_qqs88g3s909068i": { amount: 50000, name: "LUNCH" },
-  "PLN_zpaqmox70eunvd9": { amount: 540000, name: "LUNCH" },
-  "PLN_4idp8h4m8ptak6k": { amount: 120000, name: "SCALE" },
-  "PLN_l1ck8bvf49k9nhx": { amount: 1000000, name: "SCALE" },
+  "PLN_xpxme65ldog950p": { amount: 15000, name: "LAUNCH" },
+  // "PLN_zpaqmox70eunvd9": { amount: 540000, name: "LUNCH" },
+  "PLN_4idp8h4m8ptak6k": { amount: 50000, name: "SCALE" },
+  // "PLN_l1ck8bvf49k9nhx": { amount: 1000000, name: "SCALE" },
 } as const;
 
 export const paystackSubscribe = async ({
@@ -131,7 +131,6 @@ export const paystackSubscribe = async ({
       throw new Error("User not authenticated");
     }
 
-    console.log("User from Clerk:", user);
 
     // 2. Get user's email (primary email address)
     const email = user.emailAddresses.find(

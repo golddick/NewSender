@@ -181,7 +181,7 @@ const MAX_RETRIES = 2;
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
-  secure: true,
+  secure: process.env.SMTP_SECURE === "true", // "true" from env = boolean true
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -190,9 +190,27 @@ const transporter = nodemailer.createTransport({
   maxConnections: 5,
   rateDelta: 5000,
   tls: {
-    rejectUnauthorized: true,
+    rejectUnauthorized: false, // change to `true` in production with trusted cert
   },
+  logger: true,
+  debug: true,
 });
+
+// const transporter = nodemailer.createTransport({
+//   host: process.env.SMTP_HOST,
+//   port: Number(process.env.SMTP_PORT),
+//   secure: true,
+//   auth: {
+//     user: process.env.SMTP_USER,
+//     pass: process.env.SMTP_PASS,
+//   },
+//   pool: true,
+//   maxConnections: 5,
+//   rateDelta: 5000,
+//   tls: {
+//     rejectUnauthorized: true,
+//   },
+// });
 
 interface SendEmailParams {
   userEmail: string[];
@@ -240,9 +258,18 @@ export const sendEmail = async (params: SendEmailParams) => {
       throw new Error(usageCheck.message);
     }
 
-    if (!(await transporter.verify().catch(() => false))) {
-      throw new Error('Email server unavailable');
+    // if (!(await transporter.verify().catch(() => false))) {
+    //   throw new Error('Email server unavailable');
+    // }
+
+    const smtpAvailable = await transporter.verify().catch((err) => {
+    console.error("SMTP verification failed:", err); // ✅ log it
+  return false;
+    });
+    if (!smtpAvailable) {
+      throw new Error("Email server unavailable");
     }
+
 
     const emailRecord = await db.email.update({
       where: { id: emailId, integrationId },
