@@ -228,8 +228,8 @@ import { db } from "@/shared/libs/database";
 // Plan Limits
 const PLAN_LIMITS = {
   FREE: { appIntegratedLimit: 2, campaignLimit: 3, emailLimit: 5, subscriberLimit: 500 },
-  LAUNCH: { appIntegratedLimit: 2, campaignLimit: 5, emailLimit: 20, subscriberLimit: 2000 },
-  SCALE: { appIntegratedLimit: 5, campaignLimit: 10, emailLimit: 50, subscriberLimit: 10000 },
+  LAUNCH: { appIntegratedLimit: 2, campaignLimit: 5, emailLimit: 20, subscriberLimit: 20000 },
+  SCALE: { appIntegratedLimit: 5, campaignLimit: 10, emailLimit: 50, subscriberLimit: 100000 },
 } as const;
 
 type PlanName = keyof typeof PLAN_LIMITS;
@@ -372,7 +372,7 @@ async function handlePaymentFailure(data: PaystackEventData["data"]) {
     where: { paystackCustomerId: customerCode },
     data: {
       subscriptionStatus: "past_due",
-      // failedAttempts: data.attempt || 1,
+      failedAttempts: data.attempt || 1,
     },
   });
 

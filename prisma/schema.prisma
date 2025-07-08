@@ -87,6 +87,8 @@ model Membership {
   currency                   String                 @default("NGN")
   lastPaymentDate            DateTime?
   nextPaymentDate            DateTime?
+  successfulPayments         Int                    @default(0)
+  failedAttempts             Int                    @default(0)
   subscriberLimit            Int                    @default(500)
   emailLimit                 Int                    @default(5)
   campaignLimit              Int                    @default(3)

@@ -32,13 +32,13 @@ const PLAN_LIMITS = {
     appIntegratedLimit: 2,
     campaignLimit: 5,
     emailLimit: 20,
-    subscriberLimit: 2000,
+    subscriberLimit: 20000,
   },
   SCALE: {
     appIntegratedLimit: 5,
     campaignLimit: 10,
     emailLimit: 50,
-    subscriberLimit: 10000,
+    subscriberLimit: 100000,
   },
 } as const;
 
