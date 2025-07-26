@@ -42,3 +42,63 @@ export const calculatePercentage = (
 };
 
 
+
+
+
+
+
+// types.ts
+export interface PostPerformanceMetrics {
+  seoScore?: number;
+  views?: number;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+}
+
+// performanceUtils.ts
+/**
+ * Calculates a comprehensive performance score (0-100) for a post
+ * @param post Object containing post performance metrics
+ * @returns Performance score between 0 and 100
+ */
+export const calculatePerformanceScore = (post: PostPerformanceMetrics): number => {
+  // Weights for different metrics (adjust as needed)
+  const WEIGHTS = {
+    seo: 0.35,
+    engagement: 0.40,
+    reach: 0.25
+  };
+
+  // Calculate individual components (0-100 scale)
+  const seoComponent = Math.min(post.seoScore || 0, 100);
+  
+  // Engagement: weighted sum of interactions normalized by views
+  const engagementComponent = Math.min(
+    100,
+    ((post.likes || 0) * 0.5 + 
+     (post.comments || 0) * 1.5 + 
+     (post.shares || 0) * 2) / 
+    (post.views && post.views > 0 ? post.views : 1) * 1000
+  );
+
+  // Reach: logarithmic scale to normalize view counts
+  const reachComponent = Math.min(
+    100,
+    Math.log10((post.views || 0) + 1) * 20
+  );
+
+  // Calculate weighted score
+  const weightedScore = 
+    (seoComponent * WEIGHTS.seo) +
+    (engagementComponent * WEIGHTS.engagement) + 
+    (reachComponent * WEIGHTS.reach);
+
+  // Normalize to 0-100 scale
+  return Math.round(Math.min(100, Math.max(0, weightedScore)));
+};
+
+
+
+
+

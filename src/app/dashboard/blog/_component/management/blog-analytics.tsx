@@ -236,7 +236,7 @@ export function BlogAnalytics({ posts }: BlogAnalyticsProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600 mb-2">
-                {totalViews > 0 ? ((totalLikes / totalViews) * 100).toFixed(1) : 0}%
+               {totalViews > 0  ? Math.min(100, ((totalLikes / totalViews) * 100)).toFixed(1) : 0}%
               </div>
               <p className="text-gray-600">Like Rate</p>
               <p className="text-sm text-gray-500">Likes per view</p>
@@ -244,7 +244,7 @@ export function BlogAnalytics({ posts }: BlogAnalyticsProps) {
 
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600 mb-2">
-                {totalViews > 0 ? ((totalComments / totalViews) * 100).toFixed(1) : 0}%
+                {totalViews > 0 ? Math.min(100, (totalComments / totalViews) * 100).toFixed(1) : 0}%
               </div>
               <p className="text-gray-600">Comment Rate</p>
               <p className="text-sm text-gray-500">Comments per view</p>
@@ -252,7 +252,7 @@ export function BlogAnalytics({ posts }: BlogAnalyticsProps) {
 
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600 mb-2">
-                {totalViews > 0 ? ((totalShares / totalViews) * 100).toFixed(1) : 0}%
+                {totalViews > 0 ?  Math.min(100, (totalShares / totalViews) * 100).toFixed(1) : 0}%
               </div>
               <p className="text-gray-600">Share Rate</p>
               <p className="text-sm text-gray-500">Shares per view</p>

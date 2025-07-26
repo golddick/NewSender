@@ -3,11 +3,6 @@ import { BlogPostReader } from './Read-Blog'
 import { BlogPostReaderProps } from '@/app/type'
 
 
-// interface BlogPostReaderProps {
-//   // slug: string
-//   post: any
-//   relatedPosts?: any[] | null
-// }
 
 
 const Read = ({ post, relatedPosts}:BlogPostReaderProps) => {
@@ -17,7 +12,6 @@ const Read = ({ post, relatedPosts}:BlogPostReaderProps) => {
   return (
     <div>
       <BlogPostReader 
-      // slug={slug} 
       post={post} 
       relatedPosts={relatedPosts || []}
       />

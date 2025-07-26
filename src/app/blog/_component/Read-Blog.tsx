@@ -44,6 +44,8 @@ import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import Loader from "@/components/Loader"
 import { nestComments } from "@/actions/blog/nestComments"
+import { useUser } from "@clerk/nextjs"
+import toast from "react-hot-toast"
 
 
 
@@ -66,7 +68,7 @@ export function BlogPostReader({ post, relatedPosts }: BlogPostReaderProps) {
 
   const contentRef = useRef<HTMLDivElement>(null)
 
-  console.log(post, 'post in BlogPostReader'  )
+  const { user } = useUser();
 
     // Calculate reading progress
   useEffect(() => {
@@ -146,6 +148,10 @@ export function BlogPostReader({ post, relatedPosts }: BlogPostReaderProps) {
 
   const handleAddComment = async (content: string, parentId?: string) => {
   if (!post) return;
+  if (!user) {
+      toast.error("You must be logged in to comment")
+      return
+    }
   
   try {
     const result = await addComment(

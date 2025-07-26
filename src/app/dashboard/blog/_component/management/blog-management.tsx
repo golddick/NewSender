@@ -79,7 +79,7 @@ const { user } = useUser()
           authorId: user.id, 
         //   category: categoryFilter !== "all" ? categoryFilter : undefined, 
           search: searchQuery, 
-          sort: sortBy, 
+          sort: sortBy,  
           order: "desc" 
         }),
         getAllCategories()

@@ -21,8 +21,11 @@ import {
   Tag,
   Settings,
   Trash2,
+  ClipboardCopyIcon,
 } from "lucide-react"
 import { PostStatus, PostVisibility } from "@prisma/client"
+import { calculatePerformanceScore } from "@/lib/utils"
+import toast from "react-hot-toast"
 
 interface BlogPost {
   id: string
@@ -106,6 +109,8 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
       .replace(/$/, "</p>")
   }
 
+   const score = calculatePerformanceScore(post);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -152,7 +157,7 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
 
       {/* Featured Image */}
       {post.featuredImage && (
-        <div className="relative h-64 rounded-lg overflow-hidden">
+        <div className="relative h-50 rounded-lg overflow-hidden">
           <Image src={post.featuredImage } alt={post.title} fill className="object-cover" />
         </div>
       )}
@@ -304,7 +309,7 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
 
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Engagement Rate</CardTitle>
               </CardHeader>
@@ -314,7 +319,29 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
                 </div>
                 <p className="text-gray-600">Based on likes and comments vs views</p>
               </CardContent>
-            </Card>
+            </Card> */}
+            <Card>
+            <CardHeader>
+              <CardTitle>Engagement Rate</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-600 mb-2">
+                {post.views > 0 
+                  ? Math.min(
+                      1000, // Cap at 1000% to prevent extreme values while allowing >100%
+                      ((post.likes + post.comments * 1.5 + post.shares * 2) / post.views) * 100
+                    ).toFixed(1) 
+                  : '0'}%
+              </div>
+              <p className="text-gray-600">
+                {post.views > 0 ? (
+                  <>
+                    {(post.likes || 0)} likes • {(post.comments || 0)} comments • {(post.shares || 0)} shares
+                  </>
+                ) : 'No views yet'}
+              </p>
+            </CardContent>
+          </Card>
 
             <Card>
               <CardHeader>
@@ -322,14 +349,15 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600 mb-2">
-                  {Math.round((post.seoScore + (post.views > 1000 ? 20 : 0) + (post.likes > 50 ? 15 : 0)) / 1.35)}
+                  {/* {Math.round((post.seoScore + (post.views > 1000 ? 20 : 0) + (post.likes > 50 ? 15 : 0)) / 1.35)} */}
+                  {calculatePerformanceScore(post)}
                 </div>
                 <p className="text-gray-600">Overall content performance</p>
               </CardContent>
             </Card>
           </div>
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Traffic Sources</CardTitle>
             </CardHeader>
@@ -353,7 +381,7 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
@@ -366,8 +394,21 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">URL Slug</label>
-                <p className="text-gray-900 font-mono text-sm bg-gray-100 p-2 rounded">/blog/post/{post.slug}</p>
+                <label className="text-sm font-medium text-gray-600">Blog URL </label>
+                <div className="flex w-full justify-between items-center ">
+                <p className="text-gray-900 font-mono text-sm bg-gray-100 p-2 rounded">{process.env.NEXT_PUBLIC_SITE_URL}/blog/post/{post.slug}</p>
+                  <button
+                  onClick={() => {
+                    const fullUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/blog/post/${post.slug}`;
+                    navigator.clipboard.writeText(fullUrl);
+                    toast.success('URL copied to clipboard!');
+                  }}
+                  className="text-sm w-fit text-white bg-black hover:text-black hover:bg-white flex items-center gap-1"
+                >
+                  <ClipboardCopyIcon className="h-4 w-4" />
+                  Copy URL
+                </button>
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-600">Status</label>
@@ -392,14 +433,6 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
               <Button className="w-full" onClick={onEdit}>
                 <Edit3 className="h-4 w-4 mr-2" />
                 Edit Post
-              </Button>
-              <Button variant="outline" className="w-full bg-transparent">
-                <Copy className="h-4 w-4 mr-2" />
-                Duplicate Post
-              </Button>
-              <Button variant="outline" className="w-full bg-transparent">
-                <Download className="h-4 w-4 mr-2" />
-                Export as Markdown
               </Button>
               <Separator />
               <Button variant="destructive" className="w-full">
