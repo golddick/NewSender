@@ -95,64 +95,6 @@ export const getEmailById = async (emailId: string) => {
 };
 
 
-
-// export const getEmailByTitle = async ({
-//   title,
-//   newsLetterOwnerId
-// }: {
-//   title: string;
-//   newsLetterOwnerId: string;
-// }) => {
-//   try {
-//     const user = await currentUser();
-//     if (!user) {
-//       return { success: false, error: "Unauthorized" };
-//     }
-
-//     const email = await db.email.findUnique({
-//       where: {
-//       title:title,
-//       newsLetterOwnerId: newsLetterOwnerId,
-//     },
-//       include: {
-//         campaign: { select: { id: true, name: true, trigger: true } },
-//         integration: { select: { id: true, name: true, logo: true } },
-//       },
-//     });
-
-//     console.log(email, 'email server')
-//     console.log(title, 'mail tittle')
-
-//     if (!email) {
-//       return {
-//         success: false,
-//         error: `No email found for title "${title}" and owner ID "${user.id}"`,
-//       };
-//     }
-
-//     return {
-//       success: true,
-//       data: {
-//         id: email.id,
-//         title: email.title,
-//         content: email.content,
-//         campaign: email.campaign,
-//         integration: email.integration,
-//         emailType: email.emailType,
-//         scheduleType: email.scheduleType,
-//         previewText: email.previewText,
-//       },
-//     };
-//   } catch (error) {
-//     console.error("[GET_EMAIL_BY_TITLE_ERROR]", error);
-//     return {
-//       success: false,
-//       error: error instanceof Error ? error.message : "Failed to fetch email",
-//     };
-//   }
-// };
-
-
 export const getEmailByTitle = async ({
   title,
   newsLetterOwnerId,
@@ -169,7 +111,7 @@ export const getEmailByTitle = async ({
     // Normalize title
     const normalizedTitle = title.trim().toLowerCase();
 
-    console.log(normalizedTitle, 'normalized title server'  );
+    // console.log(normalizedTitle, 'normalized title server'  );
 
     const email = await db.email.findUnique({
       where: {
@@ -199,7 +141,7 @@ export const getEmailByTitle = async ({
         campaign: email.campaign,
         integration: email.integration,
         emailType: email.emailType,
-        scheduleType: email.scheduleType,
+        status: email.status,
         previewText: email.previewText,
       },
     };

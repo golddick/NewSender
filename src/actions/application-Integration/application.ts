@@ -11,7 +11,7 @@ export type IntegrationData = {
   url: string
   logo?: string
   email?: string
-  status?: "active" | "inactive"
+  status?: IntegrationStatus
   category: string
   description?: string
 }
@@ -32,6 +32,7 @@ export type IntegrationWithMetrics = IntegrationData & {
 
 
 import { checkUsageLimit, incrementUsage } from "@/lib/checkAndUpdateUsage"
+import { IntegrationStatus } from "@prisma/client"
 
 
 export async function addIntegration(data: IntegrationData) {
@@ -52,7 +53,7 @@ export async function addIntegration(data: IntegrationData) {
         url: data.url,
         logo: data.logo,
         email: data.email || user.primaryEmailAddress?.emailAddress,
-        status: data.status || "inactive",
+        status: data.status ,
         category: data.category,
         description: data.description,
         userId: user.id
@@ -222,7 +223,7 @@ export async function updateIntegrationMetrics(
   }
 }
 
-export async function updateIntegrationStatus(id: string, status: "active" | "inactive") {
+export async function updateIntegrationStatus(id: string, status: IntegrationStatus) {
   const user = await currentUser()
   if (!user) return { error: "Unauthorized" }
 
@@ -270,7 +271,7 @@ export async function getIntegrationsWithCampaigns(userId: string) {
         Campaign: {
           where: {
             userId,
-            status: "active"
+            status: "ACTIVE"
           },
           orderBy: {
             createdAt: "desc"

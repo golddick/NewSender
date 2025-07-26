@@ -2,6 +2,7 @@
 
 
 import { AdminsideBarBottomItems, AdminsideBarItems, sideBarBottomItems, sideBarItems } from "@/app/configs/constants";
+import { DashboardSideBarTypes } from "@/app/configs/types";
 import useRouteChange from "@/shared/hooks/useRouteChange";
 import { ICONS } from "@/shared/utils/icons";
 import { useClerk } from "@clerk/nextjs";

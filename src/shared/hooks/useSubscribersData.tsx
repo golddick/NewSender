@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useClerk } from "@clerk/nextjs";
 import { getSubscribers } from "@/actions/subscriber/get.subscribers";
+import { SubscriptionStatus } from "@prisma/client";
 
 interface Subscriber {
   id: string;
   email: string;
   name: string | null;
-  status: 'Subscribed' | 'Unsubscribed';
+  status: SubscriptionStatus,
   newsLetterOwnerId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -22,7 +23,7 @@ interface Subscriber {
     name: string;
     logo: string | null;
     url: string | null;
-  };
+  } | null;
 }
 
 interface SubscribersResponse {

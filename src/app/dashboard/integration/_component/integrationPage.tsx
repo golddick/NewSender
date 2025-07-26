@@ -8,6 +8,7 @@ import { IntegrationCard } from "./integrationCard"
 import { AddIntegrationDialog } from "./add-integration-dialog"
 import { deleteIntegration, getIntegrations, updateIntegrationStatus } from "@/actions/application-Integration/application"
 import toast from "react-hot-toast"
+import { IntegrationStatus } from "@prisma/client"
 
 interface Integration {
   id: string
@@ -15,7 +16,7 @@ interface Integration {
   url: string
   logo: string
   email: string
-  status: "active" | "inactive" 
+  status: IntegrationStatus
   category: string
   description: string
   dateAdded: Date
@@ -60,7 +61,7 @@ export function IntegrationsPage() {
             url: item.url,
             logo: item.logo ?? "",
             email: item.email ?? "",
-            status: item.status === "active" ? "active" : "inactive",
+            status: item.status === "ACTIVE" ? "ACTIVE" : "INACTIVE",
             category: item.category,
             description: item.description ?? "",
             dateAdded: item.dateAdded,
@@ -121,7 +122,7 @@ const handleDeleteIntegration = async (id: string) => {
                 url: item.url,
                 logo: item.logo ?? "",
                 email: item.email ?? "",
-                status: (item.status === "active" ? "active" : "inactive") as Integration["status"],
+                status: (item.status === "" ? "ACTIVE" : "INACTIVE") as IntegrationStatus,
                 category: item.category,
                 description: item.description ?? "",
                 dateAdded: item.createdAt ? item.createdAt.split("T")[0] : "",
@@ -133,7 +134,7 @@ const handleDeleteIntegration = async (id: string) => {
 }
 
 
-const handleUpdateStatus = async (id: string, status: Integration["status"]) => {
+const handleUpdateStatus = async (id: string, status:IntegrationStatus) => {
     try {
       // Optimistic update
       setIntegrations(prev => 
@@ -153,7 +154,7 @@ const handleUpdateStatus = async (id: string, status: Integration["status"]) => 
         prev.map(integration => 
           integration.id === id ? { 
             ...integration, 
-            status: integration.status === "active" ? "inactive" : "active" 
+            status: integration.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" 
           } : integration
         )
       )
@@ -201,7 +202,7 @@ const handleUpdateStatus = async (id: string, status: Integration["status"]) => 
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Active Application</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {integrations.filter((i) => i.status === "active").length}
+                  {integrations.filter((i) => i.status === "ACTIVE").length}
                 </p>
               </div>
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -212,7 +213,7 @@ const handleUpdateStatus = async (id: string, status: Integration["status"]) => 
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Inactive Application</p>
                 <p className="text-2xl font-bold text-red-600">
-                  {integrations.filter((i) => i.status === "inactive").length}
+                  {integrations.filter((i) => i.status === "INACTIVE").length}
                 </p>
               </div>
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>

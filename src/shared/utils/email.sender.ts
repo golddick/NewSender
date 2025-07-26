@@ -1,3 +1,5 @@
+
+
 // 'use server';
 
 // import * as nodemailer from 'nodemailer';
@@ -5,151 +7,248 @@
 // import { db } from '@/shared/libs/database';
 // import { checkUsageLimit, incrementUsage } from '@/lib/checkAndUpdateUsage';
 
+// // Configuration
 // const BATCH_SIZE = 20;
+// const BATCH_DELAY_MS = 1000;
+// const MAX_RETRIES = 2;
 
+// // Initialize transporter
 // const transporter = nodemailer.createTransport({
 //   host: process.env.SMTP_HOST,
 //   port: Number(process.env.SMTP_PORT),
-//   secure: true,
+//   secure: process.env.SMTP_SECURE === "true", // "true" from env = boolean true
 //   auth: {
 //     user: process.env.SMTP_USER,
 //     pass: process.env.SMTP_PASS,
 //   },
-//   tls: { rejectUnauthorized: true },
+//   pool: true,
+//   maxConnections: 5,
+//   rateDelta: 5000,
+//   tls: {
+//     rejectUnauthorized: false, // change to `true` in production with trusted cert
+//   },
+//   logger: true,
+//   debug: true,
 // });
 
-// export const sendEmail = async ({
-//   userEmail,
-//   subject,
-//   content,
-//   emailId,
-//   campaign,
-//   integrationId,
-//   newsLetterOwnerId, 
-//   contentJson,
-//   adminEmail,
 
-// }: {
+// interface SendEmailParams {
 //   userEmail: string[];
 //   subject: string;
 //   content: string;
 //   emailId: string;
-//   campaign: string;
-//   integrationId: string;
+//   campaign?: string;
+//   integrationId?: string;
 //   newsLetterOwnerId: string;
 //   contentJson: string;
 //   adminEmail: string;
-//   trackOpens?: string;
-// }) => {
-//   const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || 'https://your-domain.com';
+//   trackOpens?: boolean;
+//   trackClicks?: boolean;
+//   fromApplication: string;
+// }
+
+// export const sendEmail = async (params: SendEmailParams) => {
+//   const {
+//     userEmail,
+//     subject,
+//     content,
+//     emailId,
+//     campaign,
+//     integrationId,
+//     fromApplication,
+//     newsLetterOwnerId,
+//     contentJson,
+//     adminEmail,
+//     trackOpens = true,
+//     trackClicks = true,
+//   } = params;
+
+//   // const domain = process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://your-domain.com';
+//   const domain =  'https://denews-xi.vercel.app/';
 //   const startTime = Date.now();
+//   const trackingId = `trk_${Date.now()}`;
 
 //   try {
-//     if (!newsLetterOwnerId || !adminEmail || userEmail.length === 0)
-//       return { error: 'Missing required fields', success: false };
+//     if (!newsLetterOwnerId || !adminEmail || !userEmail?.length) {
+//       throw new Error('Missing required fields');
+//     }
 
 //     const usageCheck = await checkUsageLimit(newsLetterOwnerId, 'emailsSent');
-//     if (!usageCheck.success) return { error: usageCheck.message, success: false };
+//     if (!usageCheck.success) {
+//       throw new Error(usageCheck.message);
+//     }
 
-//     const isTransporterReady = await transporter.verify().then(() => true).catch(() => false);
-//     if (!isTransporterReady) return { error: 'Email server unavailable', success: false };
+//     // if (!(await transporter.verify().catch(() => false))) {
+//     //   throw new Error('Email server unavailable');
+//     // }
+
+//     const smtpAvailable = await transporter.verify().catch((err) => {
+//     console.error("SMTP verification failed:", err); // ✅ log it
+//   return false;
+//     });
+//     if (!smtpAvailable) {
+//       throw new Error("Email server unavailable");
+//     }
+
 
 //     const emailRecord = await db.email.update({
-//       where: { id: emailId , integrationId: integrationId },
+//       where: { id: emailId, integrationId },
 //       data: {
 //         content: contentJson,
 //         status: EmailStatus.PENDING,
 //         sentAt: new Date(),
 //       },
+//       include: {
+//         campaign: {
+//           select: { name: true }
+//         },
+//         integration: {
+//           select: { name: true }
+//         }
+//       }
 //     });
 
-//     const batches = Array.from({ length: Math.ceil(userEmail.length / BATCH_SIZE) }, (_, i) =>
-//       userEmail.slice(i * BATCH_SIZE, i * BATCH_SIZE + BATCH_SIZE)
+//     const batches = Array.from(
+//       { length: Math.ceil(userEmail.length / BATCH_SIZE) },
+//       (_, i) => userEmail.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE)
 //     );
 
 //     let totalAccepted = 0;
 //     let totalRejected = 0;
 //     let lastMessageId = '';
+//     const failedEmails: string[] = [];
 
-//     for (const batch of batches) {
-//       for (const email of batch) {
-//         try {
-//           const trackedHtml = content.replace(
-//             /href="([^"]+)"/g,
-//             (_, url) =>
-//               `href="${domain}/api/track/click?emailId=${emailId}&url=${encodeURIComponent(url)}"`
-//           );
+//     for (const [batchIndex, batch] of batches.entries()) {
+//       console.log(`Processing batch ${batchIndex + 1}/${batches.length}`);
 
-//           const htmlContent = `
-//             <div style="text-align:center;margin-bottom:20px">
-//               <img src="${domain}/logo.png" width="40" alt="Logo"/>
-//             </div>
-//             ${trackedHtml}
-//             <div style="text-align:center;margin-top:30px">
-//               <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}" 
-//                  style="padding:10px 20px;background:#e63946;color:white;border-radius:5px;text-decoration:none">
-//                 Unsubscribe
-//               </a>
-//             </div>
-//             <img src="${domain}/api/track/open?emailId=${emailId}" width="1" height="1" style="opacity:0;" />
-//           `;
+//       const batchResults = await Promise.allSettled(
+//         batch.map(async (email) => {
+//           let retries = 0;
+//           let lastError: Error | null = null;
 
-//           const result = await transporter.sendMail({
-//             from: `"THENEWS" <${process.env.SMTP_USER}>`,
-//             to: email,
-//             subject,
-//             html: htmlContent,
-//             headers: {
-//               'X-Email-ID': emailId,
-//               'X-Campaign-ID': campaign,
-//               'List-Unsubscribe': `<${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}>`,
-//             },
-//           });
+//           while (retries <= MAX_RETRIES) {
+//             try {
+//               let enhancedContent = content;
 
-//           if (result.accepted.length) totalAccepted++;
-//           if (result.rejected.length) totalRejected++;
-//           lastMessageId = result.messageId || lastMessageId;
-//         } catch (err) {
-//           console.error(`Failed to send to ${email}:`, err);
+//               if (trackClicks) {
+//                 enhancedContent = enhancedContent.replace(
+//                   /href="([^"]+)"/g,
+//                   (_, url) => `href="${domain}/api/track/click?emailId=${emailId}&email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&tid=${trackingId}"`
+//                 );
+//               }
+
+//               if (trackOpens) {
+//                 enhancedContent += `<img src="${domain}/api/track/open?emailId=${emailId}&email=${encodeURIComponent(email)}&tid=${trackingId}" width="1" height="1" style="display:none" />`;
+//               }
+
+//               enhancedContent += `
+//                 <div style="text-align:center;margin-top:30px;font-size:12px;color:#666;">
+//                   <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}&integration=${encodeURIComponent(emailRecord.integration.name)}&campaignId=${encodeURIComponent(campaign)}"
+//                     style="color:#666;text-decoration:underline;">
+//                     Unsubscribe
+//                   </a>
+//                 </div>
+//               `;
+
+//               const fromName = fromApplication.charAt(0).toUpperCase() + fromApplication.slice(1).toLowerCase() || 'Thenews Newsletter';
+
+//               const result = await transporter.sendMail({
+//                 from: `${fromName } Newsletter  <${process.env.SMTP_USER}>`,
+//                 to: email,
+//                 subject: subject,
+//                 html: enhancedContent,
+//                 headers: {
+//                   'X-Email-ID': emailId,
+//                   'X-Campaign-ID': campaign,
+//                   'X-Tracking-ID': trackingId,
+//                   'X-Integration-ID': integrationId,
+//                   'X-NewsLetter-Owner-ID': `${fromApplication} 'THENEWS' `,
+//                   'List-Unsubscribe': `<${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}&integration=${encodeURIComponent(emailRecord.integration.name)}&campaignId=${encodeURIComponent(campaign)}>`
+//                 },
+//               });
+
+//               return {
+//                 email,
+//                 success: true,
+//                 messageId: result.messageId
+//               };
+//             } catch (error) {
+//               lastError = error as Error;
+//               retries++;
+//               if (retries <= MAX_RETRIES) {
+//                 await new Promise(res => setTimeout(res, 1000 * retries));
+//               }
+//             }
+//           }
+
+//           throw lastError || new Error('Failed after retries');
+//         })
+//       );
+
+//       batchResults.forEach((result, index) => {
+//         const email = batch[index];
+//         if (result.status === 'fulfilled' && result.value.success) {
+//           totalAccepted++;
+//           lastMessageId = result.value.messageId || lastMessageId;
+//         } else {
 //           totalRejected++;
+//           failedEmails.push(email);
+//           console.error(`Failed to send to ${email}:`,
+//             result.status === 'rejected' ? result.reason : 'Unknown error');
 //         }
-//       }
+//       });
 
-//       await new Promise((res) => setTimeout(res, 1000)); // optional throttling
+//       if (batchIndex < batches.length - 1) {
+//         await new Promise(res => setTimeout(res, BATCH_DELAY_MS));
+//       }
 //     }
 
-//     await db.email.update({
-//       where: { id: emailId, integrationId: integrationId , campaignId: campaign },
-//       data: {
-//         status: EmailStatus.SENT,
-//         sentAt: new Date(),
-//         messageId: lastMessageId,
-//       },
-//     });
+//     await db.$transaction([
+//       db.email.update({
+//         where: { id: emailId },
+//         data: {
+//           status: EmailStatus.SENT,
+//           sentAt: new Date(),
+//           messageId: lastMessageId,
+//           recipients: { increment: totalAccepted },
+//           emailsSent: { increment: 1 }
+//         },
+//       }),
+//       db.campaign.update({
+//         where: { id: campaign },
+//         data: {
+//           emailsSent: { increment: 1 },
+//           recipients: { increment: totalAccepted },
+//           lastSentAt: new Date(),
+//         },
+//       }),
+//       db.integration.update({
+//         where: { id: integrationId },
+//         data: {
+//           emailsSent: { increment: 1 },
+//           recipients: { increment: totalAccepted }
+//         },
+//       })
+//     ]);
 
-//     await db.campaign.update({
-//       where: { id: campaign },
-//       data: {
-//         emailsSent: { increment: userEmail.length },
-//         lastSentAt: new Date(),
-//       },
-//     });
-
-//     await incrementUsage(newsLetterOwnerId, 'emailsSent');
+//     await incrementUsage(newsLetterOwnerId, 'emailsSent', totalAccepted);
 
 //     return {
 //       success: true,
 //       messageId: lastMessageId,
+//       trackingId,
 //       stats: {
 //         total: userEmail.length,
 //         accepted: totalAccepted,
 //         rejected: totalRejected,
+//         failedRecipients: failedEmails.length > 0 ? failedEmails : undefined,
 //         batches: batches.length,
 //         timeTaken: Date.now() - startTime,
 //       },
 //     };
 //   } catch (error) {
 //     console.error('[EMAIL_SEND_ERROR]', error);
+
 //     await db.email.update({
 //       where: { id: emailId },
 //       data: {
@@ -160,6 +259,7 @@
 //     return {
 //       success: false,
 //       error: error instanceof Error ? error.message : 'Email send failed',
+//       trackingId,
 //     };
 //   }
 // };
@@ -172,16 +272,14 @@ import { EmailStatus } from '@prisma/client';
 import { db } from '@/shared/libs/database';
 import { checkUsageLimit, incrementUsage } from '@/lib/checkAndUpdateUsage';
 
-// Configuration
 const BATCH_SIZE = 20;
 const BATCH_DELAY_MS = 1000;
 const MAX_RETRIES = 2;
 
-// Initialize transporter
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === "true", // "true" from env = boolean true
+  secure: process.env.SMTP_SECURE === "true",
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -189,36 +287,18 @@ const transporter = nodemailer.createTransport({
   pool: true,
   maxConnections: 5,
   rateDelta: 5000,
-  tls: {
-    rejectUnauthorized: false, // change to `true` in production with trusted cert
-  },
+  tls: { rejectUnauthorized: false },
   logger: true,
   debug: true,
 });
-
-// const transporter = nodemailer.createTransport({
-//   host: process.env.SMTP_HOST,
-//   port: Number(process.env.SMTP_PORT),
-//   secure: true,
-//   auth: {
-//     user: process.env.SMTP_USER,
-//     pass: process.env.SMTP_PASS,
-//   },
-//   pool: true,
-//   maxConnections: 5,
-//   rateDelta: 5000,
-//   tls: {
-//     rejectUnauthorized: true,
-//   },
-// });
 
 interface SendEmailParams {
   userEmail: string[];
   subject: string;
   content: string;
   emailId: string;
-  campaign: string;
-  integrationId: string;
+  campaign?: string | null;         // optional
+  integrationId?: string | null;    // optional
   newsLetterOwnerId: string;
   contentJson: string;
   adminEmail: string;
@@ -244,7 +324,7 @@ export const sendEmail = async (params: SendEmailParams) => {
   } = params;
 
   // const domain = process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://your-domain.com';
-  const domain =  'https://denews-xi.vercel.app/';
+  const domain = 'https://denews-xi.vercel.app/';
   const startTime = Date.now();
   const trackingId = `trk_${Date.now()}`;
 
@@ -254,38 +334,26 @@ export const sendEmail = async (params: SendEmailParams) => {
     }
 
     const usageCheck = await checkUsageLimit(newsLetterOwnerId, 'emailsSent');
-    if (!usageCheck.success) {
-      throw new Error(usageCheck.message);
-    }
-
-    // if (!(await transporter.verify().catch(() => false))) {
-    //   throw new Error('Email server unavailable');
-    // }
+    if (!usageCheck.success) throw new Error(usageCheck.message);
 
     const smtpAvailable = await transporter.verify().catch((err) => {
-    console.error("SMTP verification failed:", err); // ✅ log it
-  return false;
+      console.error("SMTP verification failed:", err);
+      return false;
     });
-    if (!smtpAvailable) {
-      throw new Error("Email server unavailable");
-    }
+    if (!smtpAvailable) throw new Error("Email server unavailable");
 
-
+    // Update the email record (integration optional)
     const emailRecord = await db.email.update({
-      where: { id: emailId, integrationId },
+      where: { id: emailId },
       data: {
         content: contentJson,
         status: EmailStatus.PENDING,
         sentAt: new Date(),
       },
       include: {
-        campaign: {
-          select: { name: true }
-        },
-        integration: {
-          select: { name: true }
-        }
-      }
+        campaign: { select: { name: true } },
+        integration: { select: { name: true } },
+      },
     });
 
     const batches = Array.from(
@@ -321,37 +389,58 @@ export const sendEmail = async (params: SendEmailParams) => {
                 enhancedContent += `<img src="${domain}/api/track/open?emailId=${emailId}&email=${encodeURIComponent(email)}&tid=${trackingId}" width="1" height="1" style="display:none" />`;
               }
 
-              enhancedContent += `
-                <div style="text-align:center;margin-top:30px;font-size:12px;color:#666;">
-                  <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}&integration=${encodeURIComponent(emailRecord.integration.name)}&campaignId=${encodeURIComponent(campaign)}"
-                    style="color:#666;text-decoration:underline;">
-                    Unsubscribe
-                  </a>
-                </div>
-              `;
 
-              const fromName = fromApplication.toUpperCase() || 'THENEWS NEWSLETTER';
+               // Add copyright notice and link to thenews.africa
+                enhancedContent += `
+                  <div style="text-align:center;margin-top:20px;font-size:12px;color:#666;">
+                    <p>
+                      © 2025 <a href="https://thenews.africa" 
+                                style="color:#666;text-decoration:underline;"
+                                target="_blank">TheNews Africa</a>. 
+                      All rights reserved.
+                    </p>
+                  </div>
+                `;
+
+                // Add unsubscribe link
+              enhancedContent += `
+              <div style="text-align:center;margin-top:30px;font-size:12px;color:#666;">
+                <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}${
+              integrationId ? `&integrationID=${encodeURIComponent(integrationId)}` : ""
+            }${campaign ? `&campaignID=${encodeURIComponent(campaign)}` : ""}"
+                  style="color:#666;text-decoration:underline;">
+                  Unsubscribe
+                </a>
+              </div>
+            `;
+
+              // enhancedContent += `
+              //   <div style="text-align:center;margin-top:30px;font-size:12px;color:#666;">
+              //     <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}${integrationId ? `&integration=${encodeURIComponent(integrationId)}` : ''}${campaign ? `&campaignId=${encodeURIComponent(campaign)}` : ''}"
+              //       style="color:#666;text-decoration:underline;">
+              //       Unsubscribe
+              //     </a>
+              //   </div>
+              // `;
+
+              const fromName = fromApplication.charAt(0).toUpperCase() + fromApplication.slice(1).toLowerCase() || 'Thenews Newsletter';
 
               const result = await transporter.sendMail({
-                from: `${fromName} <${process.env.SMTP_USER}>`,
+                from: `${fromName} Newsletter <${process.env.SMTP_USER}>`,
                 to: email,
-                subject: subject,
+                subject,
                 html: enhancedContent,
                 headers: {
                   'X-Email-ID': emailId,
-                  'X-Campaign-ID': campaign,
+                  ...(campaign && { 'X-Campaign-ID': campaign }),
                   'X-Tracking-ID': trackingId,
-                  'X-Integration-ID': integrationId,
+                  ...(integrationId && { 'X-Integration-ID': integrationId }),
                   'X-NewsLetter-Owner-ID': `${fromApplication} 'THENEWS' `,
-                  'List-Unsubscribe': `<${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}&integration=${encodeURIComponent(emailRecord.integration.name)}&campaignId=${encodeURIComponent(campaign)}>`
+                  'List-Unsubscribe': `<${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}${integrationId ? `&integration=${encodeURIComponent(integrationId)}` : ''}${campaign ? `&campaignId=${encodeURIComponent(campaign)}` : ''}>`
                 },
               });
 
-              return {
-                email,
-                success: true,
-                messageId: result.messageId
-              };
+              return { email, success: true, messageId: result.messageId };
             } catch (error) {
               lastError = error as Error;
               retries++;
@@ -373,8 +462,7 @@ export const sendEmail = async (params: SendEmailParams) => {
         } else {
           totalRejected++;
           failedEmails.push(email);
-          console.error(`Failed to send to ${email}:`,
-            result.status === 'rejected' ? result.reason : 'Unknown error');
+          console.error(`Failed to send to ${email}:`, result.status === 'rejected' ? result.reason : 'Unknown error');
         }
       });
 
@@ -383,33 +471,41 @@ export const sendEmail = async (params: SendEmailParams) => {
       }
     }
 
-    await db.$transaction([
-      db.email.update({
-        where: { id: emailId },
-        data: {
-          status: EmailStatus.SENT,
-          sentAt: new Date(),
-          messageId: lastMessageId,
-          recipients: { increment: totalAccepted },
-          emailsSent: { increment: 1 }
-        },
-      }),
-      db.campaign.update({
-        where: { id: campaign },
-        data: {
-          emailsSent: { increment: 1 },
-          recipients: { increment: totalAccepted },
-          lastSentAt: new Date(),
-        },
-      }),
-      db.integration.update({
-        where: { id: integrationId },
-        data: {
-          emailsSent: { increment: 1 },
-          recipients: { increment: totalAccepted }
-        },
-      })
-    ]);
+    // Transaction updates for campaign/integration if provided
+    await db.$transaction(async (tx) => {
+  await tx.email.update({
+    where: { id: emailId },
+    data: {
+      status: EmailStatus.SENT,
+      sentAt: new Date(),
+      messageId: lastMessageId,
+      recipients: { increment: totalAccepted },
+      emailsSent: { increment: 1 },
+    },
+  });
+
+  if (campaign) {
+    await tx.campaign.update({
+      where: { id: campaign },
+      data: {
+        emailsSent: { increment: 1 },
+        recipients: { increment: totalAccepted },
+        lastSentAt: new Date(),
+      },
+    });
+  }
+
+  if (integrationId) {
+    await tx.integration.update({
+      where: { id: integrationId },
+      data: {
+        emailsSent: { increment: 1 },
+        recipients: { increment: totalAccepted },
+      },
+    });
+  }
+});
+
 
     await incrementUsage(newsLetterOwnerId, 'emailsSent', totalAccepted);
 
@@ -421,7 +517,7 @@ export const sendEmail = async (params: SendEmailParams) => {
         total: userEmail.length,
         accepted: totalAccepted,
         rejected: totalRejected,
-        failedRecipients: failedEmails.length > 0 ? failedEmails : undefined,
+        failedRecipients: failedEmails.length ? failedEmails : undefined,
         batches: batches.length,
         timeTaken: Date.now() - startTime,
       },
@@ -431,9 +527,7 @@ export const sendEmail = async (params: SendEmailParams) => {
 
     await db.email.update({
       where: { id: emailId },
-      data: {
-        status: EmailStatus.FAILED,
-      },
+      data: { status: EmailStatus.FAILED },
     });
 
     return {
@@ -447,288 +541,6 @@ export const sendEmail = async (params: SendEmailParams) => {
 
 
 
-// 'use server';
-
-// import * as nodemailer from 'nodemailer';
-// import { EmailStatus } from '@prisma/client';
-// import { db } from '@/shared/libs/database';
-// import { checkUsageLimit, incrementUsage } from '@/lib/checkAndUpdateUsage';
-
-// // Configuration
-// const BATCH_SIZE = 20;
-// const BATCH_DELAY_MS = 1000;
-// const MAX_RETRIES = 2;
-
-// // Initialize transporter
-// const transporter = nodemailer.createTransport({
-//   host: process.env.SMTP_HOST,
-//   port: Number(process.env.SMTP_PORT),
-//   secure: true,
-//   auth: {
-//     user: process.env.SMTP_USER,
-//     pass: process.env.SMTP_PASS,
-//   },
-//   pool: true, // Use connection pooling
-//   maxConnections: 5,
-//   rateDelta: 5000, // Rate limiting
-//   tls: { 
-//     rejectUnauthorized: true 
-//   },
-// });
-
-// interface SendEmailParams {
-//   userEmail: string[];
-//   subject: string;
-//   content: string;
-//   emailId: string;
-//   campaign: string;
-//   integrationId: string;
-//   newsLetterOwnerId: string;
-//   contentJson: string;
-//   adminEmail: string;
-//   trackOpens?: boolean;
-//   trackClicks?: boolean;
-//   fromApplication: string; 
-// }
-
-// export const sendEmail = async (params: SendEmailParams) => {
-//   const {
-//     userEmail,
-//     subject,
-//     content,
-//     emailId,
-//     campaign,
-//     integrationId,
-//     fromApplication,
-//     newsLetterOwnerId,
-//     contentJson,
-//     adminEmail,
-//     trackOpens = true,
-//     trackClicks = true,
-//   } = params;
-
-//   // const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || 'https://your-domain.com';
-//   const domain = 'http://localhost:3003/';
-//   const startTime = Date.now();
-//   const trackingId = `trk_${Date.now()}`;
-
-//   try {
-//     // Validate inputs
-//     if (!newsLetterOwnerId || !adminEmail || !userEmail?.length) {
-//       throw new Error('Missing required fields');
-//     }
-
-//     // Check usage limits
-//     const usageCheck = await checkUsageLimit(newsLetterOwnerId, 'emailsSent');
-//     if (!usageCheck.success) {
-//       throw new Error(usageCheck.message);
-//     }
-
-//     // Verify SMTP connection
-//     if (!(await transporter.verify().catch(() => false))) {
-//       throw new Error('Email server unavailable');
-//     }
-
-//     // Update email status to PENDING
-//     const emailRecord = await db.email.update({
-//       where: { id: emailId, integrationId },
-//       data: {
-//         content: contentJson,
-//         status: EmailStatus.PENDING,
-//         sentAt: new Date(),
-//       },
-//       include: {
-//         campaign: {
-//           select: { name: true }
-//         },
-//         integration: {
-//           select: { name: true }
-//         }
-//       }
-//     });
-
-//     // Prepare batches
-//     const batches = Array.from(
-//       { length: Math.ceil(userEmail.length / BATCH_SIZE) },
-//       (_, i) => userEmail.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE)
-//     );
-
-//     // Tracking variables
-//     let totalAccepted = 0;
-//     let totalRejected = 0;
-//     let lastMessageId = '';
-//     const failedEmails: string[] = [];
-
-//     // Process batches
-//     for (const [batchIndex, batch] of batches.entries()) {
-//       console.log(`Processing batch ${batchIndex + 1}/${batches.length}`);
-      
-//       const batchResults = await Promise.allSettled(
-//         batch.map(async (email) => {
-//           let retries = 0;
-//           let lastError: Error | null = null;
-
-//           while (retries <= MAX_RETRIES) {
-//             try {
-//               // Enhance content with tracking
-//               let enhancedContent = content;
-              
-//               if (trackClicks) {
-//                 enhancedContent = enhancedContent.replace(
-//                   /href="([^"]+)"/g,
-//                   (_, url) => `href="${domain}/api/track/click?emailId=${emailId}&email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&tid=${trackingId}"`
-//                 );
-//               }
-
-//               if (trackOpens) {
-//                 enhancedContent += `<img src="${domain}/api/track/open?emailId=${emailId}&email=${encodeURIComponent(email)}&tid=${trackingId}" width="1" height="1" style="display:none" />`;
-//               }
-
-//               // Add unsubscribe footer
-//               enhancedContent += `
-//               <div style="text-align:center;margin-top:30px;font-size:12px;color:#666;">
-//                 <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}&integration=${encodeURIComponent(emailRecord.integration.name)}&campaignId=${encodeURIComponent(campaign)}"
-//                   style="color:#666;text-decoration:underline;">
-//                   Unsubscribe
-//                 </a>
-//               </div>
-//             `;
-
-//               const fromName = fromApplication.toUpperCase() || 'THENEWS NEWSLETTER';
-
-//               // Send email
-//               const result = await transporter.sendMail({
-//                 from: ` ${fromName} <${process.env.SMTP_USER}>`,
-//                 to: email,
-//                 subject: subject,
-//                 html: enhancedContent,
-//                 headers: {
-//                   'X-Email-ID': emailId,
-//                   'X-Campaign-ID': campaign,
-//                   'X-Tracking-ID': trackingId,
-//                   'X-Integration-ID': integrationId,
-//                   'X-NewsLetter-Owner-ID': `${fromApplication} 'THENEWS' `,
-//                   'List-Unsubscribe': `<${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}&integration=${encodeURIComponent(emailRecord.integration.name)}&campaignId=${encodeURIComponent(campaign)}>`
-
-//                 },
-//               });
-
-//               return { 
-//                 email,
-//                 success: true,
-//                 messageId: result.messageId 
-//               };
-//             } catch (error) {
-//               lastError = error as Error;
-//               retries++;
-//               if (retries <= MAX_RETRIES) {
-//                 await new Promise(res => setTimeout(res, 1000 * retries));
-//               }
-//             }
-//           }
-
-//           throw lastError || new Error('Failed after retries');
-//         })
-//       );
-
-//       // Process batch results
-//       batchResults.forEach((result, index) => {
-//         const email = batch[index];
-//         if (result.status === 'fulfilled' && result.value.success) {
-//           totalAccepted++;
-//           lastMessageId = result.value.messageId || lastMessageId;
-//         } else {
-//           totalRejected++;
-//           failedEmails.push(email);
-//           console.error(`Failed to send to ${email}:`, 
-//             result.status === 'rejected' ? result.reason : 'Unknown error');
-//         }
-//       });
-
-//       // Throttle between batches
-//       if (batchIndex < batches.length - 1) {
-//         await new Promise(res => setTimeout(res, BATCH_DELAY_MS));
-//       }
-//     }
-
-//     // Update database records
-//     await db.$transaction([
-//       db.email.update({
-//         where: { id: emailId },
-//         data: {
-//           status: EmailStatus.SENT,
-//           sentAt: new Date(),
-//           messageId: lastMessageId,
-//           recipients: { increment: totalAccepted },
-//           emailsSent:{increment: 1}
-//         },
-//       }),
-//       db.campaign.update({
-//         where: { id: campaign },
-//         data: {
-//           emailsSent: { increment: 1 },
-//           recipients:{increment: totalAccepted},
-//           lastSentAt: new Date(),
-//         },
-//       }),
-
-//       db.integration.update({
-//         where: { id: integrationId },
-//         data: {
-//           emailsSent: { increment: 1 },
-//           recipients:{increment: totalAccepted}
-//         },
-//       })
-
-//       // db.emailTracking.create({
-//       //   data: {
-//       //     trackingId,
-//       //     emailId,
-//       //     campaignId: campaign,
-//       //     integrationId,
-//       //     newsLetterOwnerId,
-//       //     status: totalAccepted > 0 ? 'partial' : 'failed',
-//       //     sentCount: totalAccepted,
-//       //     failCount: totalRejected,
-//       //     failedRecipients: failedEmails.length > 0 ? failedEmails : undefined,
-//       //   },
-//       // }),
-//     ]);
-
-//     // Update usage
-//     await incrementUsage(newsLetterOwnerId, 'emailsSent', totalAccepted);
-
-//     return {
-//       success: true,
-//       messageId: lastMessageId,
-//       trackingId,
-//       stats: {
-//         total: userEmail.length,
-//         accepted: totalAccepted,
-//         rejected: totalRejected,
-//         failedRecipients: failedEmails.length > 0 ? failedEmails : undefined,
-//         batches: batches.length,
-//         timeTaken: Date.now() - startTime,
-//       },
-//     };
-//   } catch (error) {
-//     console.error('[EMAIL_SEND_ERROR]', error);
-    
-//     // Update status to FAILED
-//     await db.email.update({
-//       where: { id: emailId },
-//       data: {
-//         status: EmailStatus.FAILED,
-//       },
-//     });
-
-//     return {
-//       success: false,
-//       error: error instanceof Error ? error.message : 'Email send failed',
-//       trackingId,
-//     };
-//   }
-// };
 
 
 

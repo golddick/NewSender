@@ -14,7 +14,7 @@ export async function getCampaignsByCreatorId(userId: string) {
     const campaigns = await db.campaign.findMany({
       where: {
         userId,
-        status: "active"
+        status: 'ACTIVE'
       },
       include: {
         integration: {
@@ -152,7 +152,7 @@ export async function getCampaignsByIntegration(integrationId: string) {
       where: {
         integrationId: integration.id,
         userId: user.id,
-        status: "active",
+        status: "ACTIVE",
       },
     });
 
@@ -217,7 +217,7 @@ export async function getCampaignsByIntegration(integrationId: string) {
 }
 
 
-export async function updateCampaignStatus(campaignId: string, status: "active" | "inactive") {
+export async function updateCampaignStatus(campaignId: string, status: "ACTIVE" | "INACTIVE") {
   const user = await currentUser()
   if (!user) {
     return { error: "Unauthorized" }

@@ -21,7 +21,7 @@ interface Subscriber {
     name: string;
     logo: string | null;
     url: string | null;
-  };
+  } | null;
   pageUrl: string | null;
 }
 

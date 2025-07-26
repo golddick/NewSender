@@ -138,6 +138,9 @@ export const addPaystack = async () => {
 
     const userId = user.id;
     const email = user.emailAddresses?.[0]?.emailAddress;
+    const fullName = user.firstName + " " + user.lastName;
+    const userName = user.username
+    const imageUrl = user.imageUrl
     if (!email) {
       throw new Error("User email not found");
     }
@@ -203,6 +206,9 @@ export const addPaystack = async () => {
       userId,
       paystackCustomerId: paystackCustomer.customer_code,
       email,
+      fullName:fullName,
+      imageUrl:imageUrl,
+      userName:userName || '',
       plan: Plan.FREE,
       subscriptionStatus: PlanSubscriptionStatus.active,
       subscriberLimit: 500,

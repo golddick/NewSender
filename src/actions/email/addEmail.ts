@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/shared/libs/database'
-import { EmailStatus } from '@prisma/client'
+import { EmailStatus, EmailType } from '@prisma/client'
 
 export const saveEmailToDatabase = async ({
   title,
@@ -9,8 +9,7 @@ export const saveEmailToDatabase = async ({
   newsLetterOwnerId,
   campaignId,
   integrationId,
-  emailType = 'scheduled',
-  scheduleType = 'scheduled',
+  emailType,
   scheduleDate,
   scheduleTime,
   trackOpens = true,
@@ -22,12 +21,11 @@ export const saveEmailToDatabase = async ({
   emailId,
 }: {
   title: string
-  content: string
+  content: string | any
   newsLetterOwnerId: string
-  campaignId: string
-  integrationId: string
-  emailType?: 'instant' | 'automated' | 'scheduled'
-  scheduleType?: 'immediate' | 'scheduled' | 'draft'
+  campaignId?: string | null
+  integrationId?: string | null
+  emailType: EmailType
   scheduleDate?: Date
   scheduleTime?: string
   trackOpens?: boolean
@@ -35,36 +33,44 @@ export const saveEmailToDatabase = async ({
   enableUnsubscribe?: boolean
   textContent: string
   emailSubject: string
-  template: string
+  template?: string
   emailId?: string
+  adminEmail: string
+  fromApplication?: string
 }) => {
   try {
     // ✅ Validate required fields
-    if (!title || !content || !newsLetterOwnerId || !campaignId || !integrationId) {
+    if (!title || !content || !newsLetterOwnerId) {
       return { success: false, error: 'Missing required fields' }
     }
 
     const normalizedTitle = title.trim().toLowerCase()
 
-    // ✅ Check if integration and campaign are active
-    const [integration, campaign] = await Promise.all([
-      db.integration.findUnique({ where: { id: integrationId } }),
-      db.campaign.findUnique({ where: { id: campaignId } }),
-    ])
-
-    if (!integration || integration.status !== 'active') {
-      return { success: false, error: 'Integration is not active' }
+    // ✅ If integrationId is provided, validate its status
+    if (integrationId) {
+      const integration = await db.integration.findUnique({
+        where: { id: integrationId },
+      })
+      if (!integration || integration.status !== 'ACTIVE') {
+        return { success: false, error: 'Integration is not active' }
+      }
     }
 
-    if (!campaign || campaign.status !== 'active') {
-      return { success: false, error: 'Campaign is not active' }
+    // ✅ If campaignId is provided, validate its status
+    if (campaignId) {
+      const campaign = await db.campaign.findUnique({
+        where: { id: campaignId },
+      })
+      if (!campaign || campaign.status !== 'ACTIVE') {
+        return { success: false, error: 'Campaign is not active' }
+      }
     }
 
-    // ✅ Prevent multiple automated emails per campaign
-    if (emailType === 'automated') {
+    // ✅ Prevent multiple automated emails per campaign (only if campaignId is provided)
+    if (emailType === 'AUTOMATED' && campaignId) {
       const existingAutomated = await db.email.findFirst({
         where: {
-          emailType: 'automated',
+          emailType: 'AUTOMATED',
           campaignId,
           newsLetterOwnerId,
           ...(emailId ? { NOT: { id: emailId } } : {}),
@@ -89,10 +95,9 @@ export const saveEmailToDatabase = async ({
         data: {
           title: normalizedTitle,
           content,
-          campaignId,
-          integrationId,
+          campaignId: campaignId || null,
+          integrationId: integrationId || null,
           emailType,
-          scheduleType,
           scheduleDate,
           scheduleTime,
           trackOpens,
@@ -131,10 +136,10 @@ export const saveEmailToDatabase = async ({
         content,
         status: EmailStatus.SAVED,
         newsLetterOwnerId,
-        campaignId,
-        integrationId,
+        campaignId: campaignId || null,
+        integrationId: integrationId || null,
         emailType,
-        scheduleType,
+        userId: newsLetterOwnerId, 
         scheduleDate,
         scheduleTime,
         trackOpens,
@@ -160,7 +165,6 @@ export const saveEmailToDatabase = async ({
     }
   }
 }
-
 
 
 

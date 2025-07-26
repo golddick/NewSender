@@ -8,6 +8,7 @@ import { motion, useInView } from "framer-motion"
 import { paystackSubscribe } from "@/actions/paystack/paystack.subscribe";
 import { toast } from "sonner";
 import Link from "next/link";
+import { PlanType } from "@/app/configs/types";
 
 
 const PricingCard = ({ active }: { active: string }) => {

@@ -110,9 +110,15 @@ export function EmailsDashboard() {
   const totalEmails = emails.length
   const sentEmails = emails.filter((e) => e.status === "SENT").length
   const totalRecipients = emails.reduce((sum, email) => sum + email.recipients, 0)
+  // const avgOpenRate =
+  //   emails.filter((e) => e.status === "SENT").reduce((sum, email) => sum + email.openRate, 0) /
+  //     sentEmails || 0
+
   const avgOpenRate =
-    emails.filter((e) => e.status === "SENT").reduce((sum, email) => sum + email.openRate, 0) /
-      sentEmails || 0
+  emails
+    .filter((e) => e.status === "SENT" && e.recipients > 0)
+    .reduce((sum, email) => sum + (email.openRate / email.recipients) * 100, 0) /
+    sentEmails || 0;
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -126,10 +132,17 @@ export function EmailsDashboard() {
   }
 
   const getTypeBadge = (type: string) => {
-    return type === "automated"
+    return type === "AUTOMATED"
       ? "bg-purple-100 text-purple-800 border-purple-200"
       : "bg-orange-100 text-orange-800 border-orange-200"
   }
+
+  const getRateColor = (percentage: number) => {
+  if (percentage >= 60) return "text-green-600";
+  if (percentage >= 30) return "text-yellow-600";
+  return "text-red-600";
+};
+
 
   return (
     <div className="min-h-screen bg-white ">
@@ -262,9 +275,9 @@ export function EmailsDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="instant">Instant</SelectItem>
-                    <SelectItem value="automated">Automated</SelectItem>
-                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="INSTANT">Instant</SelectItem>
+                    <SelectItem value="AUTOMATED">Automated</SelectItem>
+                    <SelectItem value="SCHEDULED">Scheduled</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -277,7 +290,7 @@ export function EmailsDashboard() {
           <CardHeader className="bg-black text-white">
             <CardTitle className="flex items-center">
               <Mail className="w-4 h-4 mr-2" />
-              Campaigns Mails ({filteredEmails.length})
+              Platform Saved Mails ({filteredEmails.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -287,29 +300,29 @@ export function EmailsDashboard() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-black">{email.subject}</h3>
-                        <Badge className={`text-xs ${getStatusBadge(email.status)}`}>
+                        <h3 className="text-lg font-semibold text-black capitalize max-w-[150px] md:max-w-[200px] lg:max-w-[300px] truncate">{email.subject}</h3>
+                        <Badge className={`text-xs capitalize ${getStatusBadge(email.status)} `}>
                           {email.status.charAt(0).toUpperCase() + email.status.slice(1)}
                         </Badge>
-                        <Badge className={`text-xs ${getTypeBadge(email.type)}`}>
+                        <Badge className={`text-xs capitalize hidden md:block ${getTypeBadge(email.type)}`}>
                           {email.type}
                         </Badge>
                       </div>
 
                       <div className="flex items-center space-x-6 text-sm text-gray-500">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-lg">{email.integration.logo}</span>
-                          <span>{email.integration.name}</span>
-                        </div>
-                        <div>Campaign: {email.campaign}</div>
-                        <div>
-                          Recipients: {email.recipients}
-                        </div>
+                        {
+                          email.integration && (
+                            <div className=" items-center space-x-2 hidden md:flex">
+                              <span className="text-lg">{email.integration.logo}</span>
+                              <span>{email.integration.name}</span>
+                            </div>
+                          )
+                        }
                         {email.sentDate && <div>Sent: {email.sentDate}</div>}
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-2 md:space-x-6">
                       {email.status !== "draft" && (
                         <div className="text-right">
                           <div className="grid grid-cols-3 gap-4 text-sm">
@@ -319,11 +332,25 @@ export function EmailsDashboard() {
                             </div>
                             <div>
                               <p className="text-gray-500">Open Rate</p>
-                              <p className="font-semibold text-black">{email.openRate}%</p>
+                                {email.recipients > 0 ? (
+                                  <p className={`font-semibold ${getRateColor((email.openRate / email.recipients) * 100)}`}>
+                                    {((email.openRate / email.recipients) * 100).toFixed(1)}%
+                                  </p>
+                                ) : (
+                                  <p className="text-gray-400">0%</p>
+                                )}
+
                             </div>
                             <div>
                               <p className="text-gray-500">Click Rate</p>
-                              <p className="font-semibold text-black">{email.clickRate}%</p>
+                                {email.recipients > 0 ? (
+                                  <p className={`font-semibold ${getRateColor((email.clickRate / email.recipients) * 100)}`}>
+                                    {((email.clickRate / email.recipients) * 100).toFixed(1)}%
+                                  </p>
+                                ) : (
+                                  <p className="text-gray-400">0%</p>
+                                )}
+
                             </div>
                           </div>
                         </div>

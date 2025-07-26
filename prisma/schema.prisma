@@ -1,3 +1,268 @@
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider  = "postgresql"
+//   url       = env("DATABASE_URL")
+//   directUrl = env("DATABASE_URL_UNPOOLED") // optional but useful for pooling configs
+// }
+
+// // ========== ENUMS ==========
+// enum Plan {
+//   FREE
+//   LAUNCH
+//   SCALE
+// }
+
+// enum Role {
+//   USER
+//   NEWSLETTEROWNER
+//   THENEWSADMIN
+// }
+
+// enum PlanSubscriptionStatus {
+//   active
+//   inactive
+//   past_due
+//   cancelled
+// }
+
+// enum SubscriptionStatus {
+//   Subscribed
+//   Unsubscribed
+// }
+
+// enum CampaignTrigger {
+//   new_user
+//   Subscriber
+//   unsubscribe
+//   notification
+// }
+
+// enum CampaignStatus {
+//   active
+//   inactive
+// }
+
+// enum IntegrationStatus {
+//   active
+//   inactive
+// }
+
+// enum EmailStatus {
+//   SENT
+//   SAVED
+//   FAILED
+//   PENDING
+// }
+
+
+// enum ScheduleType {
+//   immediate
+//   scheduled
+//   draft
+// }
+
+// enum EmailType {
+//   automated
+//   instant
+//   scheduled
+// }
+
+// // ========== MODELS ==========
+
+// model Membership {
+//   id                         String                 @id @default(uuid())
+//   userId                     String                 @unique
+//   paystackCustomerId         String?
+//   paystackSubscriptionId     String?
+//   plan                       Plan                   @default(FREE)
+//   role                       Role                   @default(USER)
+//   subscriptionStatus         PlanSubscriptionStatus @default(inactive)
+//   currentPeriodEnd           DateTime?
+//   email                      String
+//   organization               String?
+//   amount                     Int                    @default(0)
+//   currency                   String                 @default("NGN")
+//   lastPaymentDate            DateTime?
+//   nextPaymentDate            DateTime?
+//   successfulPayments         Int                    @default(0)
+//   failedAttempts             Int                    @default(0)
+//   subscriberLimit            Int                    @default(500)
+//   emailLimit                 Int                    @default(5)
+//   campaignLimit              Int                    @default(3)
+//   appIntegratedLimit         Int                    @default(2)
+//   termsAndConditionsAccepted Boolean                @default(false)
+//   usage                      MembershipUsage[]
+//   createdAt                  DateTime               @default(now())
+//   updatedAt                  DateTime               @updatedAt
+
+//   @@index([paystackCustomerId])
+//   @@index([paystackSubscriptionId])
+// }
+
+// model MembershipUsage {
+//   id                String   @id @default(uuid())
+//   userId            String
+//   month             String
+//   emailsSent        Int      @default(0)
+//   subscribersAdded  Int      @default(0)
+//   campaignsCreated  Int      @default(0)
+//   appIntegrated     Int      @default(0)
+//   createdAt         DateTime @default(now())
+//   updatedAt         DateTime @updatedAt
+
+//   membership Membership @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+//   @@unique([userId, month], name: "userId_month")
+//   @@index([userId])
+//   @@index([month])
+// }
+
+// model Integration {
+//   id             String            @id @default(uuid())
+//   name           String            @unique
+//   url            String
+//   logo           String?
+//   email          String?
+//   status         IntegrationStatus @default(inactive)
+//   category       String
+//   description    String?
+//   apiKey         String?           @map("api_key")
+//   webhookUrl     String?           @map("webhook_url")
+//   campaigns      Int?              @default(0)
+//   subscribers    Int?              @default(0)
+//   recipients     Int?              @default(0)
+//   emailsSent     Int?              @default(0) @map("emails_sent")
+//   openRate       Float?            @map("open_rate")
+//   clickRate      Float?            @map("click_rate")
+//   conversionRate Float?            @map("conversion_rate")
+//   lastSync       DateTime?         @map("last_sync")
+//   createdAt      DateTime          @default(now()) @map("created_at")
+//   updatedAt      DateTime          @updatedAt @map("updated_at")
+//   userId         String            @map("user_id")
+
+//   Campaign   Campaign[]
+//   Subscriber Subscriber[]
+//   Email      Email[]
+
+//   @@index([userId])
+//   @@index([category])
+//   @@index([status])
+//   @@index([name])
+//   @@map("integrations")
+// }
+
+// model Campaign {
+//   id            String          @id @default(uuid())
+//   name          String          @unique
+//   userId        String
+//   description   String?
+//   trigger       CampaignTrigger
+//   status        CampaignStatus  @default(active)
+//   integrationId String
+//   createdAt     DateTime        @default(now())
+//   updatedAt     DateTime        @updatedAt
+//   emailsSent     Int             @default(0)
+//   recipients     Int?       @default(0)
+//   openRate      Float?          @map("open_rate")
+//   clickRate     Float?          @map("click_rate")
+//   lastSentAt    DateTime?      @map("last_sent_at")
+//   integration Integration  @relation(fields: [integrationId], references: [id])
+//   subscribers Subscriber[]
+//   emails      Email[]
+
+//   @@index([integrationId])
+//   @@index([status])
+//   @@index([trigger])
+// }
+
+// model Subscriber {
+//   id                String             @id @default(cuid())
+//   email             String
+//   name              String?
+//   newsLetterOwnerId String
+//   source            String             @default("unknown")
+//   status            SubscriptionStatus @default(Subscribed)
+//   campaignId        String?  
+//   integrationId     String
+//   pageUrl           String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   campaign    Campaign?    @relation(fields: [campaignId], references: [id])
+//   integration Integration @relation(fields: [integrationId], references: [id])
+
+//   @@unique([email, newsLetterOwnerId, integrationId, campaignId], name: "unique_subscriber_key")
+// }
+
+// model Email {
+//   id                String      @id @default(uuid())
+//   title             String      @unique
+//   content           String
+//   textContent       String?
+//   previewText       String?
+//   emailSubject      String?
+//   template          String?
+//   status            EmailStatus @default(SENT)
+//   newsLetterOwnerId String
+//   campaignId        String   
+//   integrationId     String
+//   messageId         String?
+//   emailsSent        Int       @default(0)
+//   openCount         Int       @default(0)
+//   clickCount        Int       @default(0)
+//   recipients        Int?       @default(0)
+//   bounceCount       Int?       @default(0)
+//   lastOpened        DateTime?
+//   lastClicked       DateTime?
+//   sentAt            DateTime?
+//   openedByIps       String[]  @default([])
+//   openedByEmails    String[] @default([])
+//   clickedByEmails   String[] @default([])
+//   clickedByIps      String[]  @default([])
+
+//   emailType         String     //automated // instant 
+//   clickedLinks      ClickedLink[]
+//   campaign          Campaign     @relation(fields: [campaignId], references: [id])
+//   integration       Integration   @relation(fields: [integrationId], references: [id])
+
+//   //schedule fields
+//   scheduleType       String   // "immediate" | "scheduled" | "draft"
+//   scheduleDate       DateTime?
+//   scheduleTime       String?  // or DateTime if you store full datetime
+
+//   trackOpens         Boolean  @default(true)
+//   trackClicks        Boolean  @default(true)
+//   enableUnsubscribe  Boolean  @default(true)
+
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+
+// model ClickedLink {
+//   id        String   @id @default(uuid())
+//   emailId   String
+//   url       String
+//   clickedAt DateTime @default(now())
+
+//   email Email @relation(fields: [emailId], references: [id])
+
+//   @@index([emailId])
+// }
+
+
+
+
+
+
+
+
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -5,7 +270,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL_UNPOOLED") // optional but useful for pooling configs
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 // ========== ENUMS ==========
@@ -19,6 +284,8 @@ enum Role {
   USER
   NEWSLETTEROWNER
   THENEWSADMIN
+  BLOGADMIN
+  BLOGAUTHOR
 }
 
 enum PlanSubscriptionStatus {
@@ -38,16 +305,18 @@ enum CampaignTrigger {
   Subscriber
   unsubscribe
   notification
+  new_blog_post
+
 }
 
 enum CampaignStatus {
-  active
-  inactive
+   ACTIVE
+  INACTIVE
 }
 
 enum IntegrationStatus {
-  active
-  inactive
+  ACTIVE
+  INACTIVE
 }
 
 enum EmailStatus {
@@ -58,16 +327,43 @@ enum EmailStatus {
 }
 
 
-enum ScheduleType {
-  immediate
-  scheduled
-  draft
+enum EmailType {
+  AUTOMATED
+  INSTANT
+  DRAFT
+  SCHEDULE
+}
+enum NotificationEmailType {
+  NEW_BLOG_POST
+  NEW_COMMENT
+  NEW_REPLY
+  NEW_SUBSCRIBER
 }
 
-enum EmailType {
-  automated
-  instant
-  scheduled
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  SCHEDULED
+}
+
+enum PostVisibility {
+  PUBLIC
+  PRIVATE
+  MEMBERS_ONLY
+}
+
+enum ContentFormat {
+  MARKDOWN
+  HTML
+  RICH_TEXT
+}
+
+enum AIGenerationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  IN_PROGRESS
 }
 
 // ========== MODELS ==========
@@ -75,6 +371,9 @@ enum EmailType {
 model Membership {
   id                         String                 @id @default(uuid())
   userId                     String                 @unique
+  fullName                   String
+  userName                   String
+  imageUrl                   String?
   paystackCustomerId         String?
   paystackSubscriptionId     String?
   plan                       Plan                   @default(FREE)
@@ -93,10 +392,18 @@ model Membership {
   emailLimit                 Int                    @default(5)
   campaignLimit              Int                    @default(3)
   appIntegratedLimit         Int                    @default(2)
+  blogPostLimit              Int                    @default(10) // Added for blog feature
+  aiGenerationLimit          Int                    @default(5)  // Added for AI content generation
   termsAndConditionsAccepted Boolean                @default(false)
   usage                      MembershipUsage[]
   createdAt                  DateTime               @default(now())
   updatedAt                  DateTime               @updatedAt
+  blogPosts                  BlogPost[]
+  aIContentGenerationToExcerpt       BlogAIGeneration[]
+  blogComments               BlogComment[]
+  reportedComments         ReportedComment[]
+  emails                    Email[]
+  notificationEmails        NotificationEmail[]
 
   @@index([paystackCustomerId])
   @@index([paystackSubscriptionId])
@@ -110,6 +417,8 @@ model MembershipUsage {
   subscribersAdded  Int      @default(0)
   campaignsCreated  Int      @default(0)
   appIntegrated     Int      @default(0)
+  blogPostsCreated  Int      @default(0) // Added for blog feature
+  aiGenerationsUsed Int      @default(0) // Added for AI content generation
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -120,13 +429,146 @@ model MembershipUsage {
   @@index([month])
 }
 
+model BlogPost {
+  id               String         @id @default(uuid())
+  title            String
+  subtitle         String?
+  slug             String         @unique
+  content          String
+  excerpt          String?
+  format           ContentFormat  @default(MARKDOWN)
+  status           PostStatus     @default(DRAFT)
+  visibility       PostVisibility @default(PUBLIC)
+  featuredImage    String
+  featuredVideo    String?
+  galleryImages    String[]
+  authorId         String
+  authorBio        String
+  authorTitle      String  
+  author           String
+  categoryId       String?
+  seoTitle         String?
+  seoDescription   String?
+  seoKeywords      String[]
+  seoScore         Int            @default(0)
+  shares           Int            @default(0)
+  readTime         Int            @default(0)
+  wordCount        Int            @default(0)
+  characterCount   Int            @default(0)
+  likes            Int            @default(0)
+  views            Int            @default(0)
+  comments         BlogComment[]
+  tags             BlogTag[]
+  isFeatured       Boolean        @default(false)
+  isPinned         Boolean        @default(false)
+  allowComments    Boolean        @default(true)
+  publishedAt      DateTime?
+  scheduledAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  aiGeneration     BlogAIGeneration? @relation("AIContentGenerationToExcerpt",fields: [generatedById], references: [id])
+  generatedById    String?        // Reference to AI generation if applicable
+  membership       Membership     @relation(fields: [authorId], references: [userId])
+  category         BlogCategory?      @relation(fields: [categoryId], references: [id])
+
+  @@index([authorId])
+  @@index([status])
+  @@index([visibility])
+  @@index([publishedAt])
+  @@index([slug])
+}
+
+model BlogCategory {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  posts       BlogPost[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model BlogTag {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  slug      String     @unique
+  posts     BlogPost[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model BlogComment {
+  id        String   @id @default(uuid())
+  content   String
+  authorId  String
+  postId    String
+  userId    String
+  parentId  String?
+  likes     Int      @default(0)
+  status    String   @default("approved") // approved, pending, spam, trash
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post      BlogPost @relation(fields: [postId], references: [id])
+  parent    BlogComment? @relation("CommentToComment", fields: [parentId], references: [id])
+  replies   BlogComment[] @relation("CommentToComment")
+  member    Membership @relation(fields: [authorId], references: [userId])
+  reportedComments ReportedComment[]
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentId])
+  @@index([status])
+}
+
+model ReportedComment {
+  id        String   @id @default(cuid())
+  commentId String
+  blogSlug   String
+  blogOwner  String
+  parentCommentBy String
+  reportedBy String
+  reason    String?
+  member Membership @relation(fields: [reportedBy], references: [userId])
+  comment   BlogComment @relation(fields: [commentId], references: [id])
+  reportedAt DateTime @default(now())
+  resolved  Boolean  @default(false)
+}
+
+model BlogAIGeneration {
+  id          String            @id @default(uuid())
+  prompt      String
+  parameters  Json?
+  status      AIGenerationStatus @default(COMPLETED)
+  output      String
+  format      ContentFormat     @default(MARKDOWN)
+  cost        Float?
+  tokensUsed  Int?
+  model       String?
+  userId      String
+  createdAt   DateTime          @default(now())
+  completedAt DateTime?
+
+  // Relations
+  membership Membership @relation(fields: [userId], references: [userId])
+  blogPosts  BlogPost[] @relation("AIContentGenerationToExcerpt")
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+
+
+// ========== EXISTING MODELS (from your schema) ==========
+
 model Integration {
   id             String            @id @default(uuid())
   name           String            @unique
   url            String
   logo           String?
   email          String?
-  status         IntegrationStatus @default(inactive)
+  status         IntegrationStatus @default(ACTIVE)
   category       String
   description    String?
   apiKey         String?           @map("api_key")
@@ -143,10 +585,11 @@ model Integration {
   updatedAt      DateTime          @updatedAt @map("updated_at")
   userId         String            @map("user_id")
 
+
   Campaign   Campaign[]
   Subscriber Subscriber[]
   Email      Email[]
-  AutoTrigger AutoTrigger[]
+  notificationEmail NotificationEmail[]
 
   @@index([userId])
   @@index([category])
@@ -161,7 +604,7 @@ model Campaign {
   userId        String
   description   String?
   trigger       CampaignTrigger
-  status        CampaignStatus  @default(active)
+  status        CampaignStatus  @default(ACTIVE)
   integrationId String
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -173,7 +616,6 @@ model Campaign {
   integration Integration  @relation(fields: [integrationId], references: [id])
   subscribers Subscriber[]
   emails      Email[]
-  autoTrigger AutoTrigger? @relation("CampaignToAutoTrigger")
 
   @@index([integrationId])
   @@index([status])
@@ -188,14 +630,14 @@ model Subscriber {
   source            String             @default("unknown")
   status            SubscriptionStatus @default(Subscribed)
   campaignId        String?  
-  integrationId     String
+  integrationId     String?
   pageUrl           String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   campaign    Campaign?    @relation(fields: [campaignId], references: [id])
-  integration Integration @relation(fields: [integrationId], references: [id])
+  integration Integration? @relation(fields: [integrationId], references: [id])
 
   @@unique([email, newsLetterOwnerId, integrationId, campaignId], name: "unique_subscriber_key")
 }
@@ -204,14 +646,15 @@ model Email {
   id                String      @id @default(uuid())
   title             String      @unique
   content           String
+  userId            String
   textContent       String?
   previewText       String?
   emailSubject      String?
   template          String?
   status            EmailStatus @default(SENT)
   newsLetterOwnerId String
-  campaignId        String   
-  integrationId     String
+  campaignId        String?  
+  integrationId     String?
   messageId         String?
   emailsSent        Int       @default(0)
   openCount         Int       @default(0)
@@ -226,13 +669,12 @@ model Email {
   clickedByEmails   String[] @default([])
   clickedByIps      String[]  @default([])
 
-  emailType         String     //automated // instant 
+  emailType         EmailType     //automated // instant 
   clickedLinks      ClickedLink[]
-  campaign          Campaign     @relation(fields: [campaignId], references: [id])
-  integration       Integration   @relation(fields: [integrationId], references: [id])
-
+  campaign          Campaign?     @relation(fields: [campaignId], references: [id])
+  integration       Integration?   @relation(fields: [integrationId], references: [id])
+  user             Membership     @relation(fields: [userId], references: [userId])
   //schedule fields
-  scheduleType       String   // "immediate" | "scheduled" | "draft"
   scheduleDate       DateTime?
   scheduleTime       String?  // or DateTime if you store full datetime
 
@@ -240,40 +682,56 @@ model Email {
   trackClicks        Boolean  @default(true)
   enableUnsubscribe  Boolean  @default(true)
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model NotificationEmail {
+  id                String      @id @default(uuid())
+  title             String      @unique
+  content           String
+  userId            String
+  textContent       String?
+  status            EmailStatus @default(SENT)
+  newsLetterOwnerId String
+  integrationId     String?
+  messageId         String?
+  emailsSent        Int       @default(0)
+  openCount         Int       @default(0)
+  clickCount        Int       @default(0)
+  recipients        Int?       @default(0)
+  bounceCount       Int?       @default(0)
+  lastOpened        DateTime?
+  lastClicked       DateTime?
+  sentAt            DateTime?
+  openedByIps       String[]  @default([])
+  openedByEmails    String[] @default([])
+  clickedByEmails   String[] @default([])
+  clickedByIps      String[]  @default([])
+
+  emailType         NotificationEmailType    
+  clickedLinks      ClickedLink[]
+  integration       Integration?   @relation(fields: [integrationId], references: [id])
+  user             Membership     @relation(fields: [userId], references: [userId])
+
+  trackOpens         Boolean  @default(true)
+  trackClicks        Boolean  @default(true)
+  enableUnsubscribe  Boolean  @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 
-model AutoTrigger {
-  id            String          @id @default(uuid())
-  name          CampaignTrigger @unique
-  description   String?
-  trigger       CampaignTrigger
-  status        CampaignStatus  @default(active)
-  integrationId String
-  campaignId    String          @unique
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-
-  integration Integration @relation(fields: [integrationId], references: [id])
-  campaign    Campaign    @relation("CampaignToAutoTrigger", fields: [campaignId], references: [id])
-
-  @@index([integrationId])
-  @@index([status])
-}
-
-
-
-
 model ClickedLink {
   id        String   @id @default(uuid())
   emailId   String
+  notificationEmailId String?
   url       String
   clickedAt DateTime @default(now())
 
   email Email @relation(fields: [emailId], references: [id])
+  notificationEmail NotificationEmail? @relation(fields: [notificationEmailId], references: [id])
 
   @@index([emailId])
 }

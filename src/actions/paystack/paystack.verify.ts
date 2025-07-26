@@ -92,6 +92,8 @@ export const verifyPaystackPayment = async (
     const planName = (metadata.planName || plan?.name || "FREE").toUpperCase() as PlanName;
     const fallbackPlanCode = metadata?.planCode || plan?.plan_code;
     const authorizationCode = authorization?.authorization_code;
+     const fullName = customer.firstName + " " + customer.lastName;
+    const userName = customer.username
 
     let subscriptionCode = subscription_code;
 
@@ -153,6 +155,8 @@ export const verifyPaystackPayment = async (
       create: {
         userId,
         email: customer.email,
+        fullName: fullName,
+        userName: userName,
         plan: planName,
         role: planName === "FREE" ? "USER" : "NEWSLETTEROWNER",
         subscriptionStatus: "active",

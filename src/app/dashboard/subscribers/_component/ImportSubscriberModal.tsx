@@ -1,5 +1,10 @@
+
+
+
+
 // "use client";
 
+// import { useEffect, useState } from "react";
 // import { Button } from "@/components/ui/button";
 // import {
 //   Dialog,
@@ -15,13 +20,11 @@
 //   SelectTrigger,
 //   SelectValue,
 // } from "@/components/ui/select";
-// import { useEffect, useState } from "react";
 // import { Upload } from "lucide-react";
 // import ImportCSVBTN from "./exportCSVBTN";
 // import { getCampaignsByIntegrationId } from "@/actions/campaign/get-campaign";
 // import toast from "react-hot-toast";
 // import { Alert, AlertDescription } from "@/components/ui/alert";
-
 
 // interface ImportSubscriberModalProps {
 //   newsletterOwnerId?: string;
@@ -44,26 +47,23 @@
 //   const [open, setOpen] = useState(false);
 //   const [error, setError] = useState<string | null>(null);
 //   const [importStatus, setImportStatus] = useState<{
-//   success: boolean;
-//   message: string;
-//   invalidEntries?: string[];
-//   count?: number;
-//   duplicateCount?: number;
-//   duplicateEmails?: string[];
-//   existingEmails?: string[];
-// } | null>(null);
+//     success: boolean;
+//     message: string;
+//     invalidEntries?: string[];
+//     count?: number;
+//     duplicateCount?: number;
+//     duplicateEmails?: string[];
+//     existingEmails?: string[];
+//   } | null>(null);
 
-
-//   // if (!newsletterOwnerId) return null;
-
-//   // Fetch campaigns when integration changes
+//   // ✅ useEffect is always called regardless of condition
 //   useEffect(() => {
-//     const fetchCampaigns = async () => {
-//       if (!selectedIntegrationId) {
-//         setCampaigns([]);
-//         return;
-//       }
+//     if (!selectedIntegrationId) {
+//       setCampaigns([]);
+//       return;
+//     }
 
+//     const fetchCampaigns = async () => {
 //       try {
 //         setError(null);
 //         const result = await getCampaignsByIntegrationId(selectedIntegrationId);
@@ -102,18 +102,25 @@
 //     duplicateCount?: number;
 //   }) => {
 //     setImportStatus(status);
-    
 //     if (status.success) {
-//     toast.success(status.message)
+//       toast.success(status.message);
 //       onImportComplete();
 //       setOpen(false);
 //       resetSelection();
 //     } else {
-
-//     toast.error(status.message);
+//       toast.error(status.message);
 //     }
 //   };
 
+//   // ✅ Now only render if valid
+//   if (!newsletterOwnerId) {
+//     return (
+//       <Button variant="outline" disabled>
+//         <Upload className="h-4 w-4 mr-2" />
+//         Import CSV/Excel
+//       </Button>
+//     );
+//   }
 
 //   return (
 //     <Dialog
@@ -124,10 +131,7 @@
 //       }}
 //     >
 //       <DialogTrigger asChild>
-//         <Button
-//           variant="outline"
-//           className="border-gold-600 text-gold-600 hover:bg-blue-50"
-//         >
+//         <Button variant="outline" className="border-gold-600 text-gold-600 hover:bg-blue-50">
 //           <Upload className="h-4 w-4 mr-2" />
 //           Import CSV/Excel
 //         </Button>
@@ -138,57 +142,53 @@
 //         </DialogHeader>
 
 //         <div className="space-y-4">
-//           {/* Display persistent errors */}
 //           {error && (
 //             <Alert variant="destructive">
 //               <AlertDescription>{error}</AlertDescription>
 //             </Alert>
 //           )}
 
+//                    {/* Display detailed import status */}
+//             {importStatus && (
+//             <Alert variant={importStatus.success ? "default" : "destructive"}>
+//                 <AlertDescription>
+//                 <div className="font-medium">{importStatus.message}</div>
 
-          // {/* Display detailed import status */}
-          //   {importStatus && (
-          //   <Alert variant={importStatus.success ? "default" : "destructive"}>
-          //       <AlertDescription>
-          //       <div className="font-medium">{importStatus.message}</div>
+//                 {importStatus.duplicateEmails && importStatus.duplicateEmails.length > 0 && (
+//                     <div className="mt-2">
+//                     <p className="font-medium">Duplicate Emails:</p>
+//                     <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
+//                         {importStatus.duplicateEmails.map((email, index) => (
+//                         <li key={`dup-${index}`}>{email}</li>
+//                         ))}
+//                     </ul>
+//                     </div>
+//                 )}
 
-          //       {importStatus.duplicateEmails && importStatus.duplicateEmails.length > 0 && (
-          //           <div className="mt-2">
-          //           <p className="font-medium">Duplicate Emails:</p>
-          //           <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-          //               {importStatus.duplicateEmails.map((email, index) => (
-          //               <li key={`dup-${index}`}>{email}</li>
-          //               ))}
-          //           </ul>
-          //           </div>
-          //       )}
+//                 {importStatus.existingEmails && importStatus.existingEmails.length > 0 && (
+//                     <div className="mt-2">
+//                     <p className="font-medium">Already Existing Emails:</p>
+//                     <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
+//                         {importStatus.existingEmails.map((email, index) => (
+//                         <li key={`exist-${index}`}>{email}</li>
+//                         ))}
+//                     </ul>
+//                     </div>
+//                 )}
 
-          //       {importStatus.existingEmails && importStatus.existingEmails.length > 0 && (
-          //           <div className="mt-2">
-          //           <p className="font-medium">Already Existing Emails:</p>
-          //           <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-          //               {importStatus.existingEmails.map((email, index) => (
-          //               <li key={`exist-${index}`}>{email}</li>
-          //               ))}
-          //           </ul>
-          //           </div>
-          //       )}
-
-          //       {importStatus.invalidEntries && importStatus.invalidEntries.length > 0 && (
-          //           <div className="mt-2">
-          //           <p className="font-medium">Invalid Entries:</p>
-          //           <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-          //               {importStatus.invalidEntries.map((entry, index) => (
-          //               <li key={`invalid-${index}`}>{entry}</li>
-          //               ))}
-          //           </ul>
-          //           </div>
-          //       )}
-          //       </AlertDescription>
-          //   </Alert>
-          //   )}
-
-          
+//                 {importStatus.invalidEntries && importStatus.invalidEntries.length > 0 && (
+//                     <div className="mt-2">
+//                     <p className="font-medium">Invalid Entries:</p>
+//                     <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
+//                         {importStatus.invalidEntries.map((entry, index) => (
+//                         <li key={`invalid-${index}`}>{entry}</li>
+//                         ))}
+//                     </ul>
+//                     </div>
+//                 )}
+//                 </AlertDescription>
+//             </Alert>
+//             )}
 
 //           {/* Integration Select */}
 //           <div>
@@ -218,9 +218,7 @@
 //           {/* Campaign Select */}
 //           {selectedIntegrationId && (
 //             <div>
-//               <label className="block text-sm font-medium mb-1">
-//                 Campaign (Optional)
-//               </label>
+//               <label className="block text-sm font-medium mb-1">Campaign (Optional)</label>
 //               <Select
 //                 value={selectedCampaignId || "none"}
 //                 onValueChange={(value) => {
@@ -244,9 +242,7 @@
 //             </div>
 //           )}
 
-//           {/* Import Button */}
-
-//            {selectedIntegrationId && (
+//           {selectedIntegrationId && (
 //             <ImportCSVBTN
 //               newsletterOwnerId={newsletterOwnerId}
 //               integrationId={selectedIntegrationId}
@@ -260,6 +256,10 @@
 //   );
 // }
 
+
+
+
+// src/app/(dashboard)/.../components/ImportSubscriberModal.tsx
 
 
 "use client";
@@ -301,7 +301,7 @@ export function ImportSubscriberModal({
   integrations,
   onImportComplete,
 }: ImportSubscriberModalProps) {
-  const [selectedIntegrationId, setSelectedIntegrationId] = useState<string>("");
+  const [selectedIntegrationId, setSelectedIntegrationId] = useState<string | null>(null);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
   const [open, setOpen] = useState(false);
@@ -316,7 +316,7 @@ export function ImportSubscriberModal({
     existingEmails?: string[];
   } | null>(null);
 
-  // ✅ useEffect is always called regardless of condition
+  // Fetch campaigns only if integration is selected
   useEffect(() => {
     if (!selectedIntegrationId) {
       setCampaigns([]);
@@ -347,7 +347,7 @@ export function ImportSubscriberModal({
   }, [selectedIntegrationId]);
 
   const resetSelection = () => {
-    setSelectedIntegrationId("");
+    setSelectedIntegrationId(null);
     setSelectedCampaignId(null);
     setCampaigns([]);
     setError(null);
@@ -372,7 +372,6 @@ export function ImportSubscriberModal({
     }
   };
 
-  // ✅ Now only render if valid
   if (!newsletterOwnerId) {
     return (
       <Button variant="outline" disabled>
@@ -408,64 +407,67 @@ export function ImportSubscriberModal({
             </Alert>
           )}
 
-                   {/* Display detailed import status */}
-            {importStatus && (
+          {/* Import Status */}
+          {importStatus && (
             <Alert variant={importStatus.success ? "default" : "destructive"}>
-                <AlertDescription>
+              <AlertDescription>
                 <div className="font-medium">{importStatus.message}</div>
 
                 {importStatus.duplicateEmails && importStatus.duplicateEmails.length > 0 && (
-                    <div className="mt-2">
+                  <div className="mt-2">
                     <p className="font-medium">Duplicate Emails:</p>
                     <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-                        {importStatus.duplicateEmails.map((email, index) => (
+                      {importStatus.duplicateEmails.map((email, index) => (
                         <li key={`dup-${index}`}>{email}</li>
-                        ))}
+                      ))}
                     </ul>
-                    </div>
+                  </div>
                 )}
 
                 {importStatus.existingEmails && importStatus.existingEmails.length > 0 && (
-                    <div className="mt-2">
+                  <div className="mt-2">
                     <p className="font-medium">Already Existing Emails:</p>
                     <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-                        {importStatus.existingEmails.map((email, index) => (
+                      {importStatus.existingEmails.map((email, index) => (
                         <li key={`exist-${index}`}>{email}</li>
-                        ))}
+                      ))}
                     </ul>
-                    </div>
+                  </div>
                 )}
 
                 {importStatus.invalidEntries && importStatus.invalidEntries.length > 0 && (
-                    <div className="mt-2">
+                  <div className="mt-2">
                     <p className="font-medium">Invalid Entries:</p>
                     <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-                        {importStatus.invalidEntries.map((entry, index) => (
+                      {importStatus.invalidEntries.map((entry, index) => (
                         <li key={`invalid-${index}`}>{entry}</li>
-                        ))}
+                      ))}
                     </ul>
-                    </div>
+                  </div>
                 )}
-                </AlertDescription>
+              </AlertDescription>
             </Alert>
-            )}
+          )}
 
-          {/* Integration Select */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Integration</label>
+          {/* Integration Select (Optional) */}
+          {
+            integrations.length > 0 && (
+                <div>
+            <label className="block text-sm font-medium mb-1">Integration (Optional)</label>
             <Select
-              value={selectedIntegrationId}
+              value={selectedIntegrationId || "none"}
               onValueChange={(value) => {
-                setSelectedIntegrationId(value);
+                setSelectedIntegrationId(value === "none" ? null : value);
                 setSelectedCampaignId(null);
                 setError(null);
                 setImportStatus(null);
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select integration" />
+                <SelectValue placeholder="Select integration (optional)" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">No Integration</SelectItem>
                 {integrations.map((integration) => (
                   <SelectItem key={integration.id} value={integration.id}>
                     {integration.name}
@@ -474,8 +476,11 @@ export function ImportSubscriberModal({
               </SelectContent>
             </Select>
           </div>
+            )
+          }
+          
 
-          {/* Campaign Select */}
+          {/* Campaign Select (Optional) */}
           {selectedIntegrationId && (
             <div>
               <label className="block text-sm font-medium mb-1">Campaign (Optional)</label>
@@ -502,14 +507,13 @@ export function ImportSubscriberModal({
             </div>
           )}
 
-          {selectedIntegrationId && (
-            <ImportCSVBTN
-              newsletterOwnerId={newsletterOwnerId}
-              integrationId={selectedIntegrationId}
-              campaignId={selectedCampaignId}
-              onImportComplete={handleImportComplete}
-            />
-          )}
+          {/* CSV Import Button */}
+          <ImportCSVBTN
+            newsletterOwnerId={newsletterOwnerId}
+            integrationId={selectedIntegrationId}
+            campaignId={selectedCampaignId}
+            onImportComplete={handleImportComplete}
+          />
         </div>
       </DialogContent>
     </Dialog>

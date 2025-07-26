@@ -54,7 +54,7 @@ export function IntegrationCampaigns({ appName }: IntegrationCampaignsProps) {
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState("") 
   const [filterStatus, setFilterStatus] = useState("all")
   const [filterTrigger, setFilterTrigger] = useState("all")
   const [integrationInfo, setIntegrationInfo] = useState<Integration | null>(null)
@@ -191,7 +191,7 @@ export function IntegrationCampaigns({ appName }: IntegrationCampaignsProps) {
   const totalSent = campaigns.reduce((sum, campaign) => sum + campaign.emailsSent, 0)
   const avgOpenRate =
     campaigns.length > 0 ? campaigns.reduce((sum, campaign) => sum + (campaign.openRate ?? 0), 0) / campaigns.length : 0
-  const activeCampaigns = campaigns.filter((c) => c.status === "active").length
+  const activeCampaigns = campaigns.filter((c) => c.status === "ACTIVE").length
   const avgClickRate =
     campaigns.length > 0 ? campaigns.reduce((sum, campaign) => sum + (campaign.clickRate ?? 0), 0) / campaigns.length : 0
 
@@ -434,7 +434,7 @@ export function IntegrationCampaigns({ appName }: IntegrationCampaignsProps) {
         </div>
 
         {/* Add Campaign Dialog */}
-        <AddCampaignDialog open={showAddDialog} onOpenChange={setShowAddDialog} integrationId={integrationInfo?.id}  appName={integration.name} isIntegrationActive={integrationInfo?.status === 'active'} />
+        <AddCampaignDialog open={showAddDialog} onOpenChange={setShowAddDialog} integrationId={integrationInfo?.id}  appName={integration.name} isIntegrationActive={integrationInfo?.status === "ACTIVE"} />
       </div>
     </div>
   )

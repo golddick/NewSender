@@ -14,8 +14,8 @@ export const sendCampaignConfirmationEmail = async ({
   fromApplication
 }: {
   userEmail: string
-  campaign: string
-  integration: string
+  campaign?: string
+  integration?: string
   newsLetterOwnerId: string
   emailTemplateId: string
   adminEmail: string

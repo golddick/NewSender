@@ -11,13 +11,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { addIntegration } from "@/actions/application-Integration/application"
 import toast from "react-hot-toast"
 import Image from "next/image"
+import { IntegrationStatus } from "@prisma/client"
 
 interface Integration {
   name: string
   url: string
   logo: string
   email: string
-  status: "active" | "inactive" 
+  status: IntegrationStatus
   category: string
   description: string
 }
@@ -47,7 +48,7 @@ export function AddIntegrationDialog({ isOpen, onClose, onAdd }: AddIntegrationD
     url: "",
     logo: "",
     email: "",
-    status: "inactive",
+    status: 'INACTIVE',
     category: "Other",
     description: "",
   })
@@ -94,7 +95,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       url: "",
       logo: "",
       email: "",
-      status: "inactive",
+      status: "INACTIVE",
       category: "Other",
       description: "",
     });
@@ -142,7 +143,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden relative">
                 <Image src={formData.logo || '/2logo.jpg'} alt="Logo preview" fill className="w-12 h-12 object-contain absolute" />
-                {/* <Image src={formData.logo || "/2logo.jpg"} alt="Logo preview" fill className="w-12 h-12 object-cover absolute" /> */}
               </div>
               <div>
                 <input type="file" id="logo" accept="image/*" onChange={handleLogoUpload} className="hidden" />
@@ -262,11 +262,11 @@ const handleSubmit = async (e: React.FormEvent) => {
             <select
               id="status"
               value={formData.status}
-              onChange={(e) => handleInputChange("status", e.target.value as Integration["status"])}
+              onChange={(e) => handleInputChange("status", e.target.value as IntegrationStatus)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value={IntegrationStatus.ACTIVE}>Active</option>
+              <option value={IntegrationStatus.INACTIVE}>Inactive</option>
             </select>
           </div>
 

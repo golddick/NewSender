@@ -1,30 +1,47 @@
 'use server'
 
+import { SubscriberWithCampaign } from '@/app/configs/types';
 import { db } from '@/shared/libs/database'
 import { currentUser } from '@clerk/nextjs/server'
+
 
 export const getSubscribersByIntegration = async ({
   integrationId,
   ownerId,
   campaign
-
 }: {
-  integrationId: string
-  ownerId: string
-  campaign: string
-}) => {
+  integrationId: string;
+  ownerId: string;
+  campaign?: string;
+}): Promise<{
+  success: boolean;
+  subscribers?: SubscriberWithCampaign[];
+  error?: string;
+}> => {
+  // Validate required parameters
+  if (!integrationId || !ownerId) {
+    return { 
+      success: false, 
+      error: 'Missing integration or owner ID' 
+    };
+  }
+
   try {
-    if (!integrationId || !ownerId || !campaign) {
-      return { error: 'Missing integration or owner ID' }
+    // Build the where clause dynamically
+    const whereClause: any = {
+      integrationId,
+      newsLetterOwnerId: ownerId,
+      status: 'Subscribed'
+    };
+
+    // Only add campaignId to query if provided
+    if (campaign) {
+      whereClause.campaignId = campaign;
     }
 
+    // Execute the query
     const subscribers = await db.subscriber.findMany({
-      where: {
-        integrationId,
-        newsLetterOwnerId: ownerId,
-        status: 'Subscribed',
-        campaignId: campaign,
-      },
+      where: whereClause,
       select: {
         email: true,
         name: true,
@@ -36,19 +53,32 @@ export const getSubscribersByIntegration = async ({
           },
         },
       },
-    })
+      orderBy: {
+        createdAt: 'desc' // Most recent subscribers first
+      },
+    });
 
-    console.log(subscribers, 'Subscribers fetched by integration')
-
-    return { success: true, subscribers }
-  } catch (err: any) {
-    console.error('[GET_SUBSCRIBERS_BY_INTEGRATION]', err)
+    return { 
+      success: true, 
+      subscribers 
+    };
+  } catch (err) {
+    console.error('[GET_SUBSCRIBERS_BY_INTEGRATION]', err);
+    
+    // Return more specific error messages based on error type
+    const errorMessage = err instanceof Error 
+      ? err.message 
+      : 'Failed to load subscribers';
+    
     return {
       success: false,
-      error: err.message || 'Failed to load subscribers',
-    }
+      error: errorMessage
+    };
   }
-}
+};
+
+// types.ts
+
 
 
 

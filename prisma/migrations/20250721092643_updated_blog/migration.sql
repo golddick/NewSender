@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "BlogPost" ADD COLUMN     "seoScore" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "shares" INTEGER NOT NULL DEFAULT 0;

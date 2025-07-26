@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         integrationId,
         userId,
         trigger,
-        status: "active", // default, but explicit for clarity
+        status: 'ACTIVE', // default, but explicit for clarity
         recipients: 0,
         emailsSent: 0,
       },

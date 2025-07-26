@@ -46,4 +46,20 @@ type MembershipTypes = {
 
 
 
+
+export type SubscriberWithCampaign = {
+  email: string;
+  name: string | null;
+  createdAt: Date;
+  campaign: {
+    id: string;
+    name: string;
+  } | null;
+};
+
+
+
+
+
+
 // export Membership

@@ -22,6 +22,8 @@ import {
   Copy,
   Download,
   RefreshCw,
+  Check,
+  Plus,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -34,6 +36,8 @@ import {  getIntegrationByName, updateIntegrationStatus } from "@/actions/applic
 import Link from "next/link"
 import { getCampaignsByIntegrationName } from "@/actions/campaign/get-campaign"
 import Loader from "@/components/Loader"
+import { IntegrationStatus } from "@prisma/client"
+import { AddCampaignDialog } from "../campaigns/_component/add-campaign-dialog"
 
 interface SingleIntegrationProps {
   appName: string
@@ -45,7 +49,7 @@ interface Integration {
   url: string
   logo?: string
   email?: string
-  status: "active" | "inactive"
+  status: IntegrationStatus
   category: string
   description?: string
   apiKey?: string
@@ -77,12 +81,14 @@ interface Campaign {
   openRate: number
   clickRate: number
 }
-
+ 
 export function SingleIntegration({ appName }: SingleIntegrationProps) {
   const router = useRouter()
   const [integration, setIntegration] = useState<Integration | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
+ const [copied, setCopied] = useState<string | null>(null)
+   const [showAddDialog, setShowAddDialog] = useState(false)
   const [recentActivity] = useState<Activity[]>([
     { action: "Campaign sent", details: "Welcome Email to new subscribers", time: "2 hours ago", count: 45 },
     { action: "Webhook received", details: "New order notification", time: "4 hours ago", count: 12 },
@@ -122,6 +128,7 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
           clickRate: result.data.clickRate ?? undefined,
           conversionRate: result.data.conversionRate ?? undefined,
           totalEmail: result.data.totalEmailCount
+          
         })
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to load integration")
@@ -172,7 +179,6 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
       }
     }
 
-    console.log(campaigns , "campaign state before fetch")
 
     fetchCampaigns()
   }, [appName, router])
@@ -181,7 +187,7 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
     if (!integration) return
     
     try {
-      const newStatus = integration.status === "active" ? "inactive" : "active"
+      const newStatus = integration.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"
       const result = await updateIntegrationStatus(integration.id, newStatus)
       
       if (result?.error) {
@@ -189,10 +195,18 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
       }
 
       setIntegration(prev => prev ? { ...prev, status: newStatus } : null)
-      toast.success(`Integration ${newStatus === "active" ? "activated" : "deactivated"}`)
+      toast.success(`Integration ${newStatus === "ACTIVE" ? "activated" : "deactivated"}`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update status")
     }
+  }
+
+
+    const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setCopied(text)
+    toast.success("Copied to clipboard")
+    setTimeout(() => setCopied(null), 1500)
   }
 
   if (isLoading) {
@@ -244,29 +258,13 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
                   <div className="flex items-center gap-3 mb-2">
                     <h1 className="text-3xl font-bold">{integration.name}</h1>
                     <Badge
-                      variant={integration.status === "active" ? "default" : "secondary"}
-                      className={integration.status === "active" ? "bg-yellow-500 text-black hover:bg-yellow-600" : ""}
+                      variant={integration.status === "ACTIVE" ? "default" : "secondary"}
+                      className={integration.status === "ACTIVE" ? "bg-gold-600 text-black hover:bg-gold-400 capitalize" : ""}
                     >
                       {integration.status}
                     </Badge>
                   </div>
                   <p className="text-gray-500 mb-2">{integration.description}</p>
-                  <div className="flex items-center gap-6 text-sm text-gray-400">
-                    <div className="flex items-center gap-1">
-                      <Globe className="h-4 w-4" />
-                      <span>{integration.url}</span>
-                    </div>
-                    {integration.email && (
-                      <div className="flex items-center gap-1">
-                        <Mail className="h-4 w-4" />
-                        <span>{integration.email}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1 whitespace-nowrap">
-                      <Calendar className="h-4 w-4" />
-                      <span>Added {integration.dateAdded}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -274,31 +272,24 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
                   variant="outline"
                   size="sm"
                   onClick={handleToggleStatus}
-                  className="border-gold-600 text-gold-600 hover:bg-yellow-500 hover:text-black bg-transparent"
+                  className="border-gold-600 text-gold-600 hover:bg-yellow-500 hover:text-black bg-transparent "
                 >
-                  {integration.status === "active" ? (
+                  {integration.status === "ACTIVE" ? (
                     <PowerOff className="h-4 w-4 mr-2" />
                   ) : (
                     <Power className="h-4 w-4 mr-2" />
                   )}
-                  {integration.status === "active" ? "Deactivate" : "Activate"}
+                  {integration.status === "ACTIVE" ? "Deactivate" : "Activate"}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-600 text-black hover:bg-gray-800 bg-transparent"
+
+                 <Button
+                  onClick={() => setShowAddDialog(true)}
+                  className="mt-4 md:mt-0 bg-gold-600 hover:bg-yellow-600 text-black font-semibold"
                 >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Campaign
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white bg-transparent"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
+                
               </div>
             </div>
           </div>
@@ -370,8 +361,8 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
             <TabsTrigger value="settings" className="data-[state=active]:bg-gold-600 data-[state=active]:text-black">
               Settings
             </TabsTrigger>
-            <TabsTrigger value="activity" className="data-[state=active]:bg-gold-600 data-[state=active]:text-black">
-              Activity
+            <TabsTrigger value="dev" className="data-[state=active]:bg-gold-600 data-[state=active]:text-black">
+              Dev Tools
             </TabsTrigger>
           </TabsList>
 
@@ -434,14 +425,9 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
                       <p className="text-sm font-semibold">{integration.lastSync || "Never"}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">API Key</label>
+                      <label className="text-sm font-medium text-gray-600">Added date</label>
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-mono">{integration.apiKey || "Not configured"}</p>
-                        {integration.apiKey && (
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                        )}
+                        <p className="text-sm font-mono">{integration.dateAdded}</p>
                       </div>
                     </div>
                   </div>
@@ -543,7 +529,7 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
                   <p className="text-gray-500">Detailed analytics and reporting will be available here.</p>
                 </div>
               </CardContent>
-            </Card>
+            </Card>  
           </TabsContent>
 
           {/* Settings Tab */}
@@ -634,37 +620,70 @@ export function SingleIntegration({ appName }: SingleIntegrationProps) {
             </Card>
           </TabsContent>
 
-          {/* Activity Tab */}
-          <TabsContent value="activity" className="space-y-6">
+          {/* Dev Tab */}
+          <TabsContent value="dev" className="space-y-6">
             <Card>
-              <CardHeader className="bg-black text-white rounded-t-lg">
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription className="text-gray-300">
-                  Latest events and actions for this integration
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-gold-600">
+                  <Zap className="h-5 w-5" /> Integrated App ID
+                </CardTitle>
+                <CardDescription>
+                  Copy and use these IDs to connect this integrated app in your apllication forms .
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="p-6 hover:bg-gray-50">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold">{activity.action}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{activity.details}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold">{activity.count}</p>
-                          <p className="text-xs text-gray-500">{activity.time}</p>
-                        </div>
+              <CardContent className="space-y-4">
+                {/* Integration ID */}
+                <div className="flex items-center justify-between bg-gray-100 p-3 rounded-md">
+                  <span className="text-sm font-mono">{integration.id}</span>
+                  <Button onClick={() => handleCopy(integration.id)} size="sm" variant="outline">
+                    <Copy className="h-4 w-4 mr-1" />
+                    {copied === integration.id ? <Check className="h-4 w-4 text-green-500" /> : "Copy"}
+                  </Button>
+                </div>
+
+                {/* Campaign IDs */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">Campaign IDs</h4>
+                  {campaigns.length === 0 && (
+                    <p className="text-sm text-gray-500">No campaigns found.</p>
+                  )}
+                  {campaigns.map((campaign) => (
+                    <div
+                      key={campaign.id}
+                      className="flex flex-col md:flex-row md:items-center md:justify-between bg-gray-100 p-3 rounded-md"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{campaign.name}</p>
+                        <p className="text-sm font-mono text-gray-600">{campaign.id}</p>
                       </div>
+                      <Button
+                        onClick={() => handleCopy(campaign.id.toString())}
+                        size="sm"
+                        variant="outline"
+                        className="mt-2 md:mt-0"
+                      >
+                        <Copy className="h-4 w-4 mr-1" />
+                        {copied === campaign.id.toString() ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          "Copy"
+                        )}
+                      </Button>
                     </div>
                   ))}
                 </div>
               </CardContent>
-            </Card>
+              </Card>
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Add Campaign Dialog */}
+      <AddCampaignDialog open={showAddDialog} onOpenChange={setShowAddDialog} integrationId={integration?.id}  appName={integration.name} isIntegrationActive={integration?.status === "ACTIVE"} />
     </div>
   )
 }
+
+
+
+

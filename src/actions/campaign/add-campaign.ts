@@ -214,7 +214,7 @@ export async function createCampaign(
   const trigger = formData.get("trigger") as CampaignTrigger;
   const integrationId = formData.get("integrationId")?.toString() || "";
   const appName = formData.get("appName")?.toString() || "";
-  const status = formData.get("status") as CampaignStatus || CampaignStatus.inactive;
+  const status = formData.get("status") as CampaignStatus || CampaignStatus.ACTIVE;
 
   // Validate inputs
   const errors: State["errors"] = {};
@@ -260,7 +260,7 @@ export async function createCampaign(
       };
     }
 
-    if (integration.status !== "active") {
+    if (integration.status !== "ACTIVE") {
       return { 
         errors: { integrationId: ["Integration is not active"] },
         message: "Integration must be active to create campaign" 
@@ -299,6 +299,7 @@ export async function createCampaign(
     await incrementUsage(user.id, "campaignsCreated");
 
     revalidatePath(`/dashboard/integration/${appName}/campaigns`);
+    revalidatePath(`/dashboard/integration/${appName}`);
     return { 
       message: "Campaign created successfully",
       errors: undefined

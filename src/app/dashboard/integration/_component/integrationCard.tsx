@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 import Link from "next/link"
+import { IntegrationStatus } from "@prisma/client"
 
 interface Integration {
   id: string
@@ -19,7 +20,7 @@ interface Integration {
   url: string
   logo: string
   email: string
-  status: "active" | "inactive" 
+  status: IntegrationStatus
   category: string
   description: string
   dateAdded: Date
@@ -28,7 +29,7 @@ interface Integration {
 interface IntegrationCardProps {
   integration: Integration
   onDelete: (id: string) => void
-  onUpdateStatus: (id: string, status: Integration["status"]) => void
+  onUpdateStatus: (id: string, status: IntegrationStatus) => void
 }
 
 export function IntegrationCard({ integration, onDelete, onUpdateStatus }: IntegrationCardProps) {
@@ -36,11 +37,9 @@ export function IntegrationCard({ integration, onDelete, onUpdateStatus }: Integ
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active":
+      case "ACTIVE":
         return "bg-green-100 text-green-800 border-green-200"
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
-      case "inactive":
+      case "INACTIVE":
         return "bg-red-100 text-red-800 border-red-200"
       default:
         return "bg-gray-100 text-gray-800 border-gray-200"
@@ -51,7 +50,7 @@ export function IntegrationCard({ integration, onDelete, onUpdateStatus }: Integ
     setIsLoading(true)
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
-    const newStatus = integration.status === "active" ? "inactive" : "active"
+    const newStatus = integration.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"
     onUpdateStatus(integration.id, newStatus)
     setIsLoading(false)
   }
@@ -61,8 +60,6 @@ export function IntegrationCard({ integration, onDelete, onUpdateStatus }: Integ
       onDelete(integration.id)
     }
   }
-
-  console.log(integration.dateAdded, "integration date added")
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
@@ -100,7 +97,7 @@ export function IntegrationCard({ integration, onDelete, onUpdateStatus }: Integ
                 Visit Website
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleStatusToggle} disabled={isLoading}>
-              {integration.status === "active" ? (
+              {integration.status === "ACTIVE" ? (
                 <>
                   <PowerOff className="mr-2 h-4 w-4" />
                   Deactivate
@@ -122,7 +119,10 @@ export function IntegrationCard({ integration, onDelete, onUpdateStatus }: Integ
       </div>
 
       {/* Description */}
-      <p className="text-sm text-gray-600 mb-4">{integration.description}</p>
+      {
+        integration.description && 
+        <p className="text-sm text-gray-600 mb-2">{integration.description}</p>
+      }
 
       {/* Details */}
       <div className="space-y-2">

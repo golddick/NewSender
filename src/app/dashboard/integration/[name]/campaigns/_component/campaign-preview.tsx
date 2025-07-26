@@ -113,7 +113,7 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
         // }
 
         if (result.data.emailContent) {
-          // setSubjectTitle(result.data.subject || result.data.emailSubject || "No Subject");
+          setSubjectTitle( result.data.emailSubject || "No Subject");
 
           try {
             const content = typeof result.data.emailContent === 'string'
@@ -164,9 +164,9 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
     }
 
     fetchCampaignData()
-  }, [campaignId, appName, ])
+  }, [campaignId, appName,campaign, router, jsonData, subjectTitle]);
 
-  const handleStatusChange = async (newStatus: "active" | "inactive") => {
+  const handleStatusChange = async (newStatus:CampaignStatus) => {
     if (!campaign) return
     
     try {
@@ -199,7 +199,7 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
       emailEditorRef.current?.editor?.loadDesign(jsonData);
     };
 
-  console.log(campaign, `Campaign data for app: ${appName}, campaignId: ${campaignId}`)
+  console.log(campaign, `Campaign data for app: ${appName}, campaignId: ${campaignId} `)
 
   if (loading || !campaign) {
     return <Loader />
@@ -209,11 +209,11 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active":
+      case "ACTIVE":
         return "bg-green-50 text-green-700 border-green-200"
-      case "inactive":
+      case "INACTIVE":
         return "bg-red-50 text-red-700 border-red-200"
-      case "draft":
+      case "DRAFT":
         return "bg-yellow-50 text-yellow-700 border-yellow-200"
       default:
         return "bg-gray-50 text-gray-700 border-gray-200"
@@ -234,6 +234,9 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
         return "Scheduled"
       case "account_activation":
         return "Account Activation"
+        case "new_blog_post":
+          return "New Blog Post"
+        
       default:
         return trigger
     }
@@ -305,11 +308,11 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                {campaign.status === "active" ? (
+                {campaign.status === "ACTIVE" ? (
                   <Button
                     variant="outline"
-                    className="border-red-400 text-red-400 hover:bg-red-400 hover:text-white bg-transparent"
-                    onClick={() => handleStatusChange("inactive")}
+                    className=" bg-black text-white hover:bg-white hover:text-black "
+                    onClick={() => handleStatusChange("INACTIVE")}
                     disabled={updatingStatus}
                   >
                     <Pause className="h-4 w-4 mr-2" />
@@ -318,8 +321,8 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
                 ) : (
                   <Button
                     variant="outline"
-                    className="border-green-400 text-green-400 hover:bg-green-400 hover:text-white bg-transparent"
-                    onClick={() => handleStatusChange("active")}
+                    className="bg-gold-300 text-black hover:bg-black hover:text-white "
+                    onClick={() => handleStatusChange("ACTIVE")}
                     disabled={updatingStatus}
                   >
                     <Play className="h-4 w-4 mr-2" />
@@ -704,7 +707,7 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
                       <Badge className={`${getStatusColor(campaign.status)} text-xs font-medium`}>
                         {campaign.status.toUpperCase()}
                       </Badge>
-                      {campaign.status === "active" ? (
+                      {campaign.status === "ACTIVE" ? (
                         <Button size="sm" variant="outline" className="border-red-300 text-red-600 bg-transparent">
                           <Pause className="h-4 w-4 mr-1" />
                           Pause

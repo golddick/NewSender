@@ -1,5 +1,8 @@
 import { ICONS } from "@/shared/utils/icons";
 import { atom } from "jotai";
+import { LucideIcon } from "lucide-react";
+import { DashboardSideBarTypes, NavItems, PartnersTypes, PlanType } from "./types";
+
 
 export const navItems: NavItems[] = [
   {
@@ -16,7 +19,7 @@ export const navItems: NavItems[] = [
   },
   {
     title: "Blogs",
-    link: "/coming-soon",
+    link: "/blog",
   },
   {
     title: "Docs",

@@ -106,7 +106,7 @@ const Main = () => {
                 <span className="ml-1">{ICONS.link}</span>
               </div>
             </Link>
-            <Link href={"/"}>
+            <Link href={"/dashboard/blog"}>
               <div className="w-max px-3 my-2 h-[33px] bg-transparent border rounded-lg flex items-center">
                 <span className="text-sm">Blog</span>
                 <span className="ml-1">{ICONS.link}</span>

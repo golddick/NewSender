@@ -3,11 +3,12 @@
 import { db } from '@/shared/libs/database'
 import { sendEmail } from '@/shared/utils/email.sender'
 import { saveEmailToDatabase } from './addEmail'
+import { EmailType } from '@prisma/client'
 
 export const sendInstantEmail = async ({
   userEmails,
   subject,
-  design,
+  content,
   htmlContent,
   emailTemplateId,
   newsLetterOwnerId,
@@ -18,12 +19,12 @@ export const sendInstantEmail = async ({
 }: {
   userEmails: string[]
   subject: string
-  design: any
+  content: any
   htmlContent: string
   emailTemplateId: string
-  newsLetterOwnerId: string
-  integrationId: string
-  campaignId: string
+  newsLetterOwnerId: string 
+  integrationId?: string | null
+  campaignId?: string | null
   adminEmail: string
   fromApplication: string
 }) => {
@@ -37,19 +38,19 @@ export const sendInstantEmail = async ({
     if (!emailTemplate) {
       const saved = await saveEmailToDatabase({
         title: subject,
-        content: JSON.stringify(design),
+        content: JSON.stringify(content),
         textContent: htmlContent,
         emailSubject: subject,
         newsLetterOwnerId,
         integrationId,
         campaignId,
-        emailType: 'instant',
-        scheduleType: 'immediate',
-        template: 'instant',
+        emailType: EmailType.INSTANT,
         emailId: emailTemplateId,
         trackOpens: true,
         trackClicks: true,
         enableUnsubscribe: true,
+        adminEmail,
+        fromApplication: fromApplication,
       })
 
       if (!saved.success || !saved.email) {
@@ -60,7 +61,7 @@ export const sendInstantEmail = async ({
     }
 
     // Only send if it's an instant email
-    if (emailTemplate.emailType !== 'instant') {
+    if (emailTemplate.emailType !== 'INSTANT') {
       return {
         success: false,
         error: 'Email type is not instant, skipping send.',
@@ -72,7 +73,7 @@ export const sendInstantEmail = async ({
       userEmail: userEmails,
       subject: emailTemplate.emailSubject || subject,
       content: htmlContent,
-      contentJson: JSON.stringify(design),
+      contentJson: JSON.stringify(content),
       emailId: emailTemplate.id,
       newsLetterOwnerId,
       integrationId,

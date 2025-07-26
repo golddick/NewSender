@@ -12,7 +12,8 @@ const NavItems = () => {
   return (
     <div className="w-full hidden md:flex items-center">
       {navItems.map((item, index) => {
-        const isActive = pathname === item.link;
+        // const isActive = pathname === item.link;
+         const isActive = pathname.startsWith(item.link);
 
         return (
           <Link

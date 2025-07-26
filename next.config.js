@@ -3,10 +3,19 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
+        protocol: "https",
         hostname: "media.beehiiv.com",
+        pathname: "/**",
       },
       {
+        protocol: "https",
         hostname: "img.clerk.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+         pathname: '/f/**',
       },
     ],
   },

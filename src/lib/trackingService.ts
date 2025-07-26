@@ -1,13 +1,17 @@
-// lib/trackingService.ts
-import { db } from "@/shared/libs/database";
+// // lib/trackingService.ts
+// import { db } from "@/shared/libs/database";
 
-// export const recordOpen = async (emailId: string, ip: string): Promise<boolean> => {
+
+// export const recordOpen = async (
+//   emailId: string,
+//   recipientEmail: string
+// ): Promise<boolean> => {
 //   try {
 //     const email = await db.email.findUnique({
 //       where: { id: emailId },
 //       select: {
 //         id: true,
-//         openedByIps: true,
+//         openedByEmails: true,
 //         openCount: true,
 //         campaignId: true,
 //         integrationId: true,
@@ -19,23 +23,27 @@ import { db } from "@/shared/libs/database";
 //       return false;
 //     }
 
-//     // Avoid duplicate opens from same IP
-//     if (email.openedByIps.includes(ip)) {
+//     const alreadyOpened = email.openedByEmails.includes(recipientEmail);
+
+//     if (alreadyOpened) {
+//       await db.email.update({
+//         where: { id: emailId },
+//         data: {
+//           lastOpened: new Date(),
+//         },
+//       });
 //       return false;
 //     }
 
 //     await db.$transaction([
-//       // Update email open tracking
 //       db.email.update({
 //         where: { id: emailId },
 //         data: {
 //           openCount: { increment: 1 },
 //           lastOpened: new Date(),
-//           openedByIps: { set: [...email.openedByIps, ip] },
+//           openedByEmails: { set: [...email.openedByEmails, recipientEmail] },
 //         },
 //       }),
-
-//       // Update campaign open rate
 //       ...(email.campaignId
 //         ? [
 //             db.campaign.update({
@@ -46,8 +54,6 @@ import { db } from "@/shared/libs/database";
 //             }),
 //           ]
 //         : []),
-
-//       // Update integration open rate
 //       ...(email.integrationId
 //         ? [
 //             db.integration.update({
@@ -68,6 +74,95 @@ import { db } from "@/shared/libs/database";
 // };
 
 
+// export const recordClick = async (
+//   emailId: string,
+//   url: string,
+//   recipientEmail: string
+// ): Promise<boolean> => {
+//   try {
+//     // Fetch the email record
+//     const email = await db.email.findUnique({
+//       where: { id: emailId },
+//       select: {
+//         id: true,
+//         clickCount: true,
+//         clickedByEmails: true,
+//         campaignId: true,
+//         integrationId: true,
+//       },
+//     });
+
+//     if (!email) {
+//       console.error(`Email not found: ${emailId}`);
+//       return false;
+//     }
+
+//     // Avoid duplicate clicks from same email address
+//     if (email.clickedByEmails.includes(recipientEmail)) {
+//       return false;
+//     }
+
+//     // Track the clicked link and update stats
+//     await db.$transaction([
+//       db.email.update({
+//         where: { id: emailId },
+//         data: {
+//           clickCount: { increment: 1 },
+//           lastClicked: new Date(),
+//           clickedByEmails: {
+//             set: [...email.clickedByEmails, recipientEmail],
+//           },
+//         },
+//       }),
+
+//       db.clickedLink.create({
+//         data: {
+//           emailId,
+//           url,
+//         },
+//       }),
+
+//       ...(email.campaignId
+//         ? [
+//             db.campaign.update({
+//               where: { id: email.campaignId },
+//               data: {
+//                 clickRate: { increment: 1 },
+//               },
+//             }),
+//           ]
+//         : []),
+
+//       ...(email.integrationId
+//         ? [
+//             db.integration.update({
+//               where: { id: email.integrationId },
+//               data: {
+//                 clickRate: { increment: 1 },
+//               },
+//             }),
+//           ]
+//         : []),
+//     ]);
+
+//     return true;
+//   } catch (error) {
+//     console.error("Error in recordClick:", error);
+//     return false;
+//   }
+// };
+
+
+
+
+
+// lib/trackingService.ts
+import { db } from "@/shared/libs/database";
+
+/**
+ * Record email open event.
+ * Handles optional campaignId and integrationId.
+ */
 export const recordOpen = async (
   emailId: string,
   recipientEmail: string
@@ -91,17 +186,16 @@ export const recordOpen = async (
 
     const alreadyOpened = email.openedByEmails.includes(recipientEmail);
 
+    // Update lastOpened timestamp even for repeated opens
     if (alreadyOpened) {
       await db.email.update({
         where: { id: emailId },
-        data: {
-          lastOpened: new Date(),
-        },
+        data: { lastOpened: new Date() },
       });
       return false;
     }
 
-    await db.$transaction([
+    const updates: any[] = [
       db.email.update({
         where: { id: emailId },
         data: {
@@ -110,27 +204,27 @@ export const recordOpen = async (
           openedByEmails: { set: [...email.openedByEmails, recipientEmail] },
         },
       }),
-      ...(email.campaignId
-        ? [
-            db.campaign.update({
-              where: { id: email.campaignId },
-              data: {
-                openRate: { increment: 1 },
-              },
-            }),
-          ]
-        : []),
-      ...(email.integrationId
-        ? [
-            db.integration.update({
-              where: { id: email.integrationId },
-              data: {
-                openRate: { increment: 1 },
-              },
-            }),
-          ]
-        : []),
-    ]);
+    ];
+
+    if (email.campaignId) {
+      updates.push(
+        db.campaign.update({
+          where: { id: email.campaignId },
+          data: { openRate: { increment: 1 } },
+        })
+      );
+    }
+
+    if (email.integrationId) {
+      updates.push(
+        db.integration.update({
+          where: { id: email.integrationId },
+          data: { openRate: { increment: 1 } },
+        })
+      );
+    }
+
+    await db.$transaction(updates);
 
     return true;
   } catch (error) {
@@ -139,14 +233,16 @@ export const recordOpen = async (
   }
 };
 
-
+/**
+ * Record email click event.
+ * Handles optional campaignId and integrationId.
+ */
 export const recordClick = async (
   emailId: string,
   url: string,
   recipientEmail: string
 ): Promise<boolean> => {
   try {
-    // Fetch the email record
     const email = await db.email.findUnique({
       where: { id: emailId },
       select: {
@@ -163,13 +259,12 @@ export const recordClick = async (
       return false;
     }
 
-    // Avoid duplicate clicks from same email address
+    // Prevent counting multiple clicks from the same recipient
     if (email.clickedByEmails.includes(recipientEmail)) {
       return false;
     }
 
-    // Track the clicked link and update stats
-    await db.$transaction([
+    const updates: any[] = [
       db.email.update({
         where: { id: emailId },
         data: {
@@ -180,36 +275,30 @@ export const recordClick = async (
           },
         },
       }),
-
       db.clickedLink.create({
-        data: {
-          emailId,
-          url,
-        },
+        data: { emailId, url },
       }),
+    ];
 
-      ...(email.campaignId
-        ? [
-            db.campaign.update({
-              where: { id: email.campaignId },
-              data: {
-                clickRate: { increment: 1 },
-              },
-            }),
-          ]
-        : []),
+    if (email.campaignId) {
+      updates.push(
+        db.campaign.update({
+          where: { id: email.campaignId },
+          data: { clickRate: { increment: 1 } },
+        })
+      );
+    }
 
-      ...(email.integrationId
-        ? [
-            db.integration.update({
-              where: { id: email.integrationId },
-              data: {
-                clickRate: { increment: 1 },
-              },
-            }),
-          ]
-        : []),
-    ]);
+    if (email.integrationId) {
+      updates.push(
+        db.integration.update({
+          where: { id: email.integrationId },
+          data: { clickRate: { increment: 1 } },
+        })
+      );
+    }
+
+    await db.$transaction(updates);
 
     return true;
   } catch (error) {
@@ -217,69 +306,3 @@ export const recordClick = async (
     return false;
   }
 };
-
-
-
-// export const recordClick = async (emailId: string, url: string, ip: string): Promise<boolean> => {
-//   try {
-//     // Fetch the email record
-//     const email = await db.email.findUnique({
-//       where: { id: emailId },
-//       select: {
-//         id: true,
-//         clickCount: true,
-//         clickedByIps: true,
-//         campaignId: true,
-//         integrationId: true,
-//       }
-//     });
-
-//     if (!email) {
-//       console.error(`Email not found: ${emailId}`);
-//       return false;
-//     }
-
-//     // Avoid counting multiple clicks from the same IP
-//     if (email.clickedByIps.includes(ip)) {
-//       return false;
-//     }
-
-//     // Track the clicked link
-//     await db.$transaction([
-//       // Update the email record
-//       db.email.update({
-//         where: { id: emailId },
-//         data: {
-//           clickCount: { increment: 1 },
-//           lastClicked: new Date(),
-//           clickedByIps: {
-//             set: [...email.clickedByIps, ip]
-//           },
-//         }
-//       }),
-
-//       // Record clicked link
-//       db.clickedLink.create({
-//         data: {
-//           emailId,
-//           url,
-//         }
-//       }),
-
-//       // Update campaign if applicable
-//       ...(email.campaignId
-//         ? [db.campaign.update({
-//             where: { id: email.campaignId },
-//             data: {
-//               clickRate: { increment: 1 }
-//             }
-//           })]
-//         : [])
-//     ]);
-
-//     return true;
-//   } catch (error) {
-//     console.error("Error in recordClick:", error);
-//     return false;
-//   }
-// };
