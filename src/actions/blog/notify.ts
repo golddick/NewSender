@@ -197,7 +197,7 @@ export async function notifySubscribersAboutNewPost({
       featuredImage: post.featuredImage ?? undefined,
       url: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/blog/${post.slug}`,
       HostPlatformUrl: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/blog`,
-      HostPlatform: `${process.env.NEXT_PUBLIC_SOURCE}`,
+      HostPlatform: `${process.env.NEXT_PUBLIC_SOURCE}`, 
       platform: fromApplication,
     });
 
@@ -210,7 +210,7 @@ export async function notifySubscribersAboutNewPost({
       newsLetterOwnerId: post.authorId,
       contentJson: JSON.stringify({ content }),
       adminEmail: adminEmail,
-      fromApplication: fromApplication,
+      fromApplication: fromApplication, 
       trackOpens: true,
       trackClicks: true,
       enableUnsubscribe: true

@@ -76,8 +76,8 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
     const emailRecord = await db.notificationEmail.update({
       where: { id: emailId },
       data: {
-        content: contentJson,
-        status: 'SENT',
+        content: content,
+        status: "PENDING",
         sentAt: new Date(),
       }
     });
@@ -190,6 +190,8 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
       where: { id: emailId },
       data: {
         status: 'SENT',
+        content:content,
+        textContent: contentJson,
         sentAt: new Date(),
         messageId: lastMessageId,
         recipients: totalAccepted,

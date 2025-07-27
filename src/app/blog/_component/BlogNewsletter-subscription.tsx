@@ -90,11 +90,11 @@ export function NewsletterSubscription({
   const getVariantStyles = () => {
     switch (variant) {
       case "sidebar":
-        return "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200"
+        return "bg-gradient-to-br from-blue-50 to-indigo-50 border-black"
       case "footer":
-        return "bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200"
+        return "bg-gradient-to-r from-purple-50 to-pink-50 border-none"
       default:
-        return "bg-gradient-to-br from-white via-gold-50 to-white border-blue-200"
+        return "bg-gradient-to-br from-white via-gold-50 to-white border-gold-200"
     }
   }
 
@@ -152,7 +152,8 @@ export function NewsletterSubscription({
               ) : (
                 <>
                   <Mail className="h-5 w-5 mr-2" />
-                  Subscribe to {formatString(blogAuthor)} Newletter 
+                 <p className=" hidden md:flex"> Subscribe to {formatString(blogAuthor)} Newletter </p>
+                  <p className="md:hidden">Subscribe</p>
                 </>
               )}
             </Button>
