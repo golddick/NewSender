@@ -710,7 +710,7 @@ model NotificationEmail {
   clickedByIps      String[]  @default([])
 
   emailType         NotificationEmailType    
-  clickedLinks      ClickedLink[]
+  clickedLinks      NotificationEmailClickedLink[]
   integration       Integration?   @relation(fields: [integrationId], references: [id])
   user             Membership     @relation(fields: [userId], references: [userId])
 
@@ -726,12 +726,23 @@ model NotificationEmail {
 model ClickedLink {
   id        String   @id @default(uuid())
   emailId   String
-  notificationEmailId String?
   url       String
   clickedAt DateTime @default(now())
+  clickedBy String?
 
   email Email @relation(fields: [emailId], references: [id])
-  notificationEmail NotificationEmail? @relation(fields: [notificationEmailId], references: [id])
 
   @@index([emailId])
+}
+model NotificationEmailClickedLink {
+  id        String   @id @default(uuid())
+  notificationEmailId String
+  url       String
+  clickedAt DateTime @default(now())
+  clickedBy String?
+
+  
+  notificationEmail NotificationEmail @relation(fields: [notificationEmailId], references: [id])
+
+  @@index([notificationEmailId])
 }

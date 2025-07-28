@@ -390,7 +390,7 @@ const handleReportComment = async (commentId: string) => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="bg-white rounded-2xl shadow-lg p-4 md:p-8 mb-8 border border-neutral-200"
             >
-              <div className="flex items-start gap-6">
+              <div className="flex items-center gap-6">
                 <Avatar className="h-10 w-10 ring-4 ring-gold-100">
                   <AvatarImage src={post.membership?.imageUrl} alt={author} />
                   <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">

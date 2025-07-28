@@ -117,7 +117,7 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
 
               // Add footer with copyright and unsubscribe
               enhancedContent += `
-                <div style="margin-top: 40px; border-top: 1px solid #eaeaea; padding-top: 20px; font-family: Arial, sans-serif; color: #666666; font-size: 12px; line-height: 1.5;">
+                 <div style="text-align:center;margin-top:20px;font-size:12px;color:#666;">
                   <p style="margin: 0 0 10px;">
                     © 2025 <a href="https://thenews.africa" style="color: #666666; text-decoration: underline;" target="_blank">TheNews Africa</a>. All rights reserved.
                   </p>
@@ -125,7 +125,7 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
                   <p style="margin: 0;">
                     <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}" 
                        style="color: #666666; text-decoration: underline;">
-                      Unsubscribe from these notifications
+                      Unsubscribe 
                     </a>
                   </p>
                   ` : ''}

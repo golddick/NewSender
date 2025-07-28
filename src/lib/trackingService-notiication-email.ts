@@ -99,8 +99,8 @@ export const recordClick = async (
           },
         },
       }),
-      db.clickedLink.create({
-        data: { emailId, url },
+      db.notificationEmailClickedLink.create({
+        data: { notificationEmailId: emailId, url, clickedBy: recipientEmail },
       }),
     ];
 

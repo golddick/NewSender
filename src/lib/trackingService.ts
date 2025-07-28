@@ -276,7 +276,7 @@ export const recordClick = async (
         },
       }),
       db.clickedLink.create({
-        data: { emailId, url },
+        data: { emailId, url , clickedBy: recipientEmail },
       }),
     ];
 
