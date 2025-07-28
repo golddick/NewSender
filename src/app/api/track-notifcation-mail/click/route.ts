@@ -1,5 +1,5 @@
+import { recordClick } from '@/lib/trackingService-notiication-email';
 import { NextRequest, NextResponse } from 'next/server';
-import { recordClick } from '@/lib/trackingService';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   }
 
   let redirectUrl: string;
-  try {
+  try { 
     redirectUrl = decodeURIComponent(rawUrl);
   } catch (err) {
     console.error("Invalid redirect URL", err);

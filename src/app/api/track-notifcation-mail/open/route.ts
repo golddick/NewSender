@@ -1,6 +1,6 @@
 // src/app/api/track/open/route.ts
+import { recordOpen } from "@/lib/trackingService-notiication-email";
 import { NextRequest, NextResponse } from "next/server";
-import { recordOpen } from "@/lib/trackingService";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);

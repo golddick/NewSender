@@ -322,7 +322,7 @@ export const sendEmail = async (params: SendEmailParams) => {
     trackOpens = true,
     trackClicks = true,
   } = params;
-
+ 
   // const domain = process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://your-domain.com';
   const domain = 'https://denews-xi.vercel.app/';
   const startTime = Date.now();

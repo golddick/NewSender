@@ -1,9 +1,7 @@
 'use server';
 
 import * as nodemailer from 'nodemailer';
-import { EmailStatus } from '@prisma/client';
 import { db } from '@/shared/libs/database';
-import { checkUsageLimit, incrementUsage } from '@/lib/checkAndUpdateUsage';
 
 const BATCH_SIZE = 20;
 const BATCH_DELAY_MS = 1000;
@@ -109,12 +107,12 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
               if (trackClicks) {
                 enhancedContent = enhancedContent.replace(
                   /href="([^"]+)"/g,
-                  (_, url) => `href="${domain}/api/track/click?emailId=${emailId}&email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&tid=${trackingId}"`
+                  (_, url) => `href="${domain}/api/track-notifcation-mail/click?emailId=${emailId}&email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&tid=${trackingId}"`
                 );
               }
 
               if (trackOpens) {
-                enhancedContent += `<img src="${domain}/api/track/open?emailId=${emailId}&email=${encodeURIComponent(email)}&tid=${trackingId}" width="1" height="1" style="display:none" />`;
+                enhancedContent += `<img src="${domain}/api/track-notifcation-mail/open?emailId=${emailId}&email=${encodeURIComponent(email)}&tid=${trackingId}" width="1" height="1" style="display:none" />`;
               }
 
               // Add footer with copyright and unsubscribe
