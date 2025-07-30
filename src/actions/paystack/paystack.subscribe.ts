@@ -32,7 +32,8 @@ export const paystackSubscribe = async ({
 
     // 3. Verify Paystack configuration
     const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
-    const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || 'http://localhost:3003';
+    // const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || 'http://localhost:3003';
+    const websiteUrl = 'http://localhost:3003';
 
     if (!paystackSecret || !websiteUrl) {
       throw new Error("Payment system configuration error");
