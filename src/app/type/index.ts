@@ -160,3 +160,80 @@ export interface BlogPostReaderProps {
   post: BlogPost;
   relatedPosts: RelatedPost[];
 }
+
+
+
+
+
+
+
+interface Notification {
+  id: string;
+  type: "EMAIL" | "SYSTEM" | "PUSH" | "SMS";
+  category: 
+    | "WELCOME" 
+    | "NEWSLETTER" 
+    | "BLOG_APPROVAL"
+    | "KYC_APPROVAL"
+    | "PAYMENT_SUCCESS"
+    | "CAMPAIGN_ALERT"
+    | "SECURITY_ALERT"
+    | "INTEGRATION_SUCCESS"
+    | "SUBSCRIPTION_REMINDER"
+    | "ACHIEVEMENT";
+  title: string;
+  content: string;
+  textContent?: string;
+  status: "SENT" | "DELIVERED" | "SCHEDULED" | "DRAFT" | "FAILED" | "PENDING";
+  priority: "HIGH" | "MEDIUM" | "LOW";
+  userId: string;
+  recipient: number;
+  
+  // Email specific fields
+  emailsSent?: number;
+  openCount?: number;
+  clickCount?: number;
+  recipients?: number;
+  bounceCount?: number;
+  lastOpened?: string;
+  lastClicked?: string;
+  
+  // System notification metadata
+  metadata?: Record<string, any>;
+  
+  // Integration info
+  integration?: {
+    name: string;
+    logo: string;
+  };
+  
+  // Timestamps
+  sentAt: string;
+  createdAt: string;
+  updatedAt: string;
+  
+  // Read status
+  read: boolean;
+}
+
+interface NotificationSettings {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  smsNotifications: boolean;
+  weeklyDigest: boolean;
+  instantAlerts: boolean;
+  marketingEmails: boolean;
+  securityAlerts: boolean;
+  productUpdates: boolean;
+  newsletterReminders: boolean;
+  campaignReports: boolean;
+  lowEngagementAlerts: boolean;
+  highEngagementAlerts: boolean;
+  bounceAlerts: boolean;
+  unsubscribeAlerts: boolean;
+  blogApprovalNotifications: boolean;
+  kycNotifications: boolean;
+  paymentNotifications: boolean;
+  integrationNotifications: boolean;
+  achievementNotifications: boolean;
+}

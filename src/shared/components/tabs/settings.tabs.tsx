@@ -13,6 +13,9 @@ const SettingsTab = () => {
     >
       <Tab key="API Access" title="API Access" />
       <Tab key="Customize Profile" title="Customize Profile" />
+      <Tab key="KYC" title="KYC" />
+      <Tab key="Subscription Management" title="Subscription Management" />
+      <Tab key="Notification" title="Notification" />
     </Tabs>
   );
 };

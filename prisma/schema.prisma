@@ -333,11 +333,42 @@ enum EmailType {
   DRAFT
   SCHEDULE
 }
-enum NotificationEmailType {
-  NEW_BLOG_POST
-  NEW_COMMENT
-  NEW_REPLY
-  NEW_SUBSCRIBER
+
+enum NotificationType {
+  EMAIL
+  SYSTEM
+  PUSH
+  SMS
+}
+
+enum NotificationCategory {
+  WELCOME
+  NEWSLETTER
+  NEW_BLOG
+  BLOG_APPROVAL
+  NEW_KYC
+  KYC_APPROVAL
+  PAYMENT_SUCCESS
+  CAMPAIGN_ALERT
+  SECURITY_ALERT
+  INTEGRATION_SUCCESS
+  SUBSCRIPTION_REMINDER
+  ACHIEVEMENT
+}
+
+enum NotificationStatus {
+  DRAFT
+  PENDING
+  SENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum NotificationPriority {
+  HIGH
+  MEDIUM
+  LOW
 }
 
 enum PostStatus {
@@ -364,6 +395,17 @@ enum AIGenerationStatus {
   COMPLETED
   FAILED
   IN_PROGRESS
+}
+enum KYCAccountType {
+  INDIVIDUAL
+  ORGANIZATION
+}
+enum KYCStatus {
+ PENDING
+ COMPLETED
+ REJECTED
+ APPROVED
+ IN_PROGRESS
 }
 
 // ========== MODELS ==========
@@ -395,18 +437,65 @@ model Membership {
   blogPostLimit              Int                    @default(10) // Added for blog feature
   aiGenerationLimit          Int                    @default(5)  // Added for AI content generation
   termsAndConditionsAccepted Boolean                @default(false)
+  approvedKYC                Boolean                @default(false)
   usage                      MembershipUsage[]
   createdAt                  DateTime               @default(now())
   updatedAt                  DateTime               @updatedAt
   blogPosts                  BlogPost[]
   aIContentGenerationToExcerpt       BlogAIGeneration[]
   blogComments               BlogComment[]
-  reportedComments         ReportedComment[]
+  reportedComments           ReportedComment[]
   emails                    Email[]
-  notificationEmails        NotificationEmail[]
+  notificationEmails        Notification[]
+  notificationSettings      NotificationSettings[]
+  kyc                       KYC[]
+  invoices                  Invoice[]
+ 
 
   @@index([paystackCustomerId])
   @@index([paystackSubscriptionId])
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  userId      String
+  description String
+  amount      Int
+  status      String
+  invoiceUrl  String
+  date        DateTime @default(now())
+
+  user        Membership @relation(fields: [userId], references: [userId])
+}
+
+
+
+model KYC {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  accountType  KYCAccountType
+  status      KYCStatus  @default(PENDING)
+  levels      Json      // Stores all KYC level data
+  documents   Json      // Stores document references
+  livePhoto   String?   // Base64 or URL to stored live photo
+  reviewedTime  DateTime?
+  reviewedBy  String?
+  rejectedResponse String?
+  comments     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        Membership      @relation(fields: [userId], references: [userId])
+  kycDocuments KYCDocument[]
+}
+
+model KYCDocument {
+  id          String   @id @default(cuid())
+  kycId       String
+  type        String   // "id_front", "id_back", "address_proof", etc.
+  url         String
+  key         String   // Unique identifier for the file
+  uploadedAt  DateTime @default(now())
+  kyc         KYC      @relation(fields: [kycId], references: [id])
 }
 
 model MembershipUsage {
@@ -589,7 +678,7 @@ model Integration {
   Campaign   Campaign[]
   Subscriber Subscriber[]
   Email      Email[]
-  notificationEmail NotificationEmail[]
+  notificationEmail Notification[]
 
   @@index([userId])
   @@index([category])
@@ -686,40 +775,92 @@ model Email {
   updatedAt DateTime @updatedAt
 }
 
-model NotificationEmail {
-  id                String      @id @default(uuid())
-  title             String      @unique
+model Notification {
+  id                String              @id @default(uuid())
+  type              NotificationType
+  category          NotificationCategory
+  title             String
   content           String
-  userId            String
   textContent       String?
-  status            EmailStatus @default(SENT)
-  newsLetterOwnerId String
-  integrationId     String?
-  messageId         String?
-  emailsSent        Int       @default(0)
-  openCount         Int       @default(0)
-  clickCount        Int       @default(0)
-  recipients        Int?       @default(0)
-  bounceCount       Int?       @default(0)
-  lastOpened        DateTime?
-  lastClicked       DateTime?
-  sentAt            DateTime?
-  openedByIps       String[]  @default([])
+  status            NotificationStatus  @default(PENDING)
+  priority          NotificationPriority @default(MEDIUM)
+  
+  // User relation
+  userId            String
+  user              Membership                @relation(fields: [userId], references: [userId])
+  
+  recipient         Int                 @default(0)
+  
+  // Email specific fields
+  emailsSent        Int?                @default(0)
+  openCount         Int?                @default(0)
+  clickCount        Int?                @default(0)
+  recipients        Int?                @default(0)
+  bounceCount       Int?                @default(0)
   openedByEmails    String[] @default([])
   clickedByEmails   String[] @default([])
-  clickedByIps      String[]  @default([])
+  lastOpened        DateTime?
+  lastClicked       DateTime?
+  
+  // Integration relation
+  integrationId     String?
+  integration       Integration?        @relation(fields: [integrationId], references: [id])
+  
+  // System notification metadata
+  metadata          Json?
+  
+  // Timestamps
+  sentAt            DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Read status
+  read              Boolean             @default(false)
 
-  emailType         NotificationEmailType    
-  clickedLinks      NotificationEmailClickedLink[]
-  integration       Integration?   @relation(fields: [integrationId], references: [id])
-  user             Membership     @relation(fields: [userId], references: [userId])
+  NotificationEmailClickedLink NotificationEmailClickedLink[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([category])
+}
 
-  trackOpens         Boolean  @default(true)
-  trackClicks        Boolean  @default(true)
-  enableUnsubscribe  Boolean  @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model NotificationSettings {
+  id                          String    @id @default(uuid())
+  
+  // User relation
+  userId                      String    @unique
+  user                        Membership      @relation(fields: [userId], references: [userId])
+  
+  // Delivery preferences
+  emailNotifications          Boolean   @default(true)
+  pushNotifications           Boolean   @default(false)
+  smsNotifications            Boolean   @default(false)
+  
+  // Category preferences
+  marketingEmails             Boolean   @default(false)
+  securityAlerts              Boolean   @default(true)
+  productUpdates              Boolean   @default(true)
+  newsletterReminders         Boolean   @default(true)
+  campaignReports             Boolean   @default(true)
+  blogApprovalNotifications   Boolean   @default(true)
+  kycNotifications            Boolean   @default(true)
+  paymentNotifications        Boolean   @default(true)
+  integrationNotifications    Boolean   @default(true)
+  achievementNotifications    Boolean   @default(true)
+  
+  // Digest preferences
+  weeklyDigest                Boolean   @default(true)
+  instantAlerts               Boolean   @default(true)
+  
+  // Alert preferences
+  lowEngagementAlerts         Boolean   @default(false)
+  highEngagementAlerts        Boolean   @default(true)
+  bounceAlerts                Boolean   @default(true)
+  unsubscribeAlerts           Boolean   @default(false)
+  
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
 }
 
 
@@ -742,7 +883,7 @@ model NotificationEmailClickedLink {
   clickedBy String?
 
   
-  notificationEmail NotificationEmail @relation(fields: [notificationEmailId], references: [id])
+  notificationEmail Notification @relation(fields: [notificationEmailId], references: [id])
 
   @@index([notificationEmailId])
 }

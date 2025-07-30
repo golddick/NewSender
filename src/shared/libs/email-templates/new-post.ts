@@ -92,7 +92,7 @@ export function newPostNotificationTemplate({
 
     ${
       featuredImage
-        ? `<img 
+        && `<img 
             src="${featuredImage}" 
             alt="${title}" 
             style="
@@ -103,7 +103,7 @@ export function newPostNotificationTemplate({
               object-fit: cover;
             "
           />`
-        : ""
+        
     }
 
     <div style="
@@ -157,7 +157,7 @@ export function newPostNotificationTemplate({
       border-top: 1px solid #e5e5e5;
       padding-top: 12px;
       color: #999;
-      font-size: 12px;
+      font-size: 10px;
       line-height: 1.5;
     ">
       <p style="margin: 0;">

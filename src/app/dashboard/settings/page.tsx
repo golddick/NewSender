@@ -12,6 +12,9 @@ import Cookies from "js-cookie";
 import { ICONS } from "@/shared/utils/icons";
 import toast from "react-hot-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SubscriptionSettings } from "./_component/Sub-management";
+import KYCPage from "./_component/KYC";
+import { NotificationEmailList } from "./_component/Notification-Management";
 
 const Page = () => {
   const { activeItem } = useSettingsFilter();
@@ -97,6 +100,24 @@ const Page = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {activeItem === "KYC" && (
+        <div className="w-full  flex items-center justify-center overflow-y-auto m-auto mt-10 ">
+          <KYCPage/>
+        </div>
+      )}
+
+      {activeItem === "Subscription Management" && (
+        <div className="w-full  flex items-center justify-center overflow-y-auto m-auto mt-10 ">
+          <SubscriptionSettings/>
+        </div>
+      )}
+
+      {activeItem === "Notification" && (
+        <div className="w-full  flex items-center justify-center overflow-y-auto m-auto mt-10 ">
+          <NotificationEmailList/>
         </div>
       )}
     </div>

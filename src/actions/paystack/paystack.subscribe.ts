@@ -1,127 +1,17 @@
-// "use server";
-
-// import Membership from "@/models/membership.model";
-// import { connectDb } from "@/shared/libs/db";
-// import { currentUser } from "@clerk/nextjs/server";
-// import axios from "axios";
-
-// const PLAN_CONFIG = {
-//   "PLN_qqs88g3s909068i": { amount: 50000, name: "LUNCH" },
-//   "PLN_zpaqmox70eunvd9": { amount: 540000, name: "LUNCH" },
-//   "PLN_4idp8h4m8ptak6k": { amount: 120000, name: "SCALE" },
-//   "PLN_l1ck8bvf49k9nhx": { amount: 1000000, name: "SCALE" },
-// };
-
-// export const paystackSubscribe = async ({
-//   planCode,
-//   userId,
-// }: {
-//   planCode: string;
-//   userId: string;
-// }) => {
-//   try {
-//     // 1. Get current user from Clerk
-//     const user = await currentUser();
-//     if (!user) {
-//       throw new Error("User not authenticated");
-//     }
-
-//     console.log("User from Clerk:", user);
-
-//     // 2. Get user's email (primary email address)
-//     const email = user.emailAddresses.find(
-//       (email) => email.id === user.primaryEmailAddressId
-//     )?.emailAddress;
-
-//     if (!email) {
-//       throw new Error("User email not found");
-//     }
-
-//     // 3. Verify Paystack configuration
-//     const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
-//     const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL;
-    
-//     if (!paystackSecret || !websiteUrl) {
-//       throw new Error("Payment system configuration error");
-//     }
-
-//     // 4. Connect to database
-//     await connectDb();
-
-//     // 5. Get user membership
-//     const membership = await Membership.findOne({ userId });
-//     if (!membership?.paystackCustomerId) {
-//       throw new Error("User payment profile not set up");
-//     }
-
-//     // 6. Verify plan exists
-//     const planConfig = PLAN_CONFIG[planCode as keyof typeof PLAN_CONFIG];
-//     if (!planConfig) {
-//       throw new Error("Invalid subscription plan");
-//     }
-
-//     // 7. Initialize transaction
-//     const response = await axios.post(
-//       "https://api.paystack.co/transaction/initialize",
-//       {
-//         email: email, // Use the email from Clerk
-//         amount: planConfig.amount * 100,
-//         plan: planCode,
-//         metadata: {
-//           userId,
-//           planName: planConfig.name,
-//           planCode
-//         },
-//         callback_url: `${websiteUrl}/success`,
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${paystackSecret}`,
-//           "Content-Type": "application/json",
-//         },
-//         timeout: 10000,
-//       }
-//     );
-
-//     if (!response.data?.status || !response.data.data?.authorization_url) {
-//       throw new Error("Payment gateway returned invalid response");
-//     }
-
-//     return response.data.data.authorization_url;
-
-//   } catch (error: any) {
-//     console.error("Paystack Error:", {
-//       message: error.message,
-//       response: error.response?.data,
-//     });
-    
-//     throw new Error(
-//       error.response?.data?.message || 
-//       "Failed to initialize payment. Please try again later."
-//     );
-//   }
-// };
-
-
-
 'use server';
 
+import { PLAN_CONFIG } from '@/lib/planLimit';
 import { db } from '@/shared/libs/database';
 import { currentUser } from '@clerk/nextjs/server';
 import axios from 'axios';
 
-const PLAN_CONFIG = {
-  "PLN_xpxme65ldog950p": { amount: 15000, name: "LAUNCH" },
-  // "PLN_zpaqmox70eunvd9": { amount: 540000, name: "LUNCH" },
-  "PLN_4idp8h4m8ptak6k": { amount: 50000, name: "SCALE" },
-  // "PLN_l1ck8bvf49k9nhx": { amount: 1000000, name: "SCALE" },
-} as const;
-
 export const paystackSubscribe = async ({
-  planCode,
+  planName,
+  billingCycle,
   userId,
 }: {
-  planCode: string;
+  planName: keyof typeof PLAN_CONFIG;
+  billingCycle: "monthly" | "yearly";
   userId: string;
 }) => {
   try {
@@ -131,8 +21,7 @@ export const paystackSubscribe = async ({
       throw new Error("User not authenticated");
     }
 
-
-    // 2. Get user's email (primary email address)
+    // 2. Get user's email
     const email = user.emailAddresses.find(
       (email) => email.id === user.primaryEmailAddressId
     )?.emailAddress;
@@ -143,26 +32,25 @@ export const paystackSubscribe = async ({
 
     // 3. Verify Paystack configuration
     const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
-    const websiteUrl = 'http://localhost:3003/';
-    // const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL;
-    
+    const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || 'http://localhost:3003';
+
     if (!paystackSecret || !websiteUrl) {
       throw new Error("Payment system configuration error");
     }
 
     // 4. Get user membership using Prisma
     const membership = await db.membership.findUnique({
-      where: { userId }
+      where: { userId },
     });
 
     if (!membership?.paystackCustomerId) {
       throw new Error("User payment profile not set up");
     }
 
-    // 5. Verify plan exists with type safety
-    const planConfig = PLAN_CONFIG[planCode as keyof typeof PLAN_CONFIG];
+    // 5. Verify plan exists with billing cycle
+    const planConfig = PLAN_CONFIG[planName]?.[billingCycle];
     if (!planConfig) {
-      throw new Error("Invalid subscription plan");
+      throw new Error("Invalid subscription plan or billing cycle");
     }
 
     // 6. Initialize transaction with Paystack
@@ -171,11 +59,12 @@ export const paystackSubscribe = async ({
       {
         email,
         amount: planConfig.amount * 100, // Convert to kobo
-        plan: planCode,
+        plan: planConfig.id,
         metadata: {
           userId,
-          planName: planConfig.name,
-          planCode
+          planName,
+          planCode: planConfig.id,
+          billingCycle,
         },
         callback_url: `${websiteUrl}/success`,
       },
@@ -196,15 +85,104 @@ export const paystackSubscribe = async ({
 
   } catch (error: unknown) {
     console.error("Paystack Error:", error);
-    
+
     let errorMessage = "Failed to initialize payment. Please try again later.";
-    
+
     if (error instanceof Error) {
       errorMessage = error.message;
     } else if (axios.isAxiosError(error)) {
       errorMessage = error.response?.data?.message || error.message;
     }
-    
+
     throw new Error(errorMessage);
   }
 };
+
+
+
+
+// import { NextResponse } from "next/server";
+// import { db } from "@/shared/libs/database";
+// import { PLAN_CONFIG } from "@/lib/planLimit";
+// import { headers } from "next/headers";
+// import crypto from "crypto";
+// import { Plan } from "@prisma/client";
+
+// export async function POST(req: Request) {
+//   try {
+//     const secret = process.env.PAYSTACK_SECRET_KEY!;
+//     const rawBody = await req.text();
+//   const reqHeaders = await headers();
+//     const signature = reqHeaders.get("x-paystack-signature");
+
+//     // 1️⃣ Verify signature
+//     const hash = crypto
+//       .createHmac("sha512", secret)
+//       .update(rawBody)
+//       .digest("hex");
+
+//     if (hash !== signature) {
+//       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+//     }
+
+//     const event = JSON.parse(rawBody);
+
+//     // 2️⃣ Handle subscription payment success
+//     if (event.event === "charge.success" || event.event === "subscription.create") {
+//       const { metadata, plan, amount, customer } = event.data;
+//       const userId = metadata?.userId;
+//       const planCode = plan?.plan_code;
+
+//       if (!userId || !planCode) {
+//         return NextResponse.json({ error: "Invalid webhook payload" }, { status: 400 });
+//       }
+
+//       // 3️⃣ Match plan in PLAN_CONFIG by ID
+//       let selectedPlan: { name: string; billingCycle: "monthly" | "yearly"; amount: number } | null = null;
+
+//       for (const [planName, planConfig] of Object.entries(PLAN_CONFIG)) {
+//         if (planConfig.monthly.id === planCode) {
+//           selectedPlan = { name: planName, billingCycle: "monthly", amount: planConfig.monthly.amount };
+//           break;
+//         }
+//         if (planConfig.yearly.id === planCode) {
+//           selectedPlan = { name: planName, billingCycle: "yearly", amount: planConfig.yearly.amount };
+//           break;
+//         }
+//       }
+
+//       if (!selectedPlan) {
+//         return NextResponse.json({ error: "Plan not found" }, { status: 400 });
+//       }
+
+//       // 4️⃣ Update membership
+//       await db.membership.update({
+//         where: { userId },
+//         data: {
+//           plan: selectedPlan.name as Plan,
+//           amount: selectedPlan.amount,
+//           subscriptionStatus: "active",
+//           currentPeriodEnd: new Date(Date.now() + (selectedPlan.billingCycle === "yearly" ? 365 : 30) * 24 * 60 * 60 * 1000),
+//           nextPaymentDate: new Date(Date.now() + (selectedPlan.billingCycle === "yearly" ? 365 : 30) * 24 * 60 * 60 * 1000),
+//         },
+//       });
+
+//       // 5️⃣ Save invoice
+//       await db.invoice.create({
+//         data: {
+//           userId,
+//           description: `${selectedPlan.name} Plan - ${selectedPlan.billingCycle}`,
+//           amount,
+//           status: "paid",
+//           invoiceUrl: event.data.authorization?.receipt_url || "",
+//           date: new Date(),
+//         },
+//       });
+//     }
+
+//     return NextResponse.json({ success: true });
+//   } catch (error: any) {
+//     console.error("Paystack Webhook Error:", error);
+//     return NextResponse.json({ error: error.message || "Webhook failed" }, { status: 500 });
+//   }
+// }

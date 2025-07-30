@@ -6,7 +6,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 
 const Pricing = () => {
-  const [active, setActive] = useState("Monthly");
+ const [active, setActive] = useState<"Monthly" | "Yearly">("Monthly");
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
@@ -89,5 +89,5 @@ const Pricing = () => {
     </div>
   );
 };
-
+ 
 export default Pricing;

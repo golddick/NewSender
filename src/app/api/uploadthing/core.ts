@@ -66,6 +66,31 @@ export const ourFileRouter = {
         fileUrl:  file.ufsUrl || file.url,
       };
     }),
+
+
+ kycDocument: f({
+    image: { maxFileSize: "4MB", maxFileCount: 3 },
+    pdf: { maxFileSize: "4MB", maxFileCount: 3 },
+  })
+    .middleware(async () => {
+      const user = await currentUser();
+      if (!user) throw new UploadThingError("Unauthorized");
+      return { userId: user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("KYC Upload complete for:", metadata.userId);
+      console.log("File URL:", file.ufsUrl || file.url);
+      console.log("File Type:", file.type);
+
+      return {
+        uploadedBy: metadata.userId,
+        fileUrl: file.ufsUrl || file.url,
+        fileType: file.type,
+      };
+    }),
+
+
+
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
