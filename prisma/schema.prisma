@@ -341,11 +341,17 @@ enum NotificationType {
   SMS
 }
 
-enum NotificationCategory {
+enum NewsletterOwnerNotificationCategory {
+  WELCOME
+  NEWSLETTER
+  NEW_BLOG
+}
+enum SystemNotificationCategory {
   WELCOME
   NEWSLETTER
   NEW_BLOG
   BLOG_APPROVAL
+  BLOG_POST_ENAGEMENT
   NEW_KYC
   KYC_APPROVAL
   PAYMENT_SUCCESS
@@ -446,7 +452,7 @@ model Membership {
   blogComments               BlogComment[]
   reportedComments           ReportedComment[]
   emails                    Email[]
-  notificationEmails        Notification[]
+  notificationEmails        NewsletterOwnerNotification[]
   notificationSettings      NotificationSettings[]
   kyc                       KYC[]
   invoices                  Invoice[]
@@ -678,7 +684,7 @@ model Integration {
   Campaign   Campaign[]
   Subscriber Subscriber[]
   Email      Email[]
-  notificationEmail Notification[]
+  notificationEmail NewsletterOwnerNotification[]
 
   @@index([userId])
   @@index([category])
@@ -775,13 +781,14 @@ model Email {
   updatedAt DateTime @updatedAt
 }
 
-model Notification {
+model NewsletterOwnerNotification {
   id                String              @id @default(uuid())
   type              NotificationType
-  category          NotificationCategory
+  category          NewsletterOwnerNotificationCategory
   title             String
-  content           String
+  content           Json
   textContent       String?
+  htmlContent       String?               
   status            NotificationStatus  @default(PENDING)
   priority          NotificationPriority @default(MEDIUM)
   
@@ -820,6 +827,50 @@ model Notification {
   NotificationEmailClickedLink NotificationEmailClickedLink[]
   
   @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([category])
+}
+model SystemNotification {
+  id                String              @id @default(uuid())
+  type              NotificationType
+  category          SystemNotificationCategory
+  title             String
+  content           Json
+  textContent       String?
+  htmlContent       String?               
+  status            NotificationStatus  @default(PENDING)
+  priority          NotificationPriority @default(MEDIUM)
+  
+
+  
+  recipient         Int                 @default(0)
+  
+  // Email specific fields
+  emailsSent        Int?                @default(0)
+  openCount         Int?                @default(0)
+  clickCount        Int?                @default(0)
+  recipients        Int?                @default(0)
+  bounceCount       Int?                @default(0)
+  openedByEmails    String[] @default([])
+  clickedByEmails   String[] @default([])
+  lastOpened        DateTime?
+  lastClicked       DateTime?
+  
+  
+  // System notification metadata
+  metadata          Json?
+  
+  // Timestamps
+  sentAt            DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Read status
+  read              Boolean             @default(false)
+
+  NotificationEmailClickedLink NotificationEmailClickedLink[]
+  
   @@index([status])
   @@index([type])
   @@index([category])
@@ -877,13 +928,15 @@ model ClickedLink {
 }
 model NotificationEmailClickedLink {
   id        String   @id @default(uuid())
-  notificationEmailId String
+  notificationEmailId String?
+  systemNotificationId String?
   url       String
   clickedAt DateTime @default(now())
   clickedBy String?
 
   
-  notificationEmail Notification @relation(fields: [notificationEmailId], references: [id])
+  notificationEmail NewsletterOwnerNotification? @relation(fields: [notificationEmailId], references: [id])
+  systemNotification SystemNotification? @relation(fields: [systemNotificationId], references: [id])
 
   @@index([notificationEmailId])
 }

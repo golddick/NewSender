@@ -90,4 +90,46 @@ type PlanType = {
 
 
 
-// export Membership
+// types/notification.ts
+
+export interface NotificationContent {
+  title: string;
+  subtitle: string;
+  mainHeading: string;
+  mainContent: string;
+  features: string[];
+  details: Record<string, string>;
+  ctaText: string;
+  ctaUrl: string;
+}
+
+export interface CreateNotificationInput {
+  type: NotificationType;
+  category: NotificationCategory;
+  title: string;
+  content: string;
+  textContent?: string;
+  priority?: NotificationPriority;
+  userId: string;
+  metadata?: any;
+  integrationId?: string;
+}
+
+export interface Notification extends CreateNotificationInput {
+  id: string;
+  status: NotificationStatus;
+  recipient: number;
+  emailsSent?: number;
+  openCount?: number;
+  clickCount?: number;
+  recipients?: number;
+  bounceCount?: number;
+  openedByEmails: string[];
+  clickedByEmails: string[];
+  lastOpened?: Date;
+  lastClicked?: Date;
+  sentAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  read: boolean;
+}

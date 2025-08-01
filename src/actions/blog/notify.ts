@@ -133,7 +133,7 @@
 import { db } from '@/shared/libs/database';
 import { newPostNotificationTemplate } from '@/shared/libs/email-templates/new-post';
 import { sendNotificationEmail } from '@/shared/utils/notificationEmail.sender';
-import { NotificationType, NotificationCategory, NotificationStatus } from '@prisma/client';
+import { NotificationType, NotificationStatus, NewsletterOwnerNotificationCategory } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 interface NotifyParams {
@@ -192,14 +192,14 @@ export async function notifySubscribersAboutNewPost({
     });
 
     // 3. Create a single notification record for all subscribers
-    const notification = await db.notification.create({
+    const notification = await db.newsletterOwnerNotification.create({
       data: {
         type: 'EMAIL',
-        category: 'BLOG_APPROVAL',
+        category: NewsletterOwnerNotificationCategory.NEW_BLOG,
         title: `New Post: ${post.title}`,
         content: content,
         textContent: post.excerpt || post.subtitle || post.title,
-        status: 'PENDING',
+        status: 'DRAFT',
         priority: 'MEDIUM',
         userId: post.authorId,
         recipient: 0, // Store admin email as primary recipient
@@ -208,7 +208,6 @@ export async function notifySubscribersAboutNewPost({
           postSlug: post.slug,
           postTitle: post.title,
           campaignId: campaignId,
-          subscriberEmails: userEmails, // Store all subscriber emails in metadata
           totalRecipients: userEmails.length,
         },
         integrationId: integrationId,
@@ -235,7 +234,7 @@ export async function notifySubscribersAboutNewPost({
     console.log('[NOTIFY_SUBSCRIBERS_RESULT]', result);
 
     // 5. Update notification status based on result
-    await db.notification.update({
+    await db.newsletterOwnerNotification.update({
       where: { id: notification.id },
       data: {
         status: result.success ? 'SENT' : 'FAILED',
@@ -254,7 +253,7 @@ export async function notifySubscribersAboutNewPost({
     console.error('[NOTIFY_SUBSCRIBERS_ERROR]', error);
 
     // Update notification to failed status if error occurs
-    await db.notification.updateMany({
+    await db.newsletterOwnerNotification.updateMany({
       where: {
         metadata: { path: ['postId'], equals: post.id }
       },

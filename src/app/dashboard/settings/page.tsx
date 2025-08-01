@@ -14,7 +14,9 @@ import toast from "react-hot-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SubscriptionSettings } from "./_component/Sub-management";
 import KYCPage from "./_component/KYC";
-import { NotificationEmailList } from "./_component/Notification-Management";
+// import { NotificationEmailList } from "./_component/Notification-Management";
+import ApiKey from "./_component/ApiKey";
+import { NotificationCenter } from "./_component/Notification-Management";
 
 const Page = () => {
   const { activeItem } = useSettingsFilter();
@@ -61,46 +63,17 @@ const Page = () => {
   };
 
   return (
-    <div className="w-full p-5">
+    <div className=" w-full ">
+          
       <SettingsTab />
-      {activeItem === "Customize Profile" && (
+    <div className=" mt-5">
+        {activeItem === "Customize Profile" && (
         <div className="w-full flex justify-center">
           <UserProfile />
         </div>
       )}
       {activeItem === "API Access" && (
-        <div>
-          {data?.plan === "FREE" ? (
-            <div className="w-full h-[90vh] flex items-center justify-center">
-              <h3>
-                Please update your subscription plan to get access of API...!
-              </h3>
-            </div>
-          ) : (
-            <div className="p-4 w-full overflow-hidden">
-              <h3>API KEY:</h3>
-              <ScrollArea className="max-h-[200px] w-full rounded-md border p-4 whitespace-pre-line break-words copy-text flex-wrap flex">
-                {apiKey}
-              </ScrollArea>
-              <div className="flex items-center">
-                <div
-                  className="h-[38px] w-[90px] rounded my-3 cursor-pointer bg-[#DFE7FF] flex items-center justify-center"
-                  onClick={handleCopy}
-                >
-                  <span className="text-lg">{ICONS.copy}</span>
-                  <span className="pl-1">copy</span>
-                </div>
-                <div
-                  className="h-[38px] w-[120px] ml-4 rounded my-3 cursor-pointer bg-[#DFE7FF] flex items-center justify-center"
-                  onClick={handleRegenerateApiKey}
-                >
-                  <span className="text-lg">{ICONS.regenerate}</span>
-                  <span className="pl-1">Regenerate</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <ApiKey />
       )}
 
       {activeItem === "KYC" && (
@@ -117,9 +90,10 @@ const Page = () => {
 
       {activeItem === "Notification" && (
         <div className="w-full  flex items-center justify-center overflow-y-auto m-auto mt-10 ">
-          <NotificationEmailList/>
+          <NotificationCenter/>
         </div>
       )}
+    </div>
     </div>
   );
 };

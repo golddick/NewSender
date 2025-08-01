@@ -310,7 +310,7 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
     if (!smtpAvailable) throw new Error("Email server unavailable");
 
     // Update the notification record (not NotificationEmail anymore)
-    await db.notification.update({
+    await db.newsletterOwnerNotification.update({
       where: { id: emailId },
       data: {
         content: content,
@@ -423,7 +423,7 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
     }
 
     // Update notification with final stats
-    await db.notification.update({
+    await db.newsletterOwnerNotification.update({
       where: { id: emailId },
       data: {
         status: 'SENT',
@@ -459,7 +459,7 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
   } catch (error) {
     console.error('[NOTIFICATION_SEND_ERROR]', error);
 
-    await db.notification.update({
+    await db.newsletterOwnerNotification.update({
       where: { id: emailId },
       data: { status: 'FAILED' },
     });

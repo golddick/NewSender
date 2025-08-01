@@ -136,7 +136,7 @@ export const recordOpen = async (
   recipientEmail: string
 ): Promise<boolean> => {
   try {
-    const notification = await db.notification.findUnique({
+    const notification = await db.newsletterOwnerNotification.findUnique({
       where: { id: notificationId },
       select: {
         id: true,
@@ -156,7 +156,7 @@ export const recordOpen = async (
 
     // Update lastOpened timestamp even for repeated opens
     if (alreadyOpened) {
-      await db.notification.update({
+      await db.newsletterOwnerNotification.update({
         where: { id: notificationId },
         data: { 
           lastOpened: new Date(),
@@ -171,7 +171,7 @@ export const recordOpen = async (
     }
 
     // Update notification with open data
-    await db.notification.update({
+    await db.newsletterOwnerNotification.update({
       where: { id: notificationId },
       data: {
         openCount: { increment: 1 },
@@ -201,7 +201,7 @@ export const recordClick = async (
   recipientEmail: string
 ): Promise<boolean> => {
   try {
-    const notification = await db.notification.findUnique({
+    const notification = await db.newsletterOwnerNotification.findUnique({
       where: { id: notificationId },
       select: {
         id: true,
@@ -226,7 +226,7 @@ export const recordClick = async (
 
     // Update notification with click data
     await db.$transaction([
-      db.notification.update({
+      db.newsletterOwnerNotification.update({
         where: { id: notificationId },
         data: {
           clickCount: { increment: 1 },
