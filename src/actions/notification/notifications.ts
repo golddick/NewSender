@@ -153,7 +153,6 @@ export async function deleteNotification(
 
 
 
-
 interface CreateNotificationInput {
   userId: string;
   type: NotificationType;
@@ -163,11 +162,28 @@ interface CreateNotificationInput {
   textContent?: string;
   priority: NotificationPriority;
   metadata?: any;
-  htmlContent: string; // <-- Add this
+  htmlContent: string;
 }
 
 export async function createNotification(data: CreateNotificationInput) {
   try {
+    // First check if a notification with same category and priority already exists
+    const existingNotification = await db.newsletterOwnerNotification.findFirst({
+      where: {
+        userId: data.userId,
+        category: data.category,
+        priority: data.priority,
+      },
+    });
+
+    if (existingNotification) {
+      return { 
+        success: false, 
+        error: `A ${data.category} notification with ${data.priority} priority already exists. 
+                Each category can only have one notification per priority level.` 
+      };
+    }
+
     const notification = await db.newsletterOwnerNotification.create({
       data: {
         userId: data.userId,
@@ -178,13 +194,54 @@ export async function createNotification(data: CreateNotificationInput) {
         textContent: data.textContent || null,
         priority: data.priority,
         metadata: data.metadata || {},
-        htmlContent: data.htmlContent, // <-- Save HTML
+        htmlContent: data.htmlContent,
       },
     });
 
+    revalidatePath("/dashboard/settings/notification");
+    revalidatePath("/dashboard/settings");
     return { success: true, notification };
   } catch (error: any) {
     console.error("Create notification error:", error);
     return { success: false, error: error.message };
   }
 }
+
+
+
+// interface CreateNotificationInput {
+//   userId: string;
+//   type: NotificationType;
+//   category: NewsletterOwnerNotificationCategory;
+//   title: string;
+//   content: any;
+//   textContent?: string;
+//   priority: NotificationPriority;
+//   metadata?: any;
+//   htmlContent: string; // <-- Add this
+// }
+
+// export async function createNotification(data: CreateNotificationInput) {
+//   try {
+//     const notification = await db.newsletterOwnerNotification.create({
+//       data: {
+//         userId: data.userId,
+//         type: data.type,
+//         category: data.category,
+//         title: data.title,
+//         content: data.content,
+//         textContent: data.textContent || null,
+//         priority: data.priority,
+//         metadata: data.metadata || {},
+//         htmlContent: data.htmlContent, // <-- Save HTML
+//       },
+//     });
+
+//     revalidatePath("/dashboard/settings/notification");
+//     revalidatePath("/dashboard/settings");
+//     return { success: true, notification };
+//   } catch (error: any) {
+//     console.error("Create notification error:", error);
+//     return { success: false, error: error.message };
+//   }
+// }

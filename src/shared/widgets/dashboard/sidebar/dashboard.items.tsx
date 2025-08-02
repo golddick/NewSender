@@ -5,7 +5,7 @@ import { useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { redirect, usePathname } from "next/navigation";
 import { useEffect } from "react";
-
+ 
 interface DashboardSideBarProps {
   onNavigate?: () => void;
   bottomContent?: boolean;

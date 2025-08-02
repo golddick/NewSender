@@ -1224,7 +1224,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -1273,6 +1273,8 @@ import {  NotificationStatus, NotificationType, NotificationPriority, Newsletter
 import Loader from "@/components/Loader"
 import { useUser } from "@clerk/nextjs"
 import Link from "next/link"
+import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
 
 interface NotificationSettings {
   emailNotifications: boolean
@@ -1306,11 +1308,10 @@ interface NotificationContent {
 }
 
 export function NotificationCenter() {
-    const { toast } = useToast()
-  const { user } = useUser()
+ const { user } = useUser()
   const userId = user?.id
- 
-  
+  const router = useRouter()
+
   const {
     notifications,
     loading,
@@ -1351,9 +1352,16 @@ export function NotificationCenter() {
     achievementNotifications: true
   })
 
-   if (!userId) {
-    return <Loader />
-  }
+//    if (!userId) {
+//     useEffect(() => {
+//       toast.error("You are not logged in. Please log in to access this feature.")
+//       router.push('/sign-in')
+//     }, [userId ,router])
+//     return null
+//   }
+
+console.log(userId, 'user id not man ')
+  
 
   const filteredNotifications = notifications.filter((notification) => {
     const matchesSearch =
@@ -1428,59 +1436,36 @@ export function NotificationCenter() {
 
   const handleSettingChange = (key: keyof NotificationSettings, value: boolean) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
-    toast({
-      title: "Settings Updated",
-      description: `${key.replace(/([A-Z])/g, " $1").toLowerCase()} ${value ? "enabled" : "disabled"}`,
-    })
+    toast.success(`Settings updated: ${key.replace(/([A-Z])/g, " $1").toLowerCase()} ${value? "enabled" : "disabled"}`)
   }
 
   const handleDelete = async (notificationId: string) => {
     try {
       await deleteNotification(notificationId)
-      toast({
-        title: "Notification Deleted",
-        description: "The notification has been deleted successfully.",
-      })
+        toast.success("Notification deleted successfully")
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete notification",
-        variant: "destructive",
-      })
+    toast.error("Failed to delete notification")
     }
   }
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await markAsRead(notificationId)
-      toast({
-        title: "Marked as Read",
-        description: "The notification has been marked as read.",
-      })
+      toast.success("Notification marked as read successfully")
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to mark notification as read",
-        variant: "destructive",
-      })
+      toast.error("Failed to mark notification as read")
     }
   }
 
   const handleCopyContent = (content: string | null) => {
     if (!content) {
-      toast({
-        title: "No Content",
-        description: "There is no HTML content to copy.",
-        variant: "destructive",
-      })
+      toast.error("Failed to copy content")
       return
     }
     
     navigator.clipboard.writeText(content)
-    toast({
-      title: "Content Copied",
-      description: "Notification content has been copied to clipboard.",
-    })
+   
+    toast.success('Notification content has been copied to clipboard')
   }
 
   const calculateEngagementRate = (notification: NewsletterOwnerNotification) => {
@@ -1499,10 +1484,6 @@ export function NotificationCenter() {
     return <Loader />
   }
 
-  console.log(selectedNotification, 'Selected notif')
-
-  console.log(notifications, 'not')
-
 
   if (error) {
     return (
@@ -1520,14 +1501,14 @@ export function NotificationCenter() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 w-full">
+    <div className="min-h-screen bg-white w-full container mx-auto  rounded-lg shadow-lg">
       {/* Header */}
-      <div className="bg-black text-white p-4 md:p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="bg-transparent text-black p-4 md:p-6">
+        <div className="w-full">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center">
-                <Bell className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 mr-2" />
+                <Bell className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
                 Notifications Center
                 {unreadCount > 0 && (
                   <Badge className="ml-2 sm:ml-3 bg-red-500 text-white text-xs sm:text-sm">
@@ -1535,21 +1516,21 @@ export function NotificationCenter() {
                   </Badge>
                 )}
               </h1>
-              <p className="text-gray-300 mt-1 text-xs sm:text-sm md:text-base">
+              {/* <p className="text-gray-300 mt-1 text-xs sm:text-sm md:text-base">
                 Manage all your notifications and email communications
-              </p>
+              </p> */}
             </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                className="border-gray-600 text-white hover:bg-gray-800 bg-transparent text-xs sm:text-sm h-8 sm:h-9 md:h-10"
+                className="border-gray-600 text-black hover:bg-white bg-transparent text-xs sm:text-sm h-8 sm:h-9 md:h-10"
                 onClick={() => markAllAsRead()}
               >
                 <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 Mark All Read
               </Button>
               <Link href={'/dashboard/settings/notification'}>
-                <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-xs sm:text-sm h-8 sm:h-9 md:h-10">
+                <Button className="bg-gold-600 hover:bg-black hover:text-white text-black font-semibold text-xs sm:text-sm h-8 sm:h-9 md:h-10">
                   <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                   Create Notification Mail
                 </Button>
@@ -1657,7 +1638,7 @@ export function NotificationCenter() {
                   <Card
                     key={notification.id}
                     className={`border-0 shadow-lg hover:shadow-xl transition-all duration-300 ${
-                      !notification.read ? "border-l-4 border-l-yellow-500 bg-yellow-50" : ""
+                      !notification.read ? "border-l-4 border-l-gold-600 bg-yellow-50" : ""
                     }`}
                   >
                     <CardContent className="p-3 sm:p-4 md:p-6">
@@ -1697,7 +1678,7 @@ export function NotificationCenter() {
                           <p className="text-xs sm:text-sm text-gray-600 mt-2 line-clamp-2">
                             {typeof notification.content === 'string' 
                                 ? notification.content 
-                                : (notification.content as NotificationContent)?.ctaText || 
+                                : (notification.content as NotificationContent)?.title || 
                                 (notification.content as NotificationContent)?.body || 
                                 notification.textContent || 
                                 'No content available'}
@@ -1779,7 +1760,7 @@ export function NotificationCenter() {
                             </Button>
                           )}
 
-                          {!notification.read && (
+                          {!notification.read || notification.type === 'EMAIL' && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -1808,7 +1789,7 @@ export function NotificationCenter() {
                                   View Content
                                 </DropdownMenuItem>
                               )}
-                              {!notification.read && (
+                              {!notification.read || notification.type === 'EMAIL' && (
                                 <DropdownMenuItem onClick={() => handleMarkAsRead(notification.id)}>
                                   <CheckCircle className="w-3 h-3 mr-2" />
                                   Mark as Read
@@ -2012,11 +1993,7 @@ export function NotificationCenter() {
                     className="text-xs sm:text-sm h-7 sm:h-8 md:h-9"
                     onClick={() => {
                       if (!selectedNotification.htmlContent) {
-                        toast({
-                          title: "No Content",
-                          description: "There is no HTML content to open.",
-                          variant: "destructive",
-                        })
+                        toast.error('There is no HTML content to open.')
                         return
                       }
                       window.open(

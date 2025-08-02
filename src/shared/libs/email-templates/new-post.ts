@@ -97,7 +97,8 @@ export function newPostNotificationTemplate({
             alt="${title}" 
             style="
               max-width: 100%;
-              max-height: 200px;
+               max-height: 200px;
+               margin: 0 auto;
               border-radius: 6px;
               margin-bottom: 16px;
               object-fit: cover;

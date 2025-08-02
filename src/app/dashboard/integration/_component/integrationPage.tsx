@@ -9,6 +9,7 @@ import { AddIntegrationDialog } from "./add-integration-dialog"
 import { deleteIntegration, getIntegrations, updateIntegrationStatus } from "@/actions/application-Integration/application"
 import toast from "react-hot-toast"
 import { IntegrationStatus } from "@prisma/client"
+import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu"
 
 interface Integration {
   id: string

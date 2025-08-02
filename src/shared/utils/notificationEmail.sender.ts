@@ -313,7 +313,7 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
     await db.newsletterOwnerNotification.update({
       where: { id: emailId },
       data: {
-        content: content,
+        content: contentJson,
         status: "PENDING",
         sentAt: new Date(),
       }
@@ -427,8 +427,8 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
       where: { id: emailId },
       data: {
         status: 'SENT',
-        content: content,
-        textContent: contentJson,
+        content: contentJson,
+        textContent: content,
         sentAt: new Date(),
         emailsSent: totalAccepted,
         recipients: totalAccepted,

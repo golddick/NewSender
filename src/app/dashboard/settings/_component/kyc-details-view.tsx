@@ -457,12 +457,13 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
-              <div className="relative w-full h-35 ">
+              <div className="relative">
                 <Image
-                  src={kycData.livePhoto || "/placeholder.svg"}
+                  src={kycData.livePhoto }
                   alt="Live verification photo"
-                  fill
-                  className=" object-cover rounded-lg border-2 border-gray-200 absolute"
+                  width={200}
+                  height={200}
+                  className=" object-cover rounded-lg border-2 border-gray-200 "
                 />
                 <div className="absolute -top-2 -right-2">
                   <Badge className="bg-green-100 text-green-800 hover:bg-green-100 text-xs">
@@ -488,12 +489,13 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
                       <DialogTitle>Live Verification Photo</DialogTitle>
                       <DialogDescription>Photo captured during KYC verification process</DialogDescription>
                     </DialogHeader>
-                    <div className="flex justify-center relative  max-w-full h-auto">
+                    <div className="flex justify-center relative  ">
                       <Image
-                        fill
+                        width={300}
+                        height={300}
                         src={kycData.livePhoto || "/logo.jpg"}
                         alt="Live verification photo"
-                        className=" absolute rounded-lg"
+                        className="  rounded-lg"
                       />
                     </div>
                   </DialogContent>

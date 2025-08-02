@@ -85,86 +85,139 @@ export function CampaignPreview({ appName, campaignId }: CampaignPreviewProps) {
   const [loading, setLoading] = useState(true)
   const [updatingStatus, setUpdatingStatus] = useState(false)
   const [campaign, setCampaign] = useState<Campaign | null>(null)
-  // const [emailTitle, setEmailTitle] = useState("");
   const [open, setOpen] = useState(false);
   const router = useRouter()
   const emailEditorRef = useRef<EditorRef>(null);
   const [jsonData, setJsonData] = useState<any>(DefaultJsonData);
 
-  useEffect(() => {
-    const fetchCampaignData = async () => {
-      try {
-        setLoading(true)
-        const result = await getCampaignById(campaignId)
+  // useEffect(() => {
+  //   const fetchCampaignData = async () => {
+  //     try {
+  //       setLoading(true)
+  //       const result = await getCampaignById(campaignId)
 
-        console.log(result, `Fetched campaign data for ID: ${campaignId}`)
+  //       console.log(result, `Fetched campaign data for ID: ${campaignId}`)
         
-        if (result.error) {
-          throw new Error(result.error)
-        }
+  //       if (result.error) {
+  //         throw new Error(result.error)
+  //       }
 
-        if (!result.data) {
-          throw new Error("Campaign not found")
-        }
+  //       if (!result.data) {
+  //         throw new Error("Campaign not found")
+  //       }
 
-        // if (result.data.emailContent) {
-        //   setSubjectTitle(result.data.subject || result.data.emailSubject || "No Subject")
-        //    setJsonData(result.data.emailContent);
-        // }
 
-        if (result.data.emailContent) {
-          setSubjectTitle( result.data.emailSubject || "No Subject");
+  //       if (result.data.emailContent) {
+  //         setSubjectTitle( result.data.emailSubject || "No Subject");
 
-          try {
-            const content = typeof result.data.emailContent === 'string'
-              ? JSON.parse(result.data.emailContent)
-              : result.data.emailContent;
+  //         try {
+  //           const content = typeof result.data.emailContent === 'string'
+  //             ? JSON.parse(result.data.emailContent)
+  //             : result.data.emailContent;
 
-            if (typeof content === 'object' && content !== null) {
-              setJsonData(content);
-            } else {
-              console.warn("Invalid email content format");
-            }
-          } catch (err) {
-            console.error("Failed to parse email content:", err);
-          }
-        }
+  //           if (typeof content === 'object' && content !== null) {
+  //             setJsonData(content);
+  //           } else {
+  //             console.warn("Invalid email content format");
+  //           }
+  //         } catch (err) {
+  //           console.error("Failed to parse email content:", err);
+  //         }
+  //       }
 
         
-        // if (result.data.emailContent) {
-         
-        // } else {
-        //   setJsonData(DefaultJsonData);
-        // }
 
-        console.log(jsonData, 'jsonData')
 
-        setCampaign({
-          ...result.data,
-          lastSent: result.data.lastSent ?? "",
-          emailID: result.data.emailID ?? "",
-          emailSettings: {
-            ...result.data.emailSettings,
-            totalEmails: result.data.totalEmails,
+  //       setCampaign({
+  //         ...result.data,
+  //         lastSent: result.data.lastSent ?? "",
+  //         emailID: result.data.emailID ?? "",
+  //         emailSettings: {
+  //           ...result.data.emailSettings,
+  //           totalEmails: result.data.totalEmails,
             
-          },
-        })
-        const emailContent = campaign?.emailContent;
-        console.log(emailContent, 'emailContent')
-        console.log(campaign, 'campaign')
+  //         },
+  //       })
+  //       const emailContent = campaign?.emailContent;
+  //       console.log(emailContent, 'emailContent')
+  //       console.log(campaign, 'campaign')
       
 
-      } catch (error) {
-        console.log(error, `Error fetching campaign data for ID: ${campaignId}`)
-        toast.error(error instanceof Error ? error.message : "Failed to load campaign")
-        router.push(`/dashboard/integration/${appName}/campaigns`)
-      } finally {
-        setLoading(false)
-      }
-    }
+  //     } catch (error) {
+  //       console.log(error, `Error fetching campaign data for ID: ${campaignId}`)
+  //       toast.error(error instanceof Error ? error.message : "Failed to load campaign")
+  //       router.push(`/dashboard/integration/${appName}/campaigns`)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
 
-    fetchCampaignData()
-  }, [campaignId, appName,campaign, router, jsonData, subjectTitle]);
+  //   fetchCampaignData()
+  // }, [campaignId, appName,campaign, router, jsonData]);
+
+  useEffect(() => {
+  const fetchCampaignData = async () => {
+    try {
+      setLoading(true);
+      const result = await getCampaignById(campaignId);
+
+      console.log(result, `Fetched campaign data for ID: ${campaignId}`);
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      if (!result.data) {
+        throw new Error("Campaign not found");
+      }
+
+      // Parse email content
+      let parsedContent = null;
+      if (result.data.emailContent) {
+        setSubjectTitle(result.data.emailSubject || "No Subject");
+
+        try {
+          parsedContent = typeof result.data.emailContent === 'string'
+            ? JSON.parse(result.data.emailContent)
+            : result.data.emailContent;
+
+          if (typeof parsedContent === 'object' && parsedContent !== null) {
+            setJsonData(parsedContent);
+          } else {
+            console.warn("Invalid email content format");
+          }
+        } catch (err) {
+          console.error("Failed to parse email content:", err);
+        }
+      }
+
+      // Update campaign state
+      const updatedCampaign = {
+        ...result.data,
+        lastSent: result.data.lastSent ?? "",
+        emailID: result.data.emailID ?? "",
+        emailSettings: {
+          ...result.data.emailSettings,
+          totalEmails: result.data.totalEmails,
+        },
+      };
+      setCampaign(updatedCampaign);
+
+      // Debug logs
+      console.log(parsedContent, 'emailContent');
+      console.log(updatedCampaign, 'campaign');
+      
+    } catch (error) {
+      console.log(error, `Error fetching campaign data for ID: ${campaignId}`);
+      toast.error(error instanceof Error ? error.message : "Failed to load campaign");
+      router.push(`/dashboard/integration/${appName}/campaigns`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchCampaignData();
+}, [campaignId, appName, router]); 
 
   const handleStatusChange = async (newStatus:CampaignStatus) => {
     if (!campaign) return

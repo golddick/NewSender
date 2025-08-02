@@ -139,7 +139,7 @@ export async function createBlogPost(formData: {
       await notifySubscribersAboutNewPost({
           post: post,
           adminEmail: user.emailAddresses[0].emailAddress,  // admin email from Clerk
-          fromApplication: post.membership.userName,
+          fromApplication: post.membership.organization || post.membership.userName,
         });
     }
 

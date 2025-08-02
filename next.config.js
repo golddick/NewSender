@@ -15,7 +15,18 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "utfs.io",
-         pathname: '/f/**',
+        pathname: '/f/**',
+      },
+      // Add this new pattern for UploadThing's storage domain
+      {
+        protocol: "https",
+        hostname: "*.ufs.sh", // This will cover all UploadThing subdomains
+        pathname: '/**',
+      },
+      {
+        protocol: "https",
+        hostname: "deg9tan1ik.ufs.sh",
+        pathname: '/**',
       },
     ],
   },
