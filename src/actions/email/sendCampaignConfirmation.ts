@@ -43,16 +43,12 @@ export const sendCampaignConfirmationEmail = async ({
       throw new Error('Email template not found')
     }
 
-    // Send email using personalized content
+    // Send email using personalized content 
     const result = await sendNotificationEmail({
       userEmail: [userEmail],
       subject: notificationTemplateContent.subject || `Welcome to ${campaign || fromApplication}`,
       content: notificationTemplateContent.html ?? '',
-      contentJson: JSON.stringify({
-        subject: notificationTemplateContent.subject,
-        html: notificationTemplateContent.html,
-        text: notificationTemplateContent.text,
-      }),
+      contentJson: JSON.stringify(notificationTemplateContent.html),
       emailId: emailTemplateId,
       newsLetterOwnerId,
       adminEmail,

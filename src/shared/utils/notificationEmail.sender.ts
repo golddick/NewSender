@@ -313,7 +313,6 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
     await db.newsletterOwnerNotification.update({
       where: { id: emailId },
       data: {
-        content: contentJson,
         status: "PENDING",
         sentAt: new Date(),
       }
@@ -430,13 +429,14 @@ export const sendNotificationEmail = async (params: SendNotificationEmailParams)
         content: contentJson,
         textContent: content,
         sentAt: new Date(),
-        emailsSent: totalAccepted,
         recipients: totalAccepted,
+        emailsSent: { increment: 1 },
         metadata: {
           update: {
             messageId: lastMessageId,
             failedRecipients: failedEmails.length ? failedEmails : undefined,
             totalRecipients: userEmail.length,
+            batches: batches.length,
             successfulRecipients: totalAccepted
           }
         }

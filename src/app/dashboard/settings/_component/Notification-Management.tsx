@@ -1360,7 +1360,7 @@ export function NotificationCenter() {
 //     return null
 //   }
 
-console.log(userId, 'user id not man ')
+console.log(notifications, 'user  not man ')
   
 
   const filteredNotifications = notifications.filter((notification) => {

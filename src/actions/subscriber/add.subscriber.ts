@@ -280,8 +280,8 @@ export const addSubscriber = async ({
           title: defaultTemplate.title,
           content: defaultTemplate.content,
           status: NotificationStatus.DRAFT,
-          textContent: systemTemplate!.textContent,
-          htmlContent: systemTemplate!.htmlContent,
+          textContent: defaultTemplate.content.text,
+          htmlContent: defaultTemplate.content.html,
         },
       })
     }
@@ -323,7 +323,7 @@ export const addSubscriber = async ({
       adminEmail,
       fromApplication: integration?.name || 'TheNews',
     })
-
+ 
     return { success: true, subscriber }
   } catch (error) {
     console.error('[ADD_SUBSCRIBER_ERROR]', error)
