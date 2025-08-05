@@ -1367,7 +1367,7 @@ console.log(notifications, 'user  not man ')
     const matchesSearch =
       notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       notification.textContent?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      notification.recipient
+      notification.recipients
     const matchesStatus = statusFilter === "all" || notification.status === statusFilter
     const matchesType = typeFilter === "all" || notification.type === typeFilter
     const matchesCategory = categoryFilter === "all" || notification.category === categoryFilter
@@ -1672,6 +1672,39 @@ console.log(notifications, 'user  not man ')
                               <Badge className={`text-xs ${getPriorityBadge(notification.priority)}`}>
                                 {notification.priority}
                               </Badge>
+
+                                <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-7 sm:h-8 w-7 sm:w-8 p-0">
+                                <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span className="sr-only">More options</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="text-xs min-w-[150px]">
+                              {notification.type === "EMAIL" && (
+                                <DropdownMenuItem 
+                                  onClick={() => setSelectedNotification(notification)}
+                                  disabled={!notification.htmlContent}
+                                >
+                                  <Eye className="w-3 h-3 mr-2" />
+                                  View Content
+                                </DropdownMenuItem>
+                              )}
+                              {!notification.read || notification.type === 'EMAIL' && (
+                                <DropdownMenuItem onClick={() => handleMarkAsRead(notification.id)}>
+                                  <CheckCircle className="w-3 h-3 mr-2" />
+                                  Mark as Read
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => handleDelete(notification.id)}
+                              >
+                                <Trash2 className="w-3 h-3 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                             </div>
                           </div>
 
@@ -1692,11 +1725,11 @@ console.log(notifications, 'user  not man ')
                               </div>
                             )}
                             
-                            {notification.recipient > 0 && (
+                            {notification.recipients && notification.recipients > 0 && (
                               <div className="flex items-center gap-1">
-                                <Mail className="w-3 h-3" />
+                                <Users className="w-3 h-3" />
                                 <span className="truncate max-w-[120px] sm:max-w-[180px] md:max-w-none">
-                                  {notification.recipient}
+                                  {notification.recipients}
                                 </span>
                               </div>
                             )}
@@ -1705,9 +1738,9 @@ console.log(notifications, 'user  not man ')
                           {notification.type === "EMAIL" && notification.emailsSent && (
                             <div className="mt-2 sm:mt-3 grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 text-xs">
                               <MetricItem
-                                icon={<Users className="text-gray-500 w-3 h-3" />}
-                                value={notification.recipients?.toLocaleString() || "0"}
-                                label="Recipients"
+                                icon={<Mail className="text-gray-500 w-3 h-3" />}
+                                value={notification.emailsSent?.toLocaleString() || "0"}
+                                label="Mail Sent"
                               />
                               <MetricItem
                                 icon={<Eye className="text-blue-500 w-3 h-3" />}
@@ -1727,16 +1760,16 @@ console.log(notifications, 'user  not man ')
                             </div>
                           )}
 
-                          {notification.type === "SYSTEM" && notification.metadata && (
+                          {(notification.type === "SYSTEM" || notification.type === "EMAIL") && notification.metadata && (
                             <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-gray-50 rounded-lg text-xs">
                               <h4 className="font-semibold text-gray-700 mb-1 sm:mb-2">Additional Details:</h4>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2 ">
                                 {Object.entries(notification.metadata).map(([key, value]) => (
-                                  <div key={key} className="flex justify-between">
+                                  <div key={key} className="flex gap-2 ">
                                     <span className="text-gray-600 capitalize">
                                       {key.replace(/([A-Z])/g, " $1").toLowerCase()}:
                                     </span>
-                                    <span className="font-medium text-gray-800 truncate max-w-[100px] sm:max-w-[150px]">
+                                    <span className="font-medium text-gray-800  w-full">
                                       {typeof value === "object" ? JSON.stringify(value) : String(value)}
                                     </span>
                                   </div>
@@ -1746,7 +1779,7 @@ console.log(notifications, 'user  not man ')
                           )}
                         </div>
 
-                        <div className="flex gap-1 sm:gap-2 self-end sm:self-center">
+                        {/* <div className="flex gap-1 sm:gap-2 self-end sm:self-center">
                           {notification.type === "EMAIL" && (
                             <Button
                               variant="outline"
@@ -1804,7 +1837,7 @@ console.log(notifications, 'user  not man ')
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </div>
+                        </div> */}
                       </div>
                     </CardContent>
                   </Card>
@@ -2023,8 +2056,8 @@ console.log(notifications, 'user  not man ')
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-gray-500">Recipient</p>
-                    <p className="font-medium mt-1 truncate">{selectedNotification.recipient || 0}</p>
+                    <p className="text-gray-500">Recipients</p>
+                    <p className="font-medium mt-1 truncate">{selectedNotification.recipients || 0}</p>
                   </div>
                   {selectedNotification.sentAt && (
                     <div>
@@ -2043,7 +2076,7 @@ console.log(notifications, 'user  not man ')
                     <div>
                       <p className="font-medium">Subject: {selectedNotification.title}</p>
                       <p className="text-gray-600">
-                        From: TheNews Team &lt;hello@thenews.com&gt;
+                        From: TheNews &lt;hello@thenews.africa&gt;
                       </p>
                     </div>
                     {selectedNotification.sentAt && (

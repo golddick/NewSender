@@ -1,29 +1,29 @@
-import { recordClick } from '@/lib/trackingService-notiication-email';
-import { NextRequest, NextResponse } from 'next/server';
+
+import { NotificationEmailrecordClick } from "@/lib/trackingService-notiication-email";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const emailId = searchParams.get('emailId');
-  const rawUrl = searchParams.get('url');
-  const email = searchParams.get('email');
+  const notificationId = searchParams.get("notificationId");
+  const email = searchParams.get("email");
+  const url = searchParams.get("url");
+  const trackingId = searchParams.get("tid"); // ✅ Required tracking ID
 
-  if (!emailId || !rawUrl || !email) {
-    return new NextResponse("Missing parameters", { status: 400 });
-  }
-
-  let redirectUrl: string;
-  try { 
-    redirectUrl = decodeURIComponent(rawUrl);
-  } catch (err) {
-    console.error("Invalid redirect URL", err);
-    return new NextResponse("Invalid redirect URL", { status: 400 });
+  if (!notificationId || !email || !url || !trackingId) {
+    return new NextResponse("Missing notificationId, email, url, or trackingId", { status: 400 });
   }
 
   try {
-    await recordClick(emailId, redirectUrl, email);
-    return NextResponse.redirect(redirectUrl);
+    // Record the click with trackingId
+    await NotificationEmailrecordClick(notificationId, url, email, trackingId);
+
+    // ✅ Ensure safe redirect
+    const decodedUrl = decodeURIComponent(url);
+
+    // Redirect to the actual link (fixes 404 issue caused by encoded URL)
+    return NextResponse.redirect(decodedUrl, 302);
   } catch (error) {
-    console.error("Error processing click:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("Click tracking error:", error);
+    return new NextResponse("Failed to track click", { status: 500 });
   }
 }

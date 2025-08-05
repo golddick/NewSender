@@ -136,10 +136,12 @@ export async function createBlogPost(formData: {
 
       // Notify subscribers about the new post
 
+        const platformName = post.membership?.organization || post.membership?.userName || 'TheNews'
+
       await notifySubscribersAboutNewPost({
           post: post,
-          adminEmail: user.emailAddresses[0].emailAddress,  // admin email from Clerk
-          fromApplication: post.membership.organization || post.membership.userName,
+          adminEmail: user.emailAddresses[0].emailAddress, 
+          fromApplication: platformName
         });
     }
 

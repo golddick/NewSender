@@ -104,7 +104,7 @@ function SettingsContent() {
     if (tab) {
       setActiveItem(tab);
     }
-  }, [searchParams]);
+  }, [searchParams, setActiveItem]);
 
   return (
     <div className="w-full">

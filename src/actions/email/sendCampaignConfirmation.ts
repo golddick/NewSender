@@ -54,7 +54,7 @@ export const sendCampaignConfirmationEmail = async ({
       adminEmail,
       fromApplication,
     })
-
+ 
     if (!result.success) {
       throw new Error(result.error || 'Failed to send confirmation email')
     }

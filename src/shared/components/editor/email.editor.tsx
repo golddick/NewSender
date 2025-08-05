@@ -263,10 +263,6 @@ const Emaileditor = ({ subjectTitle }: { subjectTitle: string }) => {
 
 
 
-  // const onReady: EmailEditorProps["onReady"] = () => {
-  //   emailEditorRef.current?.editor?.loadDesign(jsonData);
-  // };
-
   const onReady: EmailEditorProps["onReady"] = useCallback(() => {
     if (emailEditorRef.current?.editor) {
       // Always use loadDesign - we've converted HTML to JSON structure

@@ -430,6 +430,7 @@ model Membership {
   currentPeriodEnd           DateTime?
   email                      String
   organization               String?
+  organizationUrl            String?
   amount                     Int                    @default(0)
   currency                   String                 @default("NGN")
   lastPaymentDate            DateTime?
@@ -796,7 +797,6 @@ model NewsletterOwnerNotification {
   userId            String
   user              Membership                @relation(fields: [userId], references: [userId])
   
-  recipient         Int                 @default(0)
   
   // Email specific fields
   emailsSent        Int?                @default(0)
