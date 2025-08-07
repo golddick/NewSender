@@ -1,4 +1,6 @@
 
+
+
 // "use client";
 
 // import { useState, useRef, useEffect } from "react";
@@ -50,6 +52,7 @@
 //   ImagePlus,
 //   Bot,
 //   Wand2,
+//   Hash,
 // } from "lucide-react";
 // import { useRouter, useSearchParams } from "next/navigation";
 // import { createBlogPost } from "@/actions/blog/add.blog";
@@ -67,6 +70,62 @@
 //   issues: string[];
 //   suggestions: string[];
 // }
+
+// const getTopicKeywords = (category: string) => {
+//   // Common keywords for all categories
+//   const commonKeywords = [
+//     "how to", "guide", "tips", "best practices", "benefits", 
+//     "advantages", "examples", "case study", "why", "what is", 
+//     "comparison", "vs", "versus", "ultimate guide", "step by step"
+//   ];
+  
+//   // Category-specific keywords
+//   const categoryKeywords: Record<string, string[]> = {
+//     "technology": [
+//       "tech", "innovation", "digital", "future", "trends",
+//       "software", "hardware", "gadgets", "devices", "internet",
+//       "cybersecurity", "cloud computing", "blockchain", "IoT"
+//     ],
+//     "artificial intelligence": [
+//       "AI", "machine learning", "deep learning", "neural networks",
+//       "natural language processing", "computer vision", "robotics",
+//       "automation", "chatbots", "generative AI"
+//     ],
+//     "business": [
+//       "entrepreneur", "startup", "marketing", "strategy", "growth",
+//       "leadership", "management", "finance", "investment", "ecommerce",
+//       "sales", "productivity", "remote work"
+//     ],
+//     "health": [
+//       "wellness", "fitness", "nutrition", "medical", "doctor",
+//       "exercise", "diet", "mental health", "sleep", "recovery",
+//       "prevention", "holistic", "alternative medicine"
+//     ],
+//     "food": [
+//       "recipe", "cooking", "restaurant", "nutrition", "diet",
+//       "healthy eating", "meal prep", "ingredients", "cuisine",
+//       "baking", "vegan", "vegetarian", "gluten-free"
+//     ],
+//     "travel": [
+//       "destination", "itinerary", "adventure", "budget travel",
+//       "luxury travel", "backpacking", "hotels", "airbnb",
+//       "sightseeing", "local culture", "travel tips"
+//     ],
+//     "education": [
+//       "learning", "teaching", "online courses", "study tips",
+//       "career development", "skills", "certification", "degree",
+//       "student life", "e-learning", "homeschooling"
+//     ]
+//   };
+
+//    // Convert category to lowercase for case-insensitive matching
+//   const normalizedCategory = category.toLowerCase();
+
+//   return [
+//     ...commonKeywords,
+//     ...(categoryKeywords[normalizedCategory] || [])
+//   ];
+// };
 
 // const analyzeSEO = (title: string, content: string, excerpt: string, tags: string[], category: string) => {
 //   let score = 0;
@@ -119,61 +178,8 @@
 //   }
 
 //   // Enhanced Keyword Analysis
-//   const getTopicKeywords = () => {
-//     // Common keywords for all categories
-//     const commonKeywords = [
-//       "how to", "guide", "tips", "best practices", "benefits", 
-//       "advantages", "examples", "case study", "why", "what is", 
-//       "comparison", "vs", "versus", "ultimate guide", "step by step"
-//     ];
-    
-//     // Category-specific keywords
-//     const categoryKeywords: Record<string, string[]> = {
-//       "technology": [
-//         "tech", "innovation", "digital", "future", "trends",
-//         "software", "hardware", "gadgets", "devices", "internet",
-//         "cybersecurity", "cloud computing", "blockchain", "IoT"
-//       ],
-//       "artificial intelligence": [
-//         "AI", "machine learning", "deep learning", "neural networks",
-//         "natural language processing", "computer vision", "robotics",
-//         "automation", "chatbots", "generative AI"
-//       ],
-//       "business": [
-//         "entrepreneur", "startup", "marketing", "strategy", "growth",
-//         "leadership", "management", "finance", "investment", "ecommerce",
-//         "sales", "productivity", "remote work"
-//       ],
-//       "health": [
-//         "wellness", "fitness", "nutrition", "medical", "doctor",
-//         "exercise", "diet", "mental health", "sleep", "recovery",
-//         "prevention", "holistic", "alternative medicine"
-//       ],
-//       "food": [
-//         "recipe", "cooking", "restaurant", "nutrition", "diet",
-//         "healthy eating", "meal prep", "ingredients", "cuisine",
-//         "baking", "vegan", "vegetarian", "gluten-free"
-//       ],
-//       "travel": [
-//         "destination", "itinerary", "adventure", "budget travel",
-//         "luxury travel", "backpacking", "hotels", "airbnb",
-//         "sightseeing", "local culture", "travel tips"
-//       ],
-//       "education": [
-//         "learning", "teaching", "online courses", "study tips",
-//         "career development", "skills", "certification", "degree",
-//         "student life", "e-learning", "homeschooling"
-//       ]
-//     };
-
-//     return [
-//       ...commonKeywords,
-//       ...(categoryKeywords[category.toLowerCase()] || [])
-//     ];
-//   };
-
 //   const contentLower = content.toLowerCase();
-//   const keywords = getTopicKeywords();
+//   const keywords = getTopicKeywords(category);
 //   const foundKeywords = keywords.filter(keyword => 
 //     contentLower.includes(keyword.toLowerCase())
 //   );
@@ -220,6 +226,7 @@
 //   const { toast } = useToast();
 //   const { user } = useUser();
 //   const router = useRouter();
+//   const contentRef = useRef<HTMLTextAreaElement>(null);
 //   const [isEditMode, setIsEditMode] = useState(false);
 //   const [existingPost, setExistingPost] = useState<any>(null);
 //   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -263,8 +270,9 @@
 //   const [customCategories, setCustomCategories] = useState<string[]>([]);
 //   const [isGeneratingSubtitle, setIsGeneratingSubtitle] = useState(false);
 //   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
+//   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+//   const [keywords, setKeywords] = useState<string[]>(getTopicKeywords(category));
 
-//   const contentRef = useRef<HTMLTextAreaElement>(null);
 
 //   useEffect(() => {
 //     if (user?.username) {
@@ -276,7 +284,7 @@
 //     const fetchPostData = async () => {
 //       if (editSlug) {
 //         try {
-//           const result = await getBlogPost(editSlug , isDraft);
+//           const result = await getBlogPost(editSlug, isDraft);
 
 //           console.log("Fetched post data:", result);
 
@@ -320,7 +328,7 @@
 //     };
 
 //     fetchPostData();
-//   }, [editSlug, user,isDraft, toast]);
+//   }, [editSlug, user, isDraft, toast]);
 
 //   useEffect(() => {
 //     if (content) {
@@ -340,6 +348,11 @@
 //     setSeoAnalysis(analysis);
 //     setSeoScore(analysis.score);
 //   }, [content, title, excerpt, tags, category, wordCount]);
+
+//     useEffect(() => {
+//     setKeywords(getTopicKeywords(category));
+//   }, [category]);
+
 
 //   const handleAddTag = () => {
 //     if (currentTag && !tags.includes(currentTag)) {
@@ -375,113 +388,136 @@
 //     }
 //   };
 
-//   // const handleRemoveGalleryImage = (index: number) => {
-//   //   setGalleryImages(galleryImages.filter((_, i) => i !== index));
-//   // };
-
 //   const handleRemoveGalleryImage = async (index: number) => {
-//   const updatedImages = galleryImages.filter((_, i) => i !== index);
-//   setGalleryImages(updatedImages);
+//     const updatedImages = galleryImages.filter((_, i) => i !== index);
+//     setGalleryImages(updatedImages);
 
-//   if (isEditMode && existingPost?.id) {
-//     const result = await updateGalleryImages(existingPost.id, updatedImages);
+//     if (isEditMode && existingPost?.id) {
+//       const result = await updateGalleryImages(existingPost.id, updatedImages);
 
-//     if (result.success) {
-//       toast({ title: "Successfully", description: "Gallery images updated successfully." });
-//     } else {
+//       if (result.success) {
+//         toast({ title: "Successfully", description: "Gallery images updated successfully." });
+//       } else {
+//         toast({
+//           title: "Error",
+//           description: result.error || "Failed to update gallery.",
+//           variant: "destructive",
+//         });
+//       }
+//     }
+//   };
+
+//   const generateSubtitle = async () => {
+//     if (!title && !content) {
 //       toast({
-//         title: "Error",
-//         description: result.error || "Failed to update gallery.",
+//         title: "Content needed",
+//         description: "Please add a title or content before generating a subtitle.",
 //         variant: "destructive",
 //       });
-//     }
-//   }
-// };
-
-
-// const generateSubtitle = async () => {
-//   if (!title && !content) {
-//     toast({
-//       title: "Content needed",
-//       description: "Please add a title or content before generating a subtitle.",
-//       variant: "destructive",
-//     });
-//     return;
-//   }
-
-//   setIsGeneratingSubtitle(true);
-
-//   try {
-//     const res = await fetch("/api/ai/generate-subtitle", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ title, content }),
-//     });
-
-//     const data = await res.json();
-
-//     if (!res.ok || !data.subtitle) {
-//       throw new Error(data.error || "No subtitle returned");
+//       return;
 //     }
 
-//     setSubtitle(data.subtitle);
+//     setIsGeneratingSubtitle(true);
 
-//     toast({
-//       title: "Subtitle generated",
-//       description: "AI has suggested a subtitle based on your content.",
-//     });
-//   } catch (err) {
-//     toast({
-//       title: "Generation failed",
-//       description: "Could not generate subtitle. Please try again.",
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setIsGeneratingSubtitle(false);
-//   }
-// };
-
-
-// const generateExcerpt = async () => {
-//   if (!content) {
-//     toast({
-//       title: "Content needed",
-//       description: "Please add some content before generating an excerpt.",
-//       variant: "destructive",
-//     });
-//     return;
-//   }
-
-//   setIsGeneratingExcerpt(true);
-//   try {
-//     const response = await fetch("/api/ai/generate-excerpt", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ title, content }),
-//     });
-
-//     const data = await response.json();
-
-//     if (data.excerpt) {
-//       setExcerpt(data.excerpt);
-//       toast({
-//         title: "Excerpt generated",
-//         description: "AI has suggested an excerpt based on your content.",
+//     try {
+//       const res = await fetch("/api/ai/generate-subtitle", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ title, content }),
 //       });
-//     } else {
-//       throw new Error(data.error || "Failed to generate excerpt.");
-//     }
-//   } catch (error) {
-//     toast({
-//       title: "Generation failed",
-//       description: "Could not generate excerpt. Please try again.",
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setIsGeneratingExcerpt(false);
-//   }
-// };
 
+//       const data = await res.json();
+
+//       if (!res.ok || !data.subtitle) {
+//         throw new Error(data.error || "No subtitle returned");
+//       }
+
+//       setSubtitle(data.subtitle);
+
+//       toast({
+//         title: "Subtitle generated",
+//         description: "AI has suggested a subtitle based on your content.",
+//       });
+//     } catch (err) {
+//       toast({
+//         title: "Generation failed",
+//         description: "Could not generate subtitle. Please try again.",
+//         variant: "destructive",
+//       });
+//     } finally {
+//       setIsGeneratingSubtitle(false);
+//     }
+//   };
+
+//   const generateExcerpt = async () => {
+//     if (!content) {
+//       toast({
+//         title: "Content needed",
+//         description: "Please add some content before generating an excerpt.",
+//         variant: "destructive",
+//       });
+//       return;
+//     }
+
+//     setIsGeneratingExcerpt(true);
+//     try {
+//       const response = await fetch("/api/ai/generate-excerpt", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ title, content }),
+//       });
+
+//       const data = await response.json();
+
+//       if (data.excerpt) {
+//         setExcerpt(data.excerpt);
+//         toast({
+//           title: "Excerpt generated",
+//           description: "AI has suggested an excerpt based on your content.",
+//         });
+//       } else {
+//         throw new Error(data.error || "Failed to generate excerpt.");
+//       }
+//     } catch (error) {
+//       toast({
+//         title: "Generation failed",
+//         description: "Could not generate excerpt. Please try again.",
+//         variant: "destructive",
+//       });
+//     } finally {
+//       setIsGeneratingExcerpt(false);
+//     }
+//   };
+
+//   const handleKeywordClick = (keyword: string) => {
+//     if (selectedKeywords.includes(keyword)) {
+//       setSelectedKeywords(selectedKeywords.filter(k => k !== keyword));
+//     } else {
+//       setSelectedKeywords([...selectedKeywords, keyword]);
+//     }
+//   };
+
+//   const insertKeywords = () => {
+//     if (!contentRef.current || selectedKeywords.length === 0) return;
+
+//     const textarea = contentRef.current;
+//     const start = textarea.selectionStart;
+//     const end = textarea.selectionEnd;
+    
+//     const keywordsToInsert = selectedKeywords.join(", ");
+//     const newValue = 
+//       textarea.value.substring(0, start) + 
+//       keywordsToInsert + 
+//       textarea.value.substring(end);
+    
+//     setContent(newValue);
+//     setSelectedKeywords([]);
+    
+//     setTimeout(() => {
+//       textarea.focus();
+//       textarea.setSelectionRange(start + keywordsToInsert.length, start + keywordsToInsert.length);
+//     }, 0);
+//   };
 
 //   const handleSubmit = async (publish: boolean) => {
 //     if (!title.trim()) {
@@ -522,7 +558,7 @@
 
 //     setIsSubmitting(true);
 //     try {
-//        const status: PostStatus = publish ? "PUBLISHED" : "DRAFT";
+//       const status: PostStatus = publish ? "PUBLISHED" : "DRAFT";
 //       const formData = {
 //         title,
 //         subtitle,
@@ -534,7 +570,7 @@
 //         status: status,
 //         isFeatured,
 //         isPublic,
-//         featuredImage: featuredImage ,
+//         featuredImage: featuredImage,
 //         featuredVideo: featuredVideo || undefined,
 //         galleryImages: galleryImages.length > 0 ? galleryImages : undefined,
 //         seoTitle: title,
@@ -590,7 +626,6 @@
 
 //   const handlePublish = () => handleSubmit(true);
 //   const handleSaveDraft = () => handleSubmit(false);
-
 
 //   const formatText = (format: string) => {
 //     const textarea = contentRef.current;
@@ -696,19 +731,17 @@
 //                   : (isEditMode ? "Save Edit" : "Save Draft")}
 //               </Button>
 
-//                <Button 
-//                   size="sm" 
-//                   className="bg-gold-300 text-black hover:bg-gold-600"
-//                   onClick={handlePublish}
-//                   disabled={isSubmitting}
-//                 >
-//                   <Globe className="h-4 w-4 mr-2" />
-//                   {isSubmitting 
-//                   ? (isEditMode ? "Publishing..." : "Publishing Edit...") 
-//                   : (isEditMode ? "Publish Edit" : "Publish")}
-//                 </Button>
-
-            
+//               <Button 
+//                 size="sm" 
+//                 className="bg-gold-300 text-black hover:bg-gold-600"
+//                 onClick={handlePublish}
+//                 disabled={isSubmitting}
+//               >
+//                 <Globe className="h-4 w-4 mr-2" />
+//                 {isSubmitting 
+//                 ? (isEditMode ? "Publishing..." : "Publishing Edit...") 
+//                 : (isEditMode ? "Publish Edit" : "Publish")}
+//               </Button>
 
 //               <Link href="/dashboard/blog" className="hover:underline">
 //                 <Button 
@@ -994,26 +1027,25 @@
 //                             onChange={(e) => setSubtitle(e.target.value)}
 //                           />
 //                           <div className="absolute right-0 top-0 flex items-center h-full">
-//                                <Button 
-//                       variant="ghost" 
-//                       size="sm" 
-//                       className="flex items-center gap-1 bg-black text-white"
-//                       onClick={generateSubtitle}
-//                       disabled={isGeneratingSubtitle}
-//                     >
-//                       {isGeneratingSubtitle ? (
-//                         <>
-//                           <Loader2 className="h-4 w-4 animate-spin" />
-//                           <span>Generating...</span>
-//                         </>
-//                       ) : (
-//                         <>
-//                           <Wand2 className="h-4 w-4" />
-//                           <span>Generate subtitle with AI</span>
-//                         </>
-//                       )}
-//                     </Button>
-                            
+//                             <Button 
+//                               variant="ghost" 
+//                               size="sm" 
+//                               className="flex items-center gap-1 bg-black text-white"
+//                               onClick={generateSubtitle}
+//                               disabled={isGeneratingSubtitle}
+//                             >
+//                               {isGeneratingSubtitle ? (
+//                                 <>
+//                                   <Loader2 className="h-4 w-4 animate-spin" />
+//                                   <span>Generating...</span>
+//                                 </>
+//                               ) : (
+//                                 <>
+//                                   <Wand2 className="h-4 w-4" />
+//                                   <span>Generate subtitle with AI</span>
+//                                 </>
+//                               )}
+//                             </Button>
 //                           </div>
 //                         </div>
 
@@ -1043,7 +1075,7 @@
 //                           )}
 
 //                           {featuredImage && (
-//                             <div className="relative w-full h-96 rounded-lg overflow-hidden my-6">
+//                             <div className="relative w-full h-60 rounded-lg overflow-hidden my-6">
 //                               <Image
 //                                 src={featuredImage}
 //                                 alt="Featured"
@@ -1052,8 +1084,6 @@
 //                               />
 //                             </div>
 //                           )}
-
-                         
 
 //                           {content ? (
 //                             <div
@@ -1066,7 +1096,7 @@
 //                             <div className="text-neutral-400">Your content will appear here...</div>
 //                           )}
 
-//                            {featuredVideo && (
+//                           {featuredVideo && (
 //                             <div className="w-full my-6">
 //                               <video controls className="w-full rounded-lg h-[300px]">
 //                                 <source src={featuredVideo} type="video/mp4" />
@@ -1145,6 +1175,8 @@
 //               transition={{ duration: 0.5, delay: 0.2 }}
 //               className="space-y-6"
 //             >
+              
+
 //               {/* Author Settings */}
 //               <Card>
 //                 <CardHeader>
@@ -1349,36 +1381,35 @@
 //                     )}
 //                   </div>
 
+//                   {/* Toggle buttons for video and gallery sections */}
+//                   <div className="flex gap-2">
+//                     <Button
+//                       variant="outline"
+//                       size="sm"
+//                       className="flex-1"
+//                       onClick={() => {
+//                         setShowVideoSection(!showVideoSection)
+//                         if (!showVideoSection) setShowGallerySection(false)
+//                       }}
+//                     >
+//                       <Film className="h-4 w-4 mr-2" />
+//                       {showVideoSection || featuredVideo ? "Hide Video" : "Add Video"}
+//                     </Button>
+//                     <Button
+//                       variant="outline"
+//                       size="sm"
+//                       className="flex-1"
+//                       onClick={() => {
+//                         setShowGallerySection(!showGallerySection)
+//                         if (!showGallerySection) setShowVideoSection(false)
+//                       }}
+//                     >
+//                       <ImagePlus className="h-4 w-4 mr-2" />
+//                       {showGallerySection || galleryImages.length > 0 ? "Hide Gallery" : "Add Gallery"}
+//                     </Button>
+//                   </div>
 
-//                   {/* Toggle buttons for both sections - always visible */}
-//                 <div className="flex gap-2">
-//                   <Button
-//                     variant="outline"
-//                     size="sm"
-//                     className="flex-1"
-//                     onClick={() => {
-//                       setShowVideoSection(!showVideoSection)
-//                       if (!showVideoSection) setShowGallerySection(false)
-//                     }}
-//                   >
-//                     <Film className="h-4 w-4 mr-2" />
-//                     {showVideoSection || featuredVideo ? "Hide Video" : "Add Video"}
-//                   </Button>
-//                   <Button
-//                     variant="outline"
-//                     size="sm"
-//                     className="flex-1"
-//                     onClick={() => {
-//                       setShowGallerySection(!showGallerySection)
-//                       if (!showGallerySection) setShowVideoSection(false)
-//                     }}
-//                   >
-//                     <ImagePlus className="h-4 w-4 mr-2" />
-//                     {showGallerySection || galleryImages.length > 0 ? "Hide Gallery" : "Add Gallery"}
-//                   </Button>
-//                 </div>
-
-//                     {/* Featured Video Section - Only show in edit mode if there's video or when showVideoSection is true */}
+//                   {/* Featured Video Section */}
 //                   {(isEditMode && featuredVideo) || showVideoSection ? (
 //                     <div className="space-y-2">
 //                       <Label>Featured Video</Label>
@@ -1436,23 +1467,10 @@
 //                           )}
 //                         </div>
 //                       )}
-                      
-//                       {/* Add button to toggle video section if needed in edit mode when empty */}
-//                       {isEditMode && !showVideoSection && !featuredVideo && (
-//                         <Button 
-//                           variant="outline" 
-//                           size="sm" 
-//                           onClick={() => setShowVideoSection(true)}
-//                           className="mt-2"
-//                         >
-//                           <Film className="h-4 w-4 mr-2" />
-//                           Add Featured Video
-//                         </Button>
-//                       )}
 //                     </div>
 //                   ) : null}
 
-//                   {/* Image Gallery Section - Only show in edit mode if there's gallery images or when showGallerySection is true */}
+//                   {/* Image Gallery Section */}
 //                   {(isEditMode && galleryImages.length > 0) || showGallerySection ? (
 //                     <div className="space-y-2">
 //                       <Label>Image Gallery ({galleryImages.length} images)</Label>
@@ -1518,146 +1536,8 @@
 //                           )}
 //                         </div>
 //                       )}
-                      
-//                       {/* Add button to toggle gallery section if needed in edit mode when empty */}
-//                       {isEditMode && !showGallerySection && galleryImages.length === 0 && (
-//                         <Button 
-//                           variant="outline" 
-//                           size="sm" 
-//                           onClick={() => setShowGallerySection(true)}
-//                           className="mt-2"
-//                         >
-//                           <ImagePlus className="h-4 w-4 mr-2" />
-//                           Add Gallery Images
-//                         </Button>
-//                       )}
 //                     </div>
 //                   ) : null}
-
-                
-
-//                   {/* Video Upload Section (conditionally shown) */}
-//                   {/* {showVideoSection && (
-//                     <div className="space-y-2">
-//                       <Label>Featured Video</Label>
-//                       {featuredVideo ? (
-//                         <div className="relative">
-//                           <video controls className="w-full rounded-lg">
-//                             <source src={featuredVideo} type="video/mp4" />
-//                           </video>
-//                           <Button
-//                             variant="destructive"
-//                             size="sm"
-//                             className="absolute top-2 right-2"
-//                             onClick={() => setFeaturedVideo(null)}
-//                           >
-//                             <X className="h-4 w-4" />
-//                           </Button>
-//                         </div>
-//                       ) : (
-//                         <div className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-blue-300 transition-colors">
-//                           <Video className="h-8 w-8 mx-auto text-neutral-400 mb-2" />
-//                           <p className="text-sm text-neutral-500 mb-2">Upload featured video</p>
-//                           {isVideoUploading ? (
-//                             <div className="flex items-center justify-center">
-//                               <Loader2 className="h-4 w-4 animate-spin mr-2" />
-//                               <span>Uploading...</span>
-//                             </div>
-//                           ) : (
-//                             <UploadButton
-//                               endpoint="blogVideoUpload"
-//                               onClientUploadComplete={(res) => {
-//                                 if (res && res[0]?.url) {
-//                                   setFeaturedVideo(res[0].url)
-//                                   setIsVideoUploading(false)
-//                                   toast({
-//                                     title: "Video uploaded",
-//                                     description: "Featured video has been uploaded successfully.",
-//                                   })
-//                                 }
-//                               }}
-//                               onUploadError={(error: Error) => {
-//                                 setIsVideoUploading(false)
-//                                 toast({
-//                                   title: "Upload error",
-//                                   description: error.message,
-//                                   variant: "destructive",
-//                                 })
-//                               }}
-//                               onUploadBegin={() => {
-//                                 setIsVideoUploading(true)
-//                               }}
-//                             />
-//                           )}
-//                         </div>
-//                       )}
-//                     </div>
-//                   )} */}
-
-//                   {/* Image Gallery Section (conditionally shown) */}
-//                   {/* { showGallerySection && (
-//                     <div className="space-y-2">
-//                       <Label>Image Gallery ({galleryImages.length} images)</Label>
-//                       {galleryImages.length > 0 ? (
-//                         <div className="grid grid-cols-2 gap-2">
-//                           {galleryImages.map((img, index) => (
-//                             <div key={index} className="relative h-30 rounded-lg overflow-hidden">
-//                               <Image
-//                                 src={img}
-//                                 alt={`Gallery image ${index + 1}`}
-//                                 fill
-//                                 className="object-cover"
-//                               />
-//                               <Button
-//                                 variant="destructive"
-//                                 size="sm"
-//                                 className="absolute top-1 right-1 h-6 w-6 p-0"
-//                                 onClick={() => handleRemoveGalleryImage(index)}
-//                               >
-//                                 <X className="h-3 w-3" />
-//                               </Button>
-//                             </div>
-//                           ))}
-//                         </div>
-//                       ) : (
-//                         <div className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-blue-300 transition-colors">
-//                           <ImagePlus className="h-8 w-8 mx-auto text-neutral-400 mb-2" />
-//                           <p className="text-sm text-neutral-500 mb-2">Upload gallery images</p>
-//                           {isGalleryUploading ? (
-//                             <div className="flex items-center justify-center">
-//                               <Loader2 className="h-4 w-4 animate-spin mr-2" />
-//                               <span>Uploading...</span>
-//                             </div>
-//                           ) : (
-//                             <UploadButton
-//                               endpoint="blogGalleryImg"
-//                               onClientUploadComplete={(res) => {
-//                                 if (res) {
-//                                   setGalleryImages([...galleryImages, ...res.map(r => r.url)])
-//                                   setIsGalleryUploading(false)
-//                                   toast({
-//                                     title: "Images uploaded",
-//                                     description: `${res.length} images added to gallery.`,
-//                                   })
-//                                 }
-//                               }}
-//                               onUploadError={(error: Error) => {
-//                                 setIsGalleryUploading(false)
-//                                 toast({
-//                                   title: "Upload error",
-//                                   description: error.message,
-//                                   variant: "destructive",
-//                                 })
-//                               }}
-//                               onUploadBegin={() => {
-//                                 setIsGalleryUploading(true)
-//                               }}
-//                             />
-//                           )}
-//                         </div>
-//                       )}
-//                     </div>
-//                   )} */}
 
 //                   <div className="space-y-2">
 //                     <Label>Publish Date</Label>
@@ -1688,117 +1568,172 @@
 //                     </div>
 
 //                     <div className="flex items-center justify-between">
-//                           <div className="flex items-center gap-2">
-//                          <Switch checked={allowComments} onCheckedChange={setAllowComments} />
-//                          <Label>Allow comments</Label>
-//                        </div>
-//                        <HelpCircle className="h-4 w-4 text-neutral-400" />
-//                      </div>
-//                    </div>
-//                  </CardContent>
-//                </Card>
+//                       <div className="flex items-center gap-2">
+//                         <Switch checked={allowComments} onCheckedChange={setAllowComments} />
+//                         <Label>Allow comments</Label>
+//                       </div>
+//                       <HelpCircle className="h-4 w-4 text-neutral-400" />
+//                     </div>
+//                   </div>
+//                 </CardContent>
+//               </Card>
 
-//                {/* SEO Analysis Card */}
-//                <Card>
-//                  <CardHeader>
-//                    <CardTitle className="flex items-center gap-2">
-//                      <TrendingUp className="h-5 w-5 text-blue-500" />
-//                      SEO Analysis
-//                    </CardTitle>
-//                  </CardHeader>
-//                  <CardContent className="space-y-4">
-//                    <div className="flex items-center justify-between">
-//                      <div className="flex items-center gap-2">
-//                        <span className="text-sm font-medium">Overall Score</span>
-//                        {getSeoScoreIcon(seoAnalysis.score)}
-//                      </div>
-//                      <span className={`text-lg font-bold ${getSeoScoreColor(seoAnalysis.score)}`}>
-//                        {seoAnalysis.score}%
-//                      </span>
-//                    </div>
+//                {/* Topic Keywords Card */}
+//               <Card>
+//                 <CardHeader>
+//                   <CardTitle className="flex items-center gap-2">
+//                     <Hash className="h-5 w-5 text-blue-500" />
+//                     Topic Keywords
+//                   </CardTitle>
+//                 </CardHeader>
+//                 <CardContent className="space-y-3">
+//                   <p className="text-sm text-neutral-500">
+//                     Select keywords to include in your content for better SEO:
+//                   </p>
+                  
+//                   <div className="flex flex-wrap gap-2">
+//                     {keywords.map((keyword) => (
+//                       <Badge 
+//                         key={keyword}
+//                         variant={selectedKeywords.includes(keyword) ? "default" : "outline"}
+//                         className="cursor-pointer hover:bg-blue-50"
+//                         onClick={() => handleKeywordClick(keyword)}
+//                       >
+//                         {keyword}
+//                       </Badge>
+//                     ))}
+//                   </div>
 
-//                    {seoAnalysis.issues.length > 0 && (
-//                      <div className="space-y-2">
-//                        <Label className="flex items-center gap-1 text-red-600">
-//                          <AlertCircle className="h-4 w-4" />
-//                          Issues to fix
-//                        </Label>
-//                        <div className="space-y-1">
-//                          {seoAnalysis.issues.map((issue, index) => (
-//                            <div key={index} className="flex items-start gap-2 text-sm">
-//                              <X className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-//                              <span>{issue}</span>
-//                            </div>
-//                          ))}
-//                        </div>
-//                      </div>
-//                    )}
+//                   {selectedKeywords.length > 0 && (
+//                     <Button
+//                       size="sm"
+//                       className="w-full mt-2"
+//                       onClick={insertKeywords}
+//                     >
+//                       <Plus className="h-4 w-4 mr-2" />
+//                       Insert {selectedKeywords.length} selected keywords
+//                     </Button>
+//                   )}
+//                 </CardContent>
+//               </Card>
 
-//                    {seoAnalysis.suggestions.length > 0 && (
-//                      <div className="space-y-2">
-//                        <Label className="flex items-center gap-1 text-yellow-600">
-//                          <Lightbulb className="h-4 w-4" />
-//                          Suggestions
-//                        </Label>
-//                        <div className="space-y-1">
-//                          {seoAnalysis.suggestions.map((suggestion, index) => (
-//                            <div key={index} className="flex items-start gap-2 text-sm">
-//                              <Info className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-//                              <span>{suggestion}</span>
-//                            </div>
-//                          ))}
-//                        </div>
-//                      </div>
-//                    )}
+//               {/* SEO Analysis Card */}
+//               <Card>
+//                 <CardHeader>
+//                   <CardTitle className="flex items-center gap-2">
+//                     <TrendingUp className="h-5 w-5 text-blue-500" />
+//                     SEO Analysis
+//                   </CardTitle>
+//                 </CardHeader>
+//                 <CardContent className="space-y-4">
+//                   <div className="flex items-center justify-between">
+//                     <div className="flex items-center gap-2">
+//                       <span className="text-sm font-medium">Overall Score</span>
+//                       {getSeoScoreIcon(seoAnalysis.score)}
+//                     </div>
+//                     <span className={`text-lg font-bold ${getSeoScoreColor(seoAnalysis.score)}`}>
+//                       {seoAnalysis.score}%
+//                     </span>
+//                   </div>
 
-//                    {seoAnalysis.score >= 80 && (
-//                      <div className="p-3 bg-green-50 rounded-lg text-green-800 text-sm">
-//                        <div className="flex items-center gap-2">
-//                          <CheckCircle className="h-4 w-4 text-green-600" />
-//                          <span>Great job! Your content is well optimized for SEO.</span>
-//                        </div>
-//                      </div>
-//                    )}
-//                  </CardContent>
-//                </Card>
+//                   {seoAnalysis.issues.length > 0 && (
+//                     <div className="space-y-2">
+//                       <Label className="flex items-center gap-1 text-red-600">
+//                         <AlertCircle className="h-4 w-4" />
+//                         Issues to fix
+//                       </Label>
+//                       <div className="space-y-1">
+//                         {seoAnalysis.issues.map((issue, index) => (
+//                           <div key={index} className="flex items-start gap-2 text-sm">
+//                             <X className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+//                             <span>{issue}</span>
+//                           </div>
+//                         ))}
+//                       </div>
+//                     </div>
+//                   )}
 
-//                {/* Post Stats Card */}
-//                <Card>
-//                  <CardHeader>
-//                    <CardTitle className="flex items-center gap-2">
-//                      <FileText className="h-5 w-5 text-blue-500" />
-//                      Post Stats
-//                    </CardTitle>
-//                  </CardHeader>
-//                  <CardContent className="grid grid-cols-2 gap-4">
-//                    <div className="space-y-1">
-//                      <Label className="text-neutral-500">Word Count</Label>
-//                      <p className="font-medium">{wordCount.toLocaleString()}</p>
-//                    </div>
-//                    <div className="space-y-1">
-//                      <Label className="text-neutral-500">Character Count</Label>
-//                      <p className="font-medium">{charCount.toLocaleString()}</p>
-//                    </div>
-//                    <div className="space-y-1">
-//                      <Label className="text-neutral-500">Reading Time</Label>
-//                      <p className="font-medium">{readTime} min</p>
-//                    </div>
-//                    <div className="space-y-1">
-//                      <Label className="text-neutral-500">Images</Label>
-//                      <p className="font-medium">
-//                        {featuredImage ? 1 : 0}
-//                        {galleryImages.length > 0 && ` + ${galleryImages.length}`}
-//                      </p>
-//                    </div>
-//                  </CardContent>
-//                </Card>
-//              </motion.div>
-//            </div>
-//          </div>
-//        </div>
-//      </div>
-//    );
-//  }
+//                   {seoAnalysis.suggestions.length > 0 && (
+//                     <div className="space-y-2">
+//                       <Label className="flex items-center gap-1 text-yellow-600">
+//                         <Lightbulb className="h-4 w-4" />
+//                         Suggestions
+//                       </Label>
+//                       <div className="space-y-1">
+//                         {seoAnalysis.suggestions.map((suggestion, index) => (
+//                           <div key={index} className="flex items-start gap-2 text-sm">
+//                             <Info className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+//                             <span>{suggestion}</span>
+//                           </div>
+//                         ))}
+//                       </div>
+//                     </div>
+//                   )}
+
+//                   {seoAnalysis.score >= 80 && (
+//                     <div className="p-3 bg-green-50 rounded-lg text-green-800 text-sm">
+//                       <div className="flex items-center gap-2">
+//                         <CheckCircle className="h-4 w-4 text-green-600" />
+//                         <span>Great job! Your content is well optimized for SEO.</span>
+//                       </div>
+//                     </div>
+//                   )}
+//                 </CardContent>
+//               </Card>
+
+//               {/* Post Stats Card */}
+//               <Card>
+//                 <CardHeader>
+//                   <CardTitle className="flex items-center gap-2">
+//                     <FileText className="h-5 w-5 text-blue-500" />
+//                     Post Stats
+//                   </CardTitle>
+//                 </CardHeader>
+//                 <CardContent className="grid grid-cols-2 gap-4">
+//                   <div className="space-y-1">
+//                     <Label className="text-neutral-500">Word Count</Label>
+//                     <p className="font-medium">{wordCount.toLocaleString()}</p>
+//                   </div>
+//                   <div className="space-y-1">
+//                     <Label className="text-neutral-500">Character Count</Label>
+//                     <p className="font-medium">{charCount.toLocaleString()}</p>
+//                   </div>
+//                   <div className="space-y-1">
+//                     <Label className="text-neutral-500">Reading Time</Label>
+//                     <p className="font-medium">{readTime} min</p>
+//                   </div>
+//                   <div className="space-y-1">
+//                     <Label className="text-neutral-500">Images</Label>
+//                     <p className="font-medium">
+//                       {featuredImage ? 1 : 0}
+//                       {galleryImages.length > 0 && ` + ${galleryImages.length}`}
+//                     </p>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//             </motion.div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1856,6 +1791,7 @@ import {
   Bot,
   Wand2,
   Hash,
+  Menu,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBlogPost } from "@/actions/blog/add.blog";
@@ -1867,6 +1803,9 @@ import Link from "next/link";
 import { getBlogPost, updateBlogPost, updateGalleryImages } from "@/actions/blog/get.blog";
 import { BlogPost } from "@/app/type";
 import { PostStatus } from "@prisma/client";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface SEOAnalysis {
   score: number;
@@ -1921,7 +1860,7 @@ const getTopicKeywords = (category: string) => {
     ]
   };
 
-   // Convert category to lowercase for case-insensitive matching
+  // Convert category to lowercase for case-insensitive matching
   const normalizedCategory = category.toLowerCase();
 
   return [
@@ -2075,7 +2014,10 @@ export function BlogWriteEditor() {
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [keywords, setKeywords] = useState<string[]>(getTopicKeywords(category));
-
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 1024px)");
 
   useEffect(() => {
     if (user?.username) {
@@ -2152,10 +2094,9 @@ export function BlogWriteEditor() {
     setSeoScore(analysis.score);
   }, [content, title, excerpt, tags, category, wordCount]);
 
-    useEffect(() => {
+  useEffect(() => {
     setKeywords(getTopicKeywords(category));
   }, [category]);
-
 
   const handleAddTag = () => {
     if (currentTag && !tags.includes(currentTag)) {
@@ -2293,33 +2234,24 @@ export function BlogWriteEditor() {
   };
 
   const handleKeywordClick = (keyword: string) => {
-    if (selectedKeywords.includes(keyword)) {
-      setSelectedKeywords(selectedKeywords.filter(k => k !== keyword));
-    } else {
-      setSelectedKeywords([...selectedKeywords, keyword]);
+    if (contentRef.current) {
+      const textarea = contentRef.current;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      
+      const newValue = 
+        textarea.value.substring(0, start) + 
+        keyword + 
+        textarea.value.substring(end);
+      
+      setContent(newValue);
+      
+      // Focus back on the textarea and position cursor
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + keyword.length, start + keyword.length);
+      }, 0);
     }
-  };
-
-  const insertKeywords = () => {
-    if (!contentRef.current || selectedKeywords.length === 0) return;
-
-    const textarea = contentRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    
-    const keywordsToInsert = selectedKeywords.join(", ");
-    const newValue = 
-      textarea.value.substring(0, start) + 
-      keywordsToInsert + 
-      textarea.value.substring(end);
-    
-    setContent(newValue);
-    setSelectedKeywords([]);
-    
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + keywordsToInsert.length, start + keywordsToInsert.length);
-    }, 0);
   };
 
   const handleSubmit = async (publish: boolean) => {
@@ -2497,6 +2429,535 @@ export function BlogWriteEditor() {
     return <AlertCircle className="h-4 w-4 text-red-600" />;
   };
 
+  // Responsive layout components
+  const SidebarContent = () => (
+    <div className="space-y-6">
+      {/* Author Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-blue-500" />
+            Author Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="authorTitle">Author title</Label>
+            <Input
+              id="authorTitle"
+              value={authorTitle}
+              onChange={(e) => setAuthorTitle(e.target.value)}
+              placeholder="Author's title"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="author">Author Name</Label>
+            <Input
+              id="author"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              placeholder="Your name"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="authorBio">Author Bio</Label>
+            <Textarea
+              id="authorBio"
+              value={authorBio}
+              onChange={(e) => setAuthorBio(e.target.value)}
+              placeholder="Your professional Bio"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Post Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5 text-blue-500" />
+            Post Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            {showCustomCategory ? (
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter custom category"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      handleAddCustomCategory()
+                    }
+                  }}
+                />
+                <Button type="button" variant="outline" size="icon" onClick={handleAddCustomCategory}>
+                  <CheckCircle className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    setShowCustomCategory(false)
+                    setCustomCategory("")
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Select value={category} onValueChange={handleCategoryChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Technology">💻 Technology</SelectItem>
+                  <SelectItem value="Artificial Intelligence">🤖 AI</SelectItem>
+                  <SelectItem value="Business">💼 Business</SelectItem>
+                  <SelectItem value="Science">🔬 Science</SelectItem>
+                  <SelectItem value="Health">🏥 Health</SelectItem>
+                  <SelectItem value="Education">🎓 Education</SelectItem>
+                  <SelectItem value="Entertainment">🎬 Entertainment</SelectItem>
+                  <SelectItem value="Sports">⚽ Sports</SelectItem>
+                  <SelectItem value="Travel">✈️ Travel</SelectItem>
+                  <SelectItem value="Food">🍔 Food</SelectItem>
+                  {customCategories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">
+                    <div className="flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      <span>Add custom category</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tags</Label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add tag"
+                value={currentTag}
+                onChange={(e) => setCurrentTag(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault()
+                    handleAddTag()
+                  }
+                }}
+              />
+              <Button type="button" variant="outline" size="icon" onClick={handleAddTag}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                    #{tag}
+                    <button onClick={() => handleRemoveTag(tag)}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Featured Image Section */}
+          <div className="space-y-2">
+            <Label>Featured Image</Label>
+            {featuredImage ? (
+              <div className="relative">
+                <div className="relative h-40 w-full rounded-lg overflow-hidden">
+                  <Image
+                    src={featuredImage}
+                    alt="Featured"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="absolute top-2 right-2"
+                  onClick={() => setFeaturedImage(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-blue-300 transition-colors">
+                <ImageIcon className="h-8 w-8 mx-auto text-neutral-400 mb-2" />
+                <p className="text-sm text-neutral-500 mb-2">Upload featured image</p>
+                {isUploading ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <span>Uploading...</span>
+                  </div>
+                ) : (
+                  <UploadButton
+                    endpoint="blogFeaturedImg"
+                    onClientUploadComplete={(res) => {
+                      if (res && res[0]?.url) {
+                        setFeaturedImage(res[0].url)
+                        setIsUploading(false)
+                        toast({
+                          title: "Image uploaded",
+                          description: "Featured image has been uploaded successfully.",
+                        })
+                      }
+                    }}
+                    onUploadError={(error: Error) => {
+                      setIsUploading(false)
+                      toast({
+                        title: "Upload error",
+                        description: error.message,
+                        variant: "destructive",
+                      })
+                    }}
+                    onUploadBegin={() => {
+                      setIsUploading(true)
+                    }}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Toggle buttons for video and gallery sections */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => {
+                setShowVideoSection(!showVideoSection)
+                if (!showVideoSection) setShowGallerySection(false)
+              }}
+            >
+              <Film className="h-4 w-4 mr-2" />
+              {showVideoSection || featuredVideo ? "Hide Video" : "Add Video"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => {
+                setShowGallerySection(!showGallerySection)
+                if (!showGallerySection) setShowVideoSection(false)
+              }}
+            >
+              <ImagePlus className="h-4 w-4 mr-2" />
+              {showGallerySection || galleryImages.length > 0 ? "Hide Gallery" : "Add Gallery"}
+            </Button>
+          </div>
+
+          {/* Featured Video Section */}
+          {(isEditMode && featuredVideo) || showVideoSection ? (
+            <div className="space-y-2">
+              <Label>Featured Video</Label>
+              {featuredVideo ? (
+                <div className="relative">
+                  <video controls className="w-full rounded-lg h-[200px]">
+                    <source src={featuredVideo} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={() => setFeaturedVideo(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-blue-300 transition-colors">
+                  <Video className="h-8 w-8 mx-auto text-neutral-400 mb-2" />
+                  <p className="text-sm text-neutral-500 mb-2">
+                    {isEditMode ? 'Replace featured video' : 'Upload featured video'}
+                  </p>
+                  {isVideoUploading ? (
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <span>Uploading...</span>
+                    </div>
+                  ) : (
+                    <UploadButton
+                      endpoint="blogVideoUpload"
+                      onClientUploadComplete={(res) => {
+                        if (res && res[0]?.url) {
+                          setFeaturedVideo(res[0].url)
+                          setIsVideoUploading(false)
+                          toast({
+                            title: "Video uploaded",
+                            description: "Featured video has been uploaded successfully.",
+                          })
+                        }
+                      }}
+                      onUploadError={(error: Error) => {
+                        setIsVideoUploading(false)
+                        toast({
+                          title: "Upload error",
+                          description: error.message,
+                          variant: "destructive",
+                        })
+                      }}
+                      onUploadBegin={() => {
+                        setIsVideoUploading(true)
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          ) : null}
+
+          {/* Image Gallery Section */}
+          {(isEditMode && galleryImages.length > 0) || showGallerySection ? (
+            <div className="space-y-2">
+              <Label>Image Gallery ({galleryImages.length} images)</Label>
+              
+              {galleryImages.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  {galleryImages.map((img, index) => (
+                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
+                      <Image
+                        src={img}
+                        alt={`Gallery image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-1 right-1 h-6 w-6 p-0"
+                        onClick={() => handleRemoveGalleryImage(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-blue-300 transition-colors">
+                  <ImagePlus className="h-8 w-8 mx-auto text-neutral-400 mb-2" />
+                  <p className="text-sm text-neutral-500 mb-2">
+                    {isEditMode ? 'Add gallery images' : 'Upload gallery images'}
+                  </p>
+                  {isGalleryUploading ? (
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <span>Uploading...</span>
+                    </div>
+                  ) : (
+                    <UploadButton
+                      endpoint="blogGalleryImg"
+                      onClientUploadComplete={(res) => {
+                        if (res) {
+                          setGalleryImages([...galleryImages, ...res.map(r => r.url)])
+                          setIsGalleryUploading(false)
+                          toast({
+                            title: "Images uploaded",
+                            description: `${res.length} images added to gallery.`,
+                          })
+                        }
+                      }}
+                      onUploadError={(error: Error) => {
+                        setIsGalleryUploading(false)
+                        toast({
+                          title: "Upload error",
+                          description: error.message,
+                          variant: "destructive",
+                        })
+                      }}
+                      onUploadBegin={() => {
+                        setIsGalleryUploading(true)
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          ) : null}
+
+          <div className="space-y-2">
+            <Label>Publish Date</Label>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-neutral-500" />
+              <Input type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Switch checked={isFeatured} onCheckedChange={setIsFeatured} />
+                <Label>Featured post</Label>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+                <Label>Public visibility</Label>
+              </div>
+              {isPublic ? (
+                <Globe className="h-4 w-4 text-green-600" />
+              ) : (
+                <Lock className="h-4 w-4 text-neutral-400" />
+              )}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Switch checked={allowComments} onCheckedChange={setAllowComments} />
+                <Label>Allow comments</Label>
+              </div>
+              <HelpCircle className="h-4 w-4 text-neutral-400" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Topic Keywords Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Hash className="h-5 w-5 text-blue-500" />
+            Topic Keywords
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-neutral-500">
+            Click on any keyword to insert it into your content:
+          </p>
+          
+          <div className="flex flex-wrap gap-2">
+            {keywords.map((keyword) => (
+              <Badge 
+                key={keyword}
+                variant="outline"
+                className="cursor-pointer hover:bg-blue-50"
+                onClick={() => handleKeywordClick(keyword)}
+              >
+                {keyword}
+              </Badge>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* SEO Analysis Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-blue-500" />
+            SEO Analysis
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Overall Score</span>
+              {getSeoScoreIcon(seoAnalysis.score)}
+            </div>
+            <span className={`text-lg font-bold ${getSeoScoreColor(seoAnalysis.score)}`}>
+              {seoAnalysis.score}%
+            </span>
+          </div>
+
+          {seoAnalysis.issues.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1 text-red-600">
+                <AlertCircle className="h-4 w-4" />
+                Issues to fix
+              </Label>
+              <div className="space-y-1">
+                {seoAnalysis.issues.map((issue, index) => (
+                  <div key={index} className="flex items-start gap-2 text-sm">
+                    <X className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                    <span>{issue}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {seoAnalysis.suggestions.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1 text-yellow-600">
+                <Lightbulb className="h-4 w-4" />
+                Suggestions
+              </Label>
+              <div className="space-y-1">
+                {seoAnalysis.suggestions.map((suggestion, index) => (
+                  <div key={index} className="flex items-start gap-2 text-sm">
+                    <Info className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                    <span>{suggestion}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {seoAnalysis.score >= 80 && (
+            <div className="p-3 bg-green-50 rounded-lg text-green-800 text-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>Great job! Your content is well optimized for SEO.</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Post Stats Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-blue-500" />
+            Post Stats
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <Label className="text-neutral-500">Word Count</Label>
+            <p className="font-medium">{wordCount.toLocaleString()}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-neutral-500">Character Count</Label>
+            <p className="font-medium">{charCount.toLocaleString()}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-neutral-500">Reading Time</Label>
+            <p className="font-medium">{readTime} min</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-neutral-500">Images</Label>
+            <p className="font-medium">
+              {featuredImage ? 1 : 0}
+              {galleryImages.length > 0 && ` + ${galleryImages.length}`}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100">
       {/* Header */}
@@ -2508,7 +2969,7 @@ export function BlogWriteEditor() {
                 <PenTool className="h-6 w-6 text-blue-500" />
                 <h1 className="text-xl font-bold text-neutral-900">Blog Editor</h1>
               </div>
-              <div className="flex items-center gap-2 text-sm text-neutral-500">
+              <div className="hidden md:flex items-center gap-2 text-sm text-neutral-500">
                 <div className="flex items-center gap-1">
                   <FileText className="h-4 w-4" />
                   <span>{wordCount.toLocaleString()} words</span>
@@ -2527,6 +2988,7 @@ export function BlogWriteEditor() {
                 size="sm" 
                 onClick={handleSaveDraft}
                 disabled={isSubmitting}
+                className="hidden sm:flex"
               >
                 <Save className="h-4 w-4 mr-2" />
                 {isSubmitting 
@@ -2536,7 +2998,7 @@ export function BlogWriteEditor() {
 
               <Button 
                 size="sm" 
-                className="bg-gold-300 text-black hover:bg-gold-600"
+                className="bg-gold-300 text-black hover:bg-gold-600 hidden sm:flex"
                 onClick={handlePublish}
                 disabled={isSubmitting}
               >
@@ -2546,10 +3008,56 @@ export function BlogWriteEditor() {
                 : (isEditMode ? "Publish Edit" : "Publish")}
               </Button>
 
-              <Link href="/dashboard/blog" className="hover:underline">
+              {isMobile && (
+                <Drawer>
+                  <DrawerTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Menu className="h-4 w-4" />
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerContent className="p-4">
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleSaveDraft}
+                        disabled={isSubmitting}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        {isSubmitting 
+                          ? (isEditMode ? "Saving..." : "Saving Draft...") 
+                          : (isEditMode ? "Save Edit" : "Save Draft")}
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="bg-gold-300 text-black hover:bg-gold-600"
+                        onClick={handlePublish}
+                        disabled={isSubmitting}
+                      >
+                        <Globe className="h-4 w-4 mr-2" />
+                        {isSubmitting 
+                        ? (isEditMode ? "Publishing..." : "Publishing Edit...") 
+                        : (isEditMode ? "Publish Edit" : "Publish")}
+                      </Button>
+                      <Link href="/dashboard/blog">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="w-full"
+                        >
+                          <ArrowLeft className="h-4 w-4 mr-2" />
+                          Go Back
+                        </Button>
+                      </Link>
+                    </div>
+                  </DrawerContent>
+                </Drawer>
+              )}
+
+              <Link href="/dashboard/blog" className="hover:underline hidden sm:block">
                 <Button 
                   size="sm" 
-                  className="text-white hover:bg-white hover:text-gold-700"
+                  variant="outline"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Go Back
@@ -2561,9 +3069,12 @@ export function BlogWriteEditor() {
       </div>
 
       <div className="w-full px-4 py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Editor - Scrollable Section */}
-          <div className="xl:col-span-3 h-[calc(100vh-100px)] overflow-y-auto hidden-scrollbar">
+          <div className={cn(
+            "lg:col-span-3 h-[calc(100vh-100px)] overflow-y-auto hidden-scrollbar",
+            isMobileSidebarOpen ? "hidden" : "block"
+          )}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <Card className="overflow-hidden shadow-lg">
                 <CardHeader className="pb-0">
@@ -2577,9 +3088,23 @@ export function BlogWriteEditor() {
                       <span className={`text-sm font-medium ${getSeoScoreColor(seoAnalysis.score)}`}>
                         SEO Score: {seoAnalysis.score}%
                       </span>
-                      <Button variant="ghost" size="sm" onClick={() => setShowFormattingHelp(!showFormattingHelp)}>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setShowFormattingHelp(!showFormattingHelp)}
+                        className="hidden sm:flex"
+                      >
                         <HelpCircle className="h-4 w-4" />
                       </Button>
+                      {isMobile && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setIsMobileSidebarOpen(true)}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
@@ -2758,6 +3283,7 @@ export function BlogWriteEditor() {
                               size="sm"
                               onClick={() => formatText("bold")}
                               title="Bold (**text**)"
+                              className="hidden sm:flex"
                             >
                               <Bold className="h-4 w-4" />
                             </Button>
@@ -2766,6 +3292,7 @@ export function BlogWriteEditor() {
                               size="sm"
                               onClick={() => formatText("italic")}
                               title="Italic (*text*)"
+                              className="hidden sm:flex"
                             >
                               <Italic className="h-4 w-4" />
                             </Button>
@@ -2774,6 +3301,7 @@ export function BlogWriteEditor() {
                               size="sm"
                               onClick={() => formatText("heading1")}
                               title="Heading 1 (# text)"
+                              className="hidden sm:flex"
                             >
                               <Heading1 className="h-4 w-4" />
                             </Button>
@@ -2782,6 +3310,7 @@ export function BlogWriteEditor() {
                               size="sm"
                               onClick={() => formatText("heading2")}
                               title="Heading 2 (## text)"
+                              className="hidden sm:flex"
                             >
                               <Heading2 className="h-4 w-4" />
                             </Button>
@@ -2790,10 +3319,17 @@ export function BlogWriteEditor() {
                               size="sm"
                               onClick={() => formatText("quote")}
                               title="Quote (> text)"
+                              className="hidden sm:flex"
                             >
                               <Quote className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => formatText("code")} title="Code (`text`)">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => formatText("code")} 
+                              title="Code (`text`)"
+                              className="hidden sm:flex"
+                            >
                               <Code className="h-4 w-4" />
                             </Button>
                             <Button
@@ -2801,6 +3337,7 @@ export function BlogWriteEditor() {
                               size="sm"
                               onClick={() => formatText("link")}
                               title="Link ([text](url))"
+                              className="hidden sm:flex"
                             >
                               <LinkIcon className="h-4 w-4" />
                             </Button>
@@ -2840,12 +3377,12 @@ export function BlogWriteEditor() {
                               {isGeneratingSubtitle ? (
                                 <>
                                   <Loader2 className="h-4 w-4 animate-spin" />
-                                  <span>Generating...</span>
+                                  <span className="hidden sm:inline">Generating...</span>
                                 </>
                               ) : (
                                 <>
                                   <Wand2 className="h-4 w-4" />
-                                  <span>Generate subtitle with AI</span>
+                                  <span className="hidden sm:inline">Generate subtitle with AI</span>
                                 </>
                               )}
                             </Button>
@@ -2946,13 +3483,13 @@ export function BlogWriteEditor() {
                     >
                       {isGeneratingExcerpt ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Generating...</span>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          <span className="hidden sm:inline">Generating...</span>
                         </>
                       ) : (
                         <>
                           <Bot className="h-4 w-4" />
-                          <span>Generate with AI</span>
+                          <span className="hidden sm:inline">Generate with AI</span>
                         </>
                       )}
                     </Button>
@@ -2971,551 +3508,31 @@ export function BlogWriteEditor() {
           </div>
 
           {/* Sidebar - Fixed Position */}
-          <div className="xl:col-span-1 h-[calc(100vh-100px)] overflow-y-auto sticky top-28 hidden-scrollbar">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="space-y-6"
-            >
-              
-
-              {/* Author Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-blue-500" />
-                    Author Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="authorTitle">Author title</Label>
-                    <Input
-                      id="authorTitle"
-                      value={authorTitle}
-                      onChange={(e) => setAuthorTitle(e.target.value)}
-                      placeholder="Author's title"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="author">Author Name</Label>
-                    <Input
-                      id="author"
-                      value={author}
-                      onChange={(e) => setAuthor(e.target.value)}
-                      placeholder="Your name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="authorBio">Author Bio</Label>
-                    <Textarea
-                      id="authorBio"
-                      value={authorBio}
-                      onChange={(e) => setAuthorBio(e.target.value)}
-                      placeholder="Your professional Bio"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Post Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-blue-500" />
-                    Post Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
-                    {showCustomCategory ? (
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Enter custom category"
-                          value={customCategory}
-                          onChange={(e) => setCustomCategory(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault()
-                              handleAddCustomCategory()
-                            }
-                          }}
-                        />
-                        <Button type="button" variant="outline" size="icon" onClick={handleAddCustomCategory}>
-                          <CheckCircle className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => {
-                            setShowCustomCategory(false)
-                            setCustomCategory("")
-                          }}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <Select value={category} onValueChange={handleCategoryChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Technology">💻 Technology</SelectItem>
-                          <SelectItem value="Artificial Intelligence">🤖 AI</SelectItem>
-                          <SelectItem value="Business">💼 Business</SelectItem>
-                          <SelectItem value="Science">🔬 Science</SelectItem>
-                          <SelectItem value="Health">🏥 Health</SelectItem>
-                          <SelectItem value="Education">🎓 Education</SelectItem>
-                          <SelectItem value="Entertainment">🎬 Entertainment</SelectItem>
-                          <SelectItem value="Sports">⚽ Sports</SelectItem>
-                          <SelectItem value="Travel">✈️ Travel</SelectItem>
-                          <SelectItem value="Food">🍔 Food</SelectItem>
-                          {customCategories.map((cat) => (
-                            <SelectItem key={cat} value={cat}>
-                              {cat}
-                            </SelectItem>
-                          ))}
-                          <SelectItem value="custom">
-                            <div className="flex items-center gap-2">
-                              <Plus className="h-4 w-4" />
-                              <span>Add custom category</span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Tags</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add tag"
-                        value={currentTag}
-                        onChange={(e) => setCurrentTag(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault()
-                            handleAddTag()
-                          }
-                        }}
-                      />
-                      <Button type="button" variant="outline" size="icon" onClick={handleAddTag}>
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    {tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                            #{tag}
-                            <button onClick={() => handleRemoveTag(tag)}>
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Featured Image Section */}
-                  <div className="space-y-2">
-                    <Label>Featured Image</Label>
-                    {featuredImage ? (
-                      <div className="relative">
-                        <div className="relative h-40 w-full rounded-lg overflow-hidden">
-                          <Image
-                            src={featuredImage}
-                            alt="Featured"
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2"
-                          onClick={() => setFeaturedImage(null)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-blue-300 transition-colors">
-                        <ImageIcon className="h-8 w-8 mx-auto text-neutral-400 mb-2" />
-                        <p className="text-sm text-neutral-500 mb-2">Upload featured image</p>
-                        {isUploading ? (
-                          <div className="flex items-center justify-center">
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            <span>Uploading...</span>
-                          </div>
-                        ) : (
-                          <UploadButton
-                            endpoint="blogFeaturedImg"
-                            onClientUploadComplete={(res) => {
-                              if (res && res[0]?.url) {
-                                setFeaturedImage(res[0].url)
-                                setIsUploading(false)
-                                toast({
-                                  title: "Image uploaded",
-                                  description: "Featured image has been uploaded successfully.",
-                                })
-                              }
-                            }}
-                            onUploadError={(error: Error) => {
-                              setIsUploading(false)
-                              toast({
-                                title: "Upload error",
-                                description: error.message,
-                                variant: "destructive",
-                              })
-                            }}
-                            onUploadBegin={() => {
-                              setIsUploading(true)
-                            }}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Toggle buttons for video and gallery sections */}
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => {
-                        setShowVideoSection(!showVideoSection)
-                        if (!showVideoSection) setShowGallerySection(false)
-                      }}
-                    >
-                      <Film className="h-4 w-4 mr-2" />
-                      {showVideoSection || featuredVideo ? "Hide Video" : "Add Video"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => {
-                        setShowGallerySection(!showGallerySection)
-                        if (!showGallerySection) setShowVideoSection(false)
-                      }}
-                    >
-                      <ImagePlus className="h-4 w-4 mr-2" />
-                      {showGallerySection || galleryImages.length > 0 ? "Hide Gallery" : "Add Gallery"}
-                    </Button>
-                  </div>
-
-                  {/* Featured Video Section */}
-                  {(isEditMode && featuredVideo) || showVideoSection ? (
-                    <div className="space-y-2">
-                      <Label>Featured Video</Label>
-                      {featuredVideo ? (
-                        <div className="relative">
-                          <video controls className="w-full rounded-lg h-[200px]">
-                            <source src={featuredVideo} type="video/mp4" />
-                            Your browser does not support the video tag.
-                          </video>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="absolute top-2 right-2"
-                            onClick={() => setFeaturedVideo(null)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-blue-300 transition-colors">
-                          <Video className="h-8 w-8 mx-auto text-neutral-400 mb-2" />
-                          <p className="text-sm text-neutral-500 mb-2">
-                            {isEditMode ? 'Replace featured video' : 'Upload featured video'}
-                          </p>
-                          {isVideoUploading ? (
-                            <div className="flex items-center justify-center">
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              <span>Uploading...</span>
-                            </div>
-                          ) : (
-                            <UploadButton
-                              endpoint="blogVideoUpload"
-                              onClientUploadComplete={(res) => {
-                                if (res && res[0]?.url) {
-                                  setFeaturedVideo(res[0].url)
-                                  setIsVideoUploading(false)
-                                  toast({
-                                    title: "Video uploaded",
-                                    description: "Featured video has been uploaded successfully.",
-                                  })
-                                }
-                              }}
-                              onUploadError={(error: Error) => {
-                                setIsVideoUploading(false)
-                                toast({
-                                  title: "Upload error",
-                                  description: error.message,
-                                  variant: "destructive",
-                                })
-                              }}
-                              onUploadBegin={() => {
-                                setIsVideoUploading(true)
-                              }}
-                            />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ) : null}
-
-                  {/* Image Gallery Section */}
-                  {(isEditMode && galleryImages.length > 0) || showGallerySection ? (
-                    <div className="space-y-2">
-                      <Label>Image Gallery ({galleryImages.length} images)</Label>
-                      
-                      {galleryImages.length > 0 ? (
-                       <div className="grid grid-cols-2 gap-2 w-full">
-                        {galleryImages.map((img, index) => (
-                          <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
-                            <Image
-                              src={img}
-                              alt={`Gallery image ${index + 1}`}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            />
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="absolute top-1 right-1 h-6 w-6 p-0"
-                              onClick={() => handleRemoveGalleryImage(index)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                      ) : (
-                        <div className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-blue-300 transition-colors">
-                          <ImagePlus className="h-8 w-8 mx-auto text-neutral-400 mb-2" />
-                          <p className="text-sm text-neutral-500 mb-2">
-                            {isEditMode ? 'Add gallery images' : 'Upload gallery images'}
-                          </p>
-                          {isGalleryUploading ? (
-                            <div className="flex items-center justify-center">
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              <span>Uploading...</span>
-                            </div>
-                          ) : (
-                            <UploadButton
-                              endpoint="blogGalleryImg"
-                              onClientUploadComplete={(res) => {
-                                if (res) {
-                                  setGalleryImages([...galleryImages, ...res.map(r => r.url)])
-                                  setIsGalleryUploading(false)
-                                  toast({
-                                    title: "Images uploaded",
-                                    description: `${res.length} images added to gallery.`,
-                                  })
-                                }
-                              }}
-                              onUploadError={(error: Error) => {
-                                setIsGalleryUploading(false)
-                                toast({
-                                  title: "Upload error",
-                                  description: error.message,
-                                  variant: "destructive",
-                                })
-                              }}
-                              onUploadBegin={() => {
-                                setIsGalleryUploading(true)
-                              }}
-                            />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ) : null}
-
-                  <div className="space-y-2">
-                    <Label>Publish Date</Label>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-neutral-500" />
-                      <Input type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} />
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Switch checked={isFeatured} onCheckedChange={setIsFeatured} />
-                        <Label>Featured post</Label>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Switch checked={isPublic} onCheckedChange={setIsPublic} />
-                        <Label>Public visibility</Label>
-                      </div>
-                      {isPublic ? (
-                        <Globe className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Lock className="h-4 w-4 text-neutral-400" />
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Switch checked={allowComments} onCheckedChange={setAllowComments} />
-                        <Label>Allow comments</Label>
-                      </div>
-                      <HelpCircle className="h-4 w-4 text-neutral-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-               {/* Topic Keywords Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Hash className="h-5 w-5 text-blue-500" />
-                    Topic Keywords
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-neutral-500">
-                    Select keywords to include in your content for better SEO:
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {keywords.map((keyword) => (
-                      <Badge 
-                        key={keyword}
-                        variant={selectedKeywords.includes(keyword) ? "default" : "outline"}
-                        className="cursor-pointer hover:bg-blue-50"
-                        onClick={() => handleKeywordClick(keyword)}
-                      >
-                        {keyword}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  {selectedKeywords.length > 0 && (
-                    <Button
-                      size="sm"
-                      className="w-full mt-2"
-                      onClick={insertKeywords}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Insert {selectedKeywords.length} selected keywords
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* SEO Analysis Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    SEO Analysis
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Overall Score</span>
-                      {getSeoScoreIcon(seoAnalysis.score)}
-                    </div>
-                    <span className={`text-lg font-bold ${getSeoScoreColor(seoAnalysis.score)}`}>
-                      {seoAnalysis.score}%
-                    </span>
-                  </div>
-
-                  {seoAnalysis.issues.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-red-600">
-                        <AlertCircle className="h-4 w-4" />
-                        Issues to fix
-                      </Label>
-                      <div className="space-y-1">
-                        {seoAnalysis.issues.map((issue, index) => (
-                          <div key={index} className="flex items-start gap-2 text-sm">
-                            <X className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                            <span>{issue}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {seoAnalysis.suggestions.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-yellow-600">
-                        <Lightbulb className="h-4 w-4" />
-                        Suggestions
-                      </Label>
-                      <div className="space-y-1">
-                        {seoAnalysis.suggestions.map((suggestion, index) => (
-                          <div key={index} className="flex items-start gap-2 text-sm">
-                            <Info className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                            <span>{suggestion}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {seoAnalysis.score >= 80 && (
-                    <div className="p-3 bg-green-50 rounded-lg text-green-800 text-sm">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span>Great job! Your content is well optimized for SEO.</span>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Post Stats Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-blue-500" />
-                    Post Stats
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-neutral-500">Word Count</Label>
-                    <p className="font-medium">{wordCount.toLocaleString()}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-neutral-500">Character Count</Label>
-                    <p className="font-medium">{charCount.toLocaleString()}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-neutral-500">Reading Time</Label>
-                    <p className="font-medium">{readTime} min</p>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-neutral-500">Images</Label>
-                    <p className="font-medium">
-                      {featuredImage ? 1 : 0}
-                      {galleryImages.length > 0 && ` + ${galleryImages.length}`}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+          {!isMobile ? (
+            <div className="lg:col-span-1 h-[calc(100vh-100px)] overflow-y-auto sticky top-28 hidden-scrollbar">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <SidebarContent />
+              </motion.div>
+            </div>
+          ) : (
+            <Drawer open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
+              <DrawerContent className="h-[90vh] p-4">
+                <div className="overflow-y-auto">
+                  <SidebarContent />
+                </div>
+                <Button 
+                  className="mt-4 w-full" 
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                >
+                  Close Settings
+                </Button>
+              </DrawerContent>
+            </Drawer>
+          )}
         </div>
       </div>
     </div>

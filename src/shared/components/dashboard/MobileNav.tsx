@@ -77,7 +77,7 @@ export function MobileNav() {
            <Menu />
         </Button>
       </SheetTrigger>
-      <SheetContent side={'left'} className="  bg-gray-100 w-[280px]">
+      <SheetContent side={'left'} className="  bg-gray-100 w-[280px] min-h-screen overflow-y-auto">
         <SheetHeader>
           <SheetTitle>TheNews</SheetTitle>
           <SheetDescription>

@@ -348,7 +348,6 @@ const Emaileditor = ({ subjectTitle }: { subjectTitle: string }) => {
             scheduleDate: scheduleDate,
             scheduleTime: scheduleTime,
             adminEmail: adminEmail || "",
-            fromApplication: isIntegrationSpecific ? selectedIntegrationName : undefined
           });
 
           if (!res.success) {
