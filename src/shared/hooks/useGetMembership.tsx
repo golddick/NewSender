@@ -33,11 +33,11 @@ const useGetMembership = () => {
         const res = await fetch("/api/membership", { method: "GET" });
         if (!res.ok) throw new Error("Failed to fetch membership");
         const json = await res.json();
-        if (!json) {
+        if (!json) { 
           setError("No membership found.");
         } else {
           setData(json);
-        }
+        } 
       } catch (err) {
         console.error("Failed to fetch membership:", err);
         setError("An error occurred while fetching membership.");

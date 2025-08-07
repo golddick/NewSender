@@ -431,6 +431,8 @@ model Membership {
   email                      String
   organization               String?
   organizationUrl            String?
+  kycStatus                  KYCStatus              @default(PENDING)
+  SenderName                 String?
   amount                     Int                    @default(0)
   currency                   String                 @default("NGN")
   lastPaymentDate            DateTime?

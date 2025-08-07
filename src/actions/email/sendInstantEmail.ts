@@ -4,6 +4,7 @@ import { db } from '@/shared/libs/database'
 import { sendEmail } from '@/shared/utils/email.sender'
 import { saveEmailToDatabase } from './addEmail'
 import { EmailType } from '@prisma/client'
+import { currentUser } from '@clerk/nextjs/server'
 
 export const sendInstantEmail = async ({
   userEmails,
@@ -15,7 +16,6 @@ export const sendInstantEmail = async ({
   integrationId,
   campaignId,
   adminEmail,
-  fromApplication,
 }: {
   userEmails: string[]
   subject: string
@@ -26,9 +26,24 @@ export const sendInstantEmail = async ({
   integrationId?: string | null
   campaignId?: string | null
   adminEmail: string
-  fromApplication: string
+
 }) => {
   try {
+
+
+      const user = await currentUser();
+  if (!user) {
+    return { success: false, error: "You must be logged in to create a blog post" };
+  }
+    const userId = user.id;
+
+    const admin = await db.membership.findUnique({
+      where: { userId: userId },
+    })
+
+    const fromApplication = admin?.SenderName || admin?.userName || "TheNews"
+
+
     // Check if email exists
     let emailTemplate = await db.email.findUnique({
       where: { id: emailTemplateId },

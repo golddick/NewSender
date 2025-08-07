@@ -414,19 +414,11 @@ export const sendEmail = async (params: SendEmailParams) => {
               </div>
             `;
 
-              // enhancedContent += `
-              //   <div style="text-align:center;margin-top:30px;font-size:12px;color:#666;">
-              //     <a href="${domain}/api/unsubscribe?email=${encodeURIComponent(email)}&ownerId=${newsLetterOwnerId}${integrationId ? `&integration=${encodeURIComponent(integrationId)}` : ''}${campaign ? `&campaignId=${encodeURIComponent(campaign)}` : ''}"
-              //       style="color:#666;text-decoration:underline;">
-              //       Unsubscribe
-              //     </a>
-              //   </div>
-              // `;
 
-              const fromName = fromApplication.charAt(0).toUpperCase() + fromApplication.slice(1).toLowerCase() || 'Thenews Newsletter';
+              const fromName = fromApplication.charAt(0).toUpperCase() + fromApplication.slice(1).toLowerCase();
 
               const result = await transporter.sendMail({
-                from: `${fromName} Newsletter <${process.env.SMTP_USER}>`,
+                from: `${fromName} <${process.env.SMTP_USER}>`,
                 to: email,
                 subject,
                 html: enhancedContent,

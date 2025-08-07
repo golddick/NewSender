@@ -88,10 +88,10 @@ import useGetMembership from "@/shared/hooks/useGetMembership";
 import useSettingsFilter from "@/shared/hooks/useSettingsFilter";
 import { UserProfile } from "@clerk/nextjs";
 import { useEffect } from "react";
-import { SubscriptionSettings } from "./_component/Sub-management";
-import KYCPage from "./_component/KYC";
-import ApiKey from "./_component/ApiKey";
-import { NotificationCenter } from "./_component/Notification-Management";
+import { SubscriptionSettings } from "../_component/Sub-management";
+import KYCPage from "../_component/KYC";
+import ApiKey from "../_component/ApiKey";
+import { NotificationCenter } from "../_component/Notification-Management";
 import { useSearchParams } from "next/navigation";
 import Loader from "@/components/Loader";
 

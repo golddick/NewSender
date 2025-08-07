@@ -19,7 +19,7 @@ const UserPlan = () => {
   const router = useRouter();
 
   const handleManageSubscription = async () => {
-    if (!membership?.paystackCustomerId) {
+    if (!membership?.paystackCustomerId) { 
       toast.error("No active subscription found"); 
       return;
     }

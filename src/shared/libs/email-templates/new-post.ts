@@ -227,7 +227,7 @@ export function newPostNotificationTemplate({
       margin: 0 0 12px;
       line-height: 1.5;
     ">
-      Hey there! A new blog post has just been published on <strong>${platform}</strong>. 
+      Hey there! A new blog post has just been published by <strong>${platform}</strong>. 
       Here's a sneak peek of what's inside:
     </p>
 
@@ -261,7 +261,7 @@ export function newPostNotificationTemplate({
       font-size: 13px;
       margin: 0 0 16px;
     ">
-      By <span style="color: #000; font-weight: 600;">${author}</span>
+      Authur <span style="color: #000; font-weight: 600;">${author}</span>
     </p>
 
     ${

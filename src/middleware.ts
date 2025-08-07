@@ -11,7 +11,7 @@ const isPublicRoute = createRouteMatcher([
   "/", 
   "/api/subscribe",
   "/api/campaigns",
-  "api/category",
+  "api/track-notifcation-mail/(.*)",
  '/api/track/(.*)', // Fixed pattern for tracking routes
   '/api/track/open(.*)',
   '/api/track/click(.*)'

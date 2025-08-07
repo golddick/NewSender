@@ -37,22 +37,26 @@ export async function POST(request: Request) {
       event.event === "invoice.payment_success" ||
       event.event === "charge.success"
     ) {
-      const planCode = subscription.plan.plan_code;
-
-      // Map plan code to valid plan
+      const planCode = subscription.plan?.plan_code;
       let mappedPlan: "LAUNCH" | "SCALE" | "FREE" = "FREE";
+      let billingCycle: "monthly" | "yearly" = "monthly";
+      let amount = 0;
 
       for (const [planName, planConfig] of Object.entries(PLAN_CONFIG)) {
-        if (
-          planConfig.monthly.id === planCode ||
-          planConfig.yearly.id === planCode
-        ) {
+        if (planConfig.monthly.id === planCode) {
           mappedPlan = planName as "LAUNCH" | "SCALE";
+          billingCycle = "monthly";
+          amount = planConfig.monthly.amount;
+          break;
+        }
+
+        if (planConfig.yearly.id === planCode) {
+          mappedPlan = planName as "LAUNCH" | "SCALE";
+          billingCycle = "yearly";
+          amount = planConfig.yearly.amount;
           break;
         }
       }
-
-      const amount = subscription.amount / 100; // Convert from kobo to Naira
 
       // Update membership
       await db.membership.update({
@@ -67,10 +71,10 @@ export async function POST(request: Request) {
       await db.invoice.create({
         data: {
           userId: membership.userId,
-          description: `${mappedPlan} Plan - ${subscription.interval || "monthly"}`,
+          description: `${mappedPlan} Plan - ${billingCycle}`,
           amount,
           status: "paid",
-          invoiceUrl: subscription.authorization?.receipt_url || "",
+          invoiceUrl: subscription?.authorization?.receipt_url || "",
           date: new Date(),
         },
       });
@@ -80,14 +84,14 @@ export async function POST(request: Request) {
 
     // Handle downgrade (subscription cancellation or expiration)
     if (
-      event.event === "subscription.not_renew" || // Paystack does not renew
-      event.event === "subscription.disable" || // Subscription disabled
-      event.event === "subscription.cancel" // Explicit cancellation
+      event.event === "subscription.not_renew" ||
+      event.event === "subscription.disable" ||
+      event.event === "subscription.cancel"
     ) {
       await db.membership.update({
         where: { id: membership.id },
         data: {
-          plan: "FREE", // Downgrade to free plan
+          plan: "FREE",
           amount: 0,
         },
       });
@@ -101,8 +105,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
-
 
 
 

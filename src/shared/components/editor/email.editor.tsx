@@ -332,12 +332,11 @@ const Emaileditor = ({ subjectTitle }: { subjectTitle: string }) => {
             integrationId: isIntegrationSpecific ? selectedIntegration : undefined,
             campaignId: isIntegrationSpecific ? selectedCampaign : undefined,
             adminEmail: adminEmail || "",
-            fromApplication: isIntegrationSpecific ? selectedIntegrationName : 'TheNews',
           });
         } else if (emailType === 'SCHEDULE' && scheduleDate) {
           const res = await saveEmailToDatabase({
             title: subject,
-            content: JSON.stringify(design),
+            content: JSON.stringify(design), 
             emailId: emailId,
             textContent: html,
             emailSubject: subject,

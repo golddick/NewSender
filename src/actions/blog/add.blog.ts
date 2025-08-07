@@ -136,7 +136,7 @@ export async function createBlogPost(formData: {
 
       // Notify subscribers about the new post
 
-        const platformName = post.membership?.organization || post.membership?.userName || 'TheNews'
+        const platformName = post.membership?.SenderName || post.membership?.userName || 'TheNews'
 
       await notifySubscribersAboutNewPost({
           post: post,

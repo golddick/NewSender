@@ -56,7 +56,7 @@ export const addSubscriber = async ({
 
     // 3. Get platform name and URL
     const owner = await db.membership.findUnique({ where: { userId: ownerId } })
-    const platformName = owner?.organization || owner?.userName || 'TheNews'
+    const platformName = owner?.SenderName || owner?.userName || 'TheNews'
     const platformUrl = owner?.organizationUrl || 'https://thenews.africa/'
 
     // 4. Validate email with ZeroBounce
