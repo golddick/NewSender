@@ -94,49 +94,43 @@ function SettingsContent() {
   }, [searchParams, setActiveItem]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full  mx-auto px-4  lg:px-8 ">
       {/* Settings Tab - Responsive */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto ">
         <SettingsTab />
       </div>
 
       {/* Content Area - Responsive */}
-      <div className="mt-5 pb-10">
+      <div className="mt-5 pb-10 ">
         {activeItem === "Customize Profile" && (
           <div className="w-full flex justify-center">
-            <div className="w-full max-w-4xl">
               <UserProfile />
-            </div>
           </div>
         )}
         
         {activeItem === "API Access" && (
-          <div className="w-full px-4 sm:px-0">
+          <div className="">
             <ApiKey />
           </div>
         )}
         
         {activeItem === "KYC" && (
-          <div className="w-full px-4 sm:px-0">
-            <div className="w-full max-w-4xl mx-auto">
+          <div className="w-full ">
+           
               <KYCPage />
-            </div>
+              
           </div>
         )}
         
-        {activeItem === "Subscription Management" && (
-          <div className="w-full px-4 sm:px-0">
-            <div className="w-full max-w-4xl mx-auto">
+        {activeItem === "Subscription" && (
+          <div className="w-full">
               <SubscriptionSettings />
-            </div>
           </div>
         )}
         
         {activeItem === "Notification" && (
-          <div className="w-full px-4 sm:px-0">
-            <div className="w-full max-w-4xl mx-auto">
+          <div className="w-full ">
               <NotificationCenter />
-            </div>
           </div>
         )}
       </div>
@@ -147,7 +141,7 @@ function SettingsContent() {
 export default function Page() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
+      <div >
         <Loader/>
       </div>
     }>

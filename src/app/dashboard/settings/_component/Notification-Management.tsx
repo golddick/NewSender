@@ -272,7 +272,7 @@ console.log(notifications, 'user  not man ')
   }
 
   return (
-    <div className="min-h-screen bg-white space-y-8 px-4 sm:px-6 lg:px-8 w-full  ">
+    <div className="min-h-screen bg-white space-y-8  w-full  ">
       {/* Header */}
       {/* <div className="bg-transparent text-black p-4 md:p-6">
         <div className="w-full">
@@ -308,7 +308,7 @@ console.log(notifications, 'user  not man ')
         </div>
       </div> */}
 
-      <div className="max-w-7xl mb-4 mx-auto p-3 sm:p-4 md:p-6">
+      <div className="max-w-7xl mb-4 mx-auto p-3  md:p-6">
         <Tabs defaultValue="notifications" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-3 sm:mb-4 md:mb-6 h-10 sm:h-11 md:h-12">
             <TabsTrigger value="notifications" className="flex items-center text-xs sm:text-sm">
@@ -324,7 +324,7 @@ console.log(notifications, 'user  not man ')
           {/* Notifications Tab */}
           <TabsContent value="notifications" className="space-y-3 sm:space-y-4 md:space-y-6">
             {/* Statistics Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4  ">
               <StatCard
                 title="Total"
                 value={notifications.length}
@@ -435,10 +435,10 @@ console.log(notifications, 'user  not man ')
                             </h3>
                             <div className="flex gap-1 sm:gap-2 flex-wrap">
                               {getStatusBadge(notification.status)}
-                              <Badge className={`text-xs ${getTypeBadge(notification.type)}`}>
+                              <Badge className={`text-xs hidden md:block ${getTypeBadge(notification.type)}`}>
                                 {notification.type}
                               </Badge>
-                              <Badge className={`text-xs ${getPriorityBadge(notification.priority)}`}>
+                              <Badge className={`text-xs hidden md:block ${getPriorityBadge(notification.priority)}`}>
                                 {notification.priority}
                               </Badge>
 
@@ -477,7 +477,7 @@ console.log(notifications, 'user  not man ')
                             </div>
                           </div>
 
-                          <p className="text-xs sm:text-sm text-gray-600 mt-2 line-clamp-2">
+                          <p className="text-xs sm:text-sm text-black mt-2 line-clamp-2">
                             {typeof notification.content === 'string' 
                                 ? notification.content 
                                 : (notification.content as NotificationContent)?.title || 
