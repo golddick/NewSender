@@ -12,7 +12,6 @@ export const sendCampaignConfirmationEmail = async ({
   userEmail,
   userName,
   campaign,
-  integration,
   newsLetterOwnerId,
   emailTemplateId,
   notificationTemplateContent,
@@ -22,7 +21,6 @@ export const sendCampaignConfirmationEmail = async ({
   userEmail: string
   userName?: string
   campaign?: string
-  integration?: string
   newsLetterOwnerId: string
   emailTemplateId: string
   notificationTemplateContent: {

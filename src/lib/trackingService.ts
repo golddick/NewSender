@@ -61,14 +61,7 @@ export const recordOpen = async (
       );
     }
 
-    if (email.integrationId) {
-      updates.push(
-        db.integration.update({
-          where: { id: email.integrationId },
-          data: { openRate: { increment: 1 } },
-        })
-      );
-    }
+   
 
     await db.$transaction(updates);
 
@@ -135,14 +128,6 @@ export const recordClick = async (
       );
     }
 
-    if (email.integrationId) {
-      updates.push(
-        db.integration.update({
-          where: { id: email.integrationId },
-          data: { clickRate: { increment: 1 } },
-        })
-      );
-    }
 
     await db.$transaction(updates);
 

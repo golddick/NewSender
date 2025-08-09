@@ -13,7 +13,6 @@ export const sendInstantEmail = async ({
   htmlContent,
   emailTemplateId,
   newsLetterOwnerId,
-  integrationId,
   campaignId,
   adminEmail,
 }: {
@@ -57,7 +56,6 @@ export const sendInstantEmail = async ({
         textContent: htmlContent,
         emailSubject: subject,
         newsLetterOwnerId,
-        integrationId,
         campaignId,
         emailType: EmailType.INSTANT,
         emailId: emailTemplateId,
@@ -91,7 +89,6 @@ export const sendInstantEmail = async ({
       contentJson: JSON.stringify(content),
       emailId: emailTemplate.id,
       newsLetterOwnerId,
-      integrationId,
       campaign: campaignId,
       adminEmail,
       fromApplication,

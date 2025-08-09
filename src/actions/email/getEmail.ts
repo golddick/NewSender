@@ -16,7 +16,6 @@ export const getAllEmails = async () => {
       },
       include: {
         campaign: { select: { name: true } },
-        integration: { select: { id: true, name: true, logo: true } },
       },
       orderBy: {
         createdAt: 'desc',
@@ -36,11 +35,6 @@ export const getAllEmails = async () => {
         id: email.id,
         subject: email.title,
         previewText: email.title, // optional, populate if your model has it
-        integration: {
-          id: email.integration?.id || '',
-          name: email.integration?.name || '',
-          logo: email.integration?.logo || '',
-        },
         campaign: email.campaign?.name || '',
         type: email.emailType || '',
         status: email.status,
@@ -76,7 +70,6 @@ export const getEmailById = async (emailId: string) => {
       where: { id: emailId },
       include: {
         campaign: { select: { name: true } },
-        integration: { select: { id: true, name: true, logo: true } },
       },
     });
 
@@ -120,8 +113,7 @@ export const getEmailByTitle = async ({
           newsLetterOwnerId,
       },
       include: {
-        campaign: { select: { id: true, name: true, trigger: true } },
-        integration: { select: { id: true, name: true, logo: true } },
+        campaign: { select: { id: true, name: true } },
       },
     });
 
@@ -139,7 +131,6 @@ export const getEmailByTitle = async ({
         title: email.title,
         content: email.content,
         campaign: email.campaign,
-        integration: email.integration,
         emailType: email.emailType,
         status: email.status,
         previewText: email.previewText,

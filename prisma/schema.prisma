@@ -660,50 +660,15 @@ model BlogAIGeneration {
 
 // ========== EXISTING MODELS (from your schema) ==========
 
-model Integration {
-  id             String            @id @default(uuid())
-  name           String            @unique
-  url            String
-  logo           String?
-  email          String?
-  status         IntegrationStatus @default(ACTIVE)
-  category       String
-  description    String?
-  apiKey         String?           @map("api_key")
-  webhookUrl     String?           @map("webhook_url")
-  campaigns      Int?              @default(0)
-  subscribers    Int?              @default(0)
-  recipients     Int?              @default(0)
-  emailsSent     Int?              @default(0) @map("emails_sent")
-  openRate       Float?            @map("open_rate")
-  clickRate      Float?            @map("click_rate")
-  conversionRate Float?            @map("conversion_rate")
-  lastSync       DateTime?         @map("last_sync")
-  createdAt      DateTime          @default(now()) @map("created_at")
-  updatedAt      DateTime          @updatedAt @map("updated_at")
-  userId         String            @map("user_id")
 
-
-  Campaign   Campaign[]
-  Subscriber Subscriber[]
-  Email      Email[]
-  notificationEmail NewsletterOwnerNotification[]
-
-  @@index([userId])
-  @@index([category])
-  @@index([status])
-  @@index([name])
-  @@map("integrations")
-}
 
 model Campaign {
   id            String          @id @default(uuid())
   name          String          @unique
   userId        String
   description   String?
-  trigger       CampaignTrigger
+  type          String?
   status        CampaignStatus  @default(ACTIVE)
-  integrationId String
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   emailsSent     Int             @default(0)
@@ -711,13 +676,9 @@ model Campaign {
   openRate      Float?          @map("open_rate")
   clickRate     Float?          @map("click_rate")
   lastSentAt    DateTime?      @map("last_sent_at")
-  integration Integration  @relation(fields: [integrationId], references: [id])
-  subscribers Subscriber[]
   emails      Email[]
 
-  @@index([integrationId])
   @@index([status])
-  @@index([trigger])
 }
 
 model Subscriber {
@@ -728,16 +689,12 @@ model Subscriber {
   source            String             @default("unknown")
   status            SubscriptionStatus @default(Subscribed)
   campaignId        String?  
-  integrationId     String?
   pageUrl           String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  campaign    Campaign?    @relation(fields: [campaignId], references: [id])
-  integration Integration? @relation(fields: [integrationId], references: [id])
-
-  @@unique([email, newsLetterOwnerId, integrationId, campaignId], name: "unique_subscriber_key")
+  @@unique([email, newsLetterOwnerId], name: "unique_subscriber_key")
 }
 
 model Email {
@@ -770,7 +727,6 @@ model Email {
   emailType         EmailType     //automated // instant 
   clickedLinks      ClickedLink[]
   campaign          Campaign?     @relation(fields: [campaignId], references: [id])
-  integration       Integration?   @relation(fields: [integrationId], references: [id])
   user             Membership     @relation(fields: [userId], references: [userId])
   //schedule fields
   scheduleDate       DateTime?
@@ -811,9 +767,6 @@ model NewsletterOwnerNotification {
   lastOpened        DateTime?
   lastClicked       DateTime?
   
-  // Integration relation
-  integrationId     String?
-  integration       Integration?        @relation(fields: [integrationId], references: [id])
   
   // System notification metadata
   metadata          Json?

@@ -7,21 +7,9 @@ interface Subscriber {
   id: string;
   email: string;
   name: string | null;
-  source: string;
   status: SubscriptionStatus;
   createdAt: Date;
   updatedAt: Date;
-  campaign: {
-    id: string;
-    name: string;
-    trigger: string;
-  } | null;
-  integration: {
-    id: string;
-    name: string;
-    logo: string | null;
-    url: string | null;
-  } | null;
   pageUrl: string | null;
 }
 

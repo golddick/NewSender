@@ -103,152 +103,123 @@
 // export default SubscribeFormPage;
 
 
+
+
+
+
+
+
+
+
+
+
+
 "use client";
 
 import { getCampaignById } from "@/actions/campaign/get-campaign";
-import { getIntegrationByName } from "@/actions/application-Integration/application";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { addSubscriber } from "@/actions/subscriber/add.subscriber";
-import { Integration } from "@prisma/client";
 import toast from "react-hot-toast";
 import Loader from "@/components/Loader";
-import Image from "next/image";
 import { formatString } from "@/lib/utils";
+import type { Campaign } from "@prisma/client"; // ✅ using Prisma type
+
+// Narrowed campaign type for only needed fields
+type CampaignInfo = Pick<Campaign, "id" | "name" | "description" | "type" | "status">;
 
 const SubscribeFormPage = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [campaign, setCampaign] = useState<any>(null);
-  const [integration, setIntegration] = useState<Partial<Integration>>();
+  const [campaign, setCampaign] = useState<CampaignInfo | null>(null);
+
   const searchParams = useSearchParams();
   const router = useRouter();
-
   const campaignId = searchParams.get("campaignId");
-  const appName = searchParams.get("appName");
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!campaignId || !appName) {
-        console.error("Invalid subscription link - missing campaignId or appName");
-        toast.error("Invalid subscription link");
-        router.push("/dashboard");
+    const fetchCampaign = async () => {
+      if (!campaignId) {
+        console.log("No campaign ID provided - standalone subscription");
         return;
       }
 
       setLoading(true);
       try {
-        // Fetch integration data
-        const integrationRes = await getIntegrationByName(appName);
-        if (!integrationRes || integrationRes.error || !integrationRes.data) {
-          const errorMsg = integrationRes?.error || "Integration not found";
-          console.error("Failed to fetch integration:", errorMsg);
-          throw new Error(errorMsg);
-        }
-        setIntegration(integrationRes.data as Partial<Integration>);
-
-        // Fetch campaign data
         const campaignRes = await getCampaignById(campaignId);
         if (!campaignRes) {
-          console.error("Campaign not found for ID:", campaignId);
-          throw new Error("Campaign not found");
+          toast.error("Campaign not found");
+          return;
         }
-        setCampaign(campaignRes.data);
-
-        console.log("Successfully loaded integration and campaign data");
+        setCampaign(campaignRes); // ✅ no `.data` here
       } catch (error) {
-        console.error("Error in fetchData:", error);
-        toast.error(error instanceof Error ? error.message : "Failed to load data");
-        router.push("/");
+        console.error("Error loading campaign:", error);
+        toast.error("Failed to load campaign data");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [campaignId, appName, router]);
+    fetchCampaign();
+  }, [campaignId, router]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!email || !campaignId || !appName || !integration?.id) {
-      console.error("Missing required fields:", {
-        email,
-        campaignId,
-        appName,
-        integrationId: integration?.id
-      });
-      toast.error("Please provide all required information");
+    if (!email) {
+      toast.error("Please provide your email address");
       return;
     }
 
     setLoading(true);
     try {
-      console.log("Attempting to subscribe:", { email, name, campaignId });
-      
       const result = await addSubscriber({
         email,
-        name: name,
-        integrationId: integration?.id,
-        campaignId: campaignId,
-        source: "THENEWS website-form",
-        status: 'Subscribed',
+        name: name || undefined,
+        campaignId: campaignId || undefined,
+        source: "website-form",
+        status: "Subscribed",
         pageUrl: window.location.href,
       });
 
       if (result?.error) {
-        console.error("Subscription failed:", result.error);
         throw new Error(result.error);
       }
 
-      console.log("Subscription successful for email:", email);
-      toast.success('Subscribed successfully!')
+      toast.success("Subscribed successfully!");
       setEmail("");
       setName("");
-
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
-      toast.error(error instanceof Error ? error.message : String(error))
+      toast.error(error instanceof Error ? error.message : "Subscription failed");
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading && (!campaign || !integration)) {
-    return (
-      <Loader/>
-    );
+  if (loading && campaignId && !campaign) {
+    return <Loader />;
   }
-
-  console.log(campaign, 'camp')
-  console.log(integration, 'Int')
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-12">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center">
-          {integration?.logo && (
-            <div className=" relative  w-16 h-16">
-            <Image
-              fill 
-              src={integration.logo} 
-              alt={integration.name || 'logo'}
-              className=" absolute mx-auto mb-4 rounded"
-            />
-             </div>
-          )}
-          <h1 className="text-3xl font-bold capitalize">
-            Subscribe to {integration?.name || "our application"}
+          <h1 className="text-3xl font-bold">
+            {campaign ? `Subscribe to ${campaign.name}` : "Subscribe to our newsletter"}
           </h1>
-        <p className="text-gray-600 mt-2">
-        {campaign?.trigger && `${formatString(campaign.trigger)} • `}
-        Campaign
-      </p>
+          {campaign?.type && (
+            <p className="text-gray-600 mt-2">
+              {`${formatString(campaign.type)} • Campaign`}
+            </p>
+          )}
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-gray-50 p-6 rounded-lg shadow-sm space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-gray-50 p-6 rounded-lg shadow-sm space-y-4"
+        >
           <div className="space-y-2">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email Address *
@@ -283,7 +254,7 @@ const SubscribeFormPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gold-400 text-black py-3 rounded-md hover:bg-gold-700 transition flex justify-center items-center gap-2"
+            className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition flex justify-center items-center gap-2"
           >
             {loading ? (
               <>
@@ -301,5 +272,3 @@ const SubscribeFormPage = () => {
 };
 
 export default SubscribeFormPage;
-
-

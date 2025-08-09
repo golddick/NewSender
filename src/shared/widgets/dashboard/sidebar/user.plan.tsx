@@ -9,9 +9,11 @@ import { Slider } from "@nextui-org/slider";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { managePaystackSubscription } from "@/actions/paystack/manage.paystack.subcription";
+import { useUser } from "@clerk/nextjs";
 
 const UserPlan = () => {
-  const { data: subscribers, loading: subscribersLoading } = useSubscribersData();
+
+  const { subscribers, loading: subscribersLoading } = useSubscribersData( );
   const { data: membership, loading: membershipLoading } = useGetMembership();
 
   console.log(subscribers, 'sub data cart')

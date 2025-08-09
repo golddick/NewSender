@@ -1,7 +1,6 @@
 
 
 
-
 // "use client";
 
 // import { useEffect, useState } from "react";
@@ -22,7 +21,6 @@
 // } from "@/components/ui/select";
 // import { Upload } from "lucide-react";
 // import ImportCSVBTN from "./exportCSVBTN";
-// import { getCampaignsByIntegrationId } from "@/actions/campaign/get-campaign";
 // import toast from "react-hot-toast";
 // import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -41,7 +39,7 @@
 //   integrations,
 //   onImportComplete,
 // }: ImportSubscriberModalProps) {
-//   const [selectedIntegrationId, setSelectedIntegrationId] = useState<string>("");
+//   const [selectedIntegrationId, setSelectedIntegrationId] = useState<string | null>(null);
 //   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
 //   const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
 //   const [open, setOpen] = useState(false);
@@ -56,7 +54,7 @@
 //     existingEmails?: string[];
 //   } | null>(null);
 
-//   // ✅ useEffect is always called regardless of condition
+//   // Fetch campaigns only if integration is selected
 //   useEffect(() => {
 //     if (!selectedIntegrationId) {
 //       setCampaigns([]);
@@ -87,7 +85,7 @@
 //   }, [selectedIntegrationId]);
 
 //   const resetSelection = () => {
-//     setSelectedIntegrationId("");
+//     setSelectedIntegrationId(null);
 //     setSelectedCampaignId(null);
 //     setCampaigns([]);
 //     setError(null);
@@ -112,7 +110,6 @@
 //     }
 //   };
 
-//   // ✅ Now only render if valid
 //   if (!newsletterOwnerId) {
 //     return (
 //       <Button variant="outline" disabled>
@@ -148,64 +145,67 @@
 //             </Alert>
 //           )}
 
-//                    {/* Display detailed import status */}
-//             {importStatus && (
+//           {/* Import Status */}
+//           {importStatus && (
 //             <Alert variant={importStatus.success ? "default" : "destructive"}>
-//                 <AlertDescription>
+//               <AlertDescription>
 //                 <div className="font-medium">{importStatus.message}</div>
 
 //                 {importStatus.duplicateEmails && importStatus.duplicateEmails.length > 0 && (
-//                     <div className="mt-2">
+//                   <div className="mt-2">
 //                     <p className="font-medium">Duplicate Emails:</p>
 //                     <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-//                         {importStatus.duplicateEmails.map((email, index) => (
+//                       {importStatus.duplicateEmails.map((email, index) => (
 //                         <li key={`dup-${index}`}>{email}</li>
-//                         ))}
+//                       ))}
 //                     </ul>
-//                     </div>
+//                   </div>
 //                 )}
 
 //                 {importStatus.existingEmails && importStatus.existingEmails.length > 0 && (
-//                     <div className="mt-2">
+//                   <div className="mt-2">
 //                     <p className="font-medium">Already Existing Emails:</p>
 //                     <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-//                         {importStatus.existingEmails.map((email, index) => (
+//                       {importStatus.existingEmails.map((email, index) => (
 //                         <li key={`exist-${index}`}>{email}</li>
-//                         ))}
+//                       ))}
 //                     </ul>
-//                     </div>
+//                   </div>
 //                 )}
 
 //                 {importStatus.invalidEntries && importStatus.invalidEntries.length > 0 && (
-//                     <div className="mt-2">
+//                   <div className="mt-2">
 //                     <p className="font-medium">Invalid Entries:</p>
 //                     <ul className="list-disc pl-5 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-//                         {importStatus.invalidEntries.map((entry, index) => (
+//                       {importStatus.invalidEntries.map((entry, index) => (
 //                         <li key={`invalid-${index}`}>{entry}</li>
-//                         ))}
+//                       ))}
 //                     </ul>
-//                     </div>
+//                   </div>
 //                 )}
-//                 </AlertDescription>
+//               </AlertDescription>
 //             </Alert>
-//             )}
+//           )}
 
-//           {/* Integration Select */}
-//           <div>
-//             <label className="block text-sm font-medium mb-1">Integration</label>
+//           {/* Integration Select (Optional) */}
+//           {
+//             integrations.length > 0 && (
+//                 <div>
+//             <label className="block text-sm font-medium mb-1">Integration (Optional)</label>
 //             <Select
-//               value={selectedIntegrationId}
+//               value={selectedIntegrationId || "none"}
 //               onValueChange={(value) => {
-//                 setSelectedIntegrationId(value);
+//                 setSelectedIntegrationId(value === "none" ? null : value);
 //                 setSelectedCampaignId(null);
 //                 setError(null);
 //                 setImportStatus(null);
 //               }}
 //             >
 //               <SelectTrigger>
-//                 <SelectValue placeholder="Select integration" />
+//                 <SelectValue placeholder="Select integration (optional)" />
 //               </SelectTrigger>
 //               <SelectContent>
+//                 <SelectItem value="none">No Integration</SelectItem>
 //                 {integrations.map((integration) => (
 //                   <SelectItem key={integration.id} value={integration.id}>
 //                     {integration.name}
@@ -214,8 +214,11 @@
 //               </SelectContent>
 //             </Select>
 //           </div>
+//             )
+//           }
+          
 
-//           {/* Campaign Select */}
+//           {/* Campaign Select (Optional) */}
 //           {selectedIntegrationId && (
 //             <div>
 //               <label className="block text-sm font-medium mb-1">Campaign (Optional)</label>
@@ -242,14 +245,13 @@
 //             </div>
 //           )}
 
-//           {selectedIntegrationId && (
-//             <ImportCSVBTN
-//               newsletterOwnerId={newsletterOwnerId}
-//               integrationId={selectedIntegrationId}
-//               campaignId={selectedCampaignId}
-//               onImportComplete={handleImportComplete}
-//             />
-//           )}
+//           {/* CSV Import Button */}
+//           <ImportCSVBTN
+//             newsletterOwnerId={newsletterOwnerId}
+//             integrationId={selectedIntegrationId}
+//             campaignId={selectedCampaignId}
+//             onImportComplete={handleImportComplete}
+//           />
 //         </div>
 //       </DialogContent>
 //     </Dialog>
@@ -259,7 +261,12 @@
 
 
 
-// src/app/(dashboard)/.../components/ImportSubscriberModal.tsx
+
+
+
+
+
+
 
 
 "use client";
@@ -282,30 +289,24 @@ import {
 } from "@/components/ui/select";
 import { Upload } from "lucide-react";
 import ImportCSVBTN from "./exportCSVBTN";
-import { getCampaignsByIntegrationId } from "@/actions/campaign/get-campaign";
 import toast from "react-hot-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getLogUserCampaigns } from "@/actions/campaign/get-campaign";
 
 interface ImportSubscriberModalProps {
   newsletterOwnerId?: string;
-  integrations: {
-    id: string;
-    name: string;
-    logo: string | null;
-  }[];
   onImportComplete: () => void;
 }
 
 export function ImportSubscriberModal({
   newsletterOwnerId,
-  integrations,
   onImportComplete,
 }: ImportSubscriberModalProps) {
-  const [selectedIntegrationId, setSelectedIntegrationId] = useState<string | null>(null);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
   const [importStatus, setImportStatus] = useState<{
     success: boolean;
     message: string;
@@ -316,40 +317,40 @@ export function ImportSubscriberModal({
     existingEmails?: string[];
   } | null>(null);
 
-  // Fetch campaigns only if integration is selected
+  // Fetch campaigns when modal opens
   useEffect(() => {
-    if (!selectedIntegrationId) {
-      setCampaigns([]);
-      return;
-    }
+    if (!open || !newsletterOwnerId) return;
 
     const fetchCampaigns = async () => {
       try {
+        setLoadingCampaigns(true);
         setError(null);
-        const result = await getCampaignsByIntegrationId(selectedIntegrationId);
-        if (result?.error) {
-          setError(result.error);
-          toast.error(result.error);
-          setCampaigns([]);
+        const result = await getLogUserCampaigns();
+        
+        if (Array.isArray(result)) {
+          setCampaigns(result.map(campaign => ({
+            id: campaign.id,
+            name: campaign.name
+          })));
         } else {
-          setCampaigns(result.data || []);
+          setError("Failed to load campaigns");
+          toast.error("Failed to load campaigns");
         }
       } catch (err) {
         const errorMessage = "Failed to fetch campaigns";
         setError(errorMessage);
         toast.error(errorMessage);
         console.error(errorMessage, err);
-        setCampaigns([]);
+      } finally {
+        setLoadingCampaigns(false);
       }
     };
 
     fetchCampaigns();
-  }, [selectedIntegrationId]);
+  }, [open, newsletterOwnerId]);
 
   const resetSelection = () => {
-    setSelectedIntegrationId(null);
     setSelectedCampaignId(null);
-    setCampaigns([]);
     setError(null);
     setImportStatus(null);
   };
@@ -449,68 +450,37 @@ export function ImportSubscriberModal({
             </Alert>
           )}
 
-          {/* Integration Select (Optional) */}
-          {
-            integrations.length > 0 && (
-                <div>
-            <label className="block text-sm font-medium mb-1">Integration (Optional)</label>
+          {/* Campaign Select (Optional) */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Campaign (Optional)</label>
             <Select
-              value={selectedIntegrationId || "none"}
+              value={selectedCampaignId || "none"}
               onValueChange={(value) => {
-                setSelectedIntegrationId(value === "none" ? null : value);
-                setSelectedCampaignId(null);
+                setSelectedCampaignId(value === "none" ? null : value);
                 setError(null);
                 setImportStatus(null);
               }}
+              disabled={loadingCampaigns}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select integration (optional)" />
+                <SelectValue placeholder={
+                  loadingCampaigns ? "Loading campaigns..." : "Select campaign (optional)"
+                } />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No Integration</SelectItem>
-                {integrations.map((integration) => (
-                  <SelectItem key={integration.id} value={integration.id}>
-                    {integration.name}
+                <SelectItem value="none">No Campaign</SelectItem>
+                {campaigns.map((campaign) => (
+                  <SelectItem key={campaign.id} value={campaign.id}>
+                    {campaign.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-            )
-          }
-          
-
-          {/* Campaign Select (Optional) */}
-          {selectedIntegrationId && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Campaign (Optional)</label>
-              <Select
-                value={selectedCampaignId || "none"}
-                onValueChange={(value) => {
-                  setSelectedCampaignId(value === "none" ? null : value);
-                  setError(null);
-                  setImportStatus(null);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select campaign (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No Campaign</SelectItem>
-                  {campaigns.map((campaign) => (
-                    <SelectItem key={campaign.id} value={campaign.id}>
-                      {campaign.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
 
           {/* CSV Import Button */}
           <ImportCSVBTN
             newsletterOwnerId={newsletterOwnerId}
-            integrationId={selectedIntegrationId}
             campaignId={selectedCampaignId}
             onImportComplete={handleImportComplete}
           />

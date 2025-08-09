@@ -27,7 +27,6 @@ import Link from "next/link"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 import { useClerk } from "@clerk/nextjs"
-import { getIntegrations } from "@/actions/application-Integration/application"
 import { getAllEmails } from "@/actions/email/getEmail"
 
 
@@ -61,29 +60,12 @@ export function EmailsDashboard() {
     }
   }, [user?.id]);
 
-  const FindIntegrations = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const res = await getIntegrations();
-
-        console.log("Fetched integrations:", res);
-      if (res && Array.isArray(res.data)) {
-        setIntegrations(res.data);
-      } else {
-        setIntegrations([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch integrations:", error);
-      setIntegrations([]);
-    }
-  }, [user?.id]);
 
   useEffect(() => {
     if (user?.id) {
       FindEmails();
-      FindIntegrations();
     }
-  }, [user?.id, FindEmails, FindIntegrations]);
+  }, [user?.id, FindEmails]);
 
   // const deleteHandler = async (id: string) => {
   //   await deleteEmail({ emailId: id });
@@ -92,19 +74,16 @@ export function EmailsDashboard() {
 
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [integrationFilter, setIntegrationFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
 
   const filteredEmails = emails.filter((email) => {
     const matchesSearch =
       email.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      email.integration?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       email.campaign?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "all" || email.status === statusFilter
-    const matchesIntegration = integrationFilter === "all" || email.integration?.id?.toString() === integrationFilter
     const matchesType = typeFilter === "all" || email.type === typeFilter
 
-    return matchesSearch && matchesStatus && matchesIntegration && matchesType
+    return matchesSearch && matchesStatus && matchesType
   })
 
   const totalEmails = emails.length
@@ -252,20 +231,6 @@ export function EmailsDashboard() {
                     <SelectItem value="scheduled">Scheduled</SelectItem>
                     <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="paused">Paused</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={integrationFilter} onValueChange={setIntegrationFilter}>
-                  <SelectTrigger className="w-40 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500">
-                    <SelectValue placeholder="Integration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Integrations</SelectItem>
-                    {integrations.map((integration) => (
-                      <SelectItem key={integration.id} value={integration.id.toString()}>
-                        {integration.logo} {integration.name}
-                      </SelectItem>
-                    ))}
                   </SelectContent>
                 </Select>
 

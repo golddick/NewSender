@@ -31,29 +31,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ✅ Check if integration exists and belongs to the user
-    const integration = await db.integration.findFirst({
-      where: {
-        id: integrationId,
-        userId,
-      },
-    });
-
-    if (!integration) {
-      return NextResponse.json(
-        { error: "Invalid or unauthorized integration." },
-        { status: 403 }
-      );
-    }
 
     // ✅ Create campaign
     const campaign = await db.campaign.create({
       data: {
         name,
         description,
-        integrationId,
         userId,
-        trigger,
         status: 'ACTIVE', // default, but explicit for clarity
         recipients: 0,
         emailsSent: 0,

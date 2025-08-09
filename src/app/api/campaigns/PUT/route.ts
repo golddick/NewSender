@@ -18,9 +18,9 @@ export async function PUT(req: NextRequest) {
     const { campaignId, name, description, startDate, endDate, status } = await req.json();
 
     // ✅ Validate required fields
-    if (!campaignId || !name || !description) {
+    if (!campaignId || !name ) {
       return NextResponse.json(
-        { error: "campaignId, name, and description are required." },
+        { error: "campaignId and name are required." },
         { status: 400 }
       );
     }

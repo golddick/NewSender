@@ -25,7 +25,6 @@ export async function getCurrentSubscription() {
       subscriberLimit: true,
       emailLimit: true,
       campaignLimit: true,
-      appIntegratedLimit: true,
       blogPostLimit: true,
       aiGenerationLimit: true,
     },
@@ -53,52 +52,11 @@ export async function getUsageStats() {
       emailsSent: true,
       subscribersAdded: true,
       campaignsCreated: true,
-      appIntegrated: true,
       blogPostsCreated: true,
       aiGenerationsUsed: true,
     },
   });
 }
-
-// Change subscription plan (Paystack integrated)
-// export async function changePlan(planId: keyof typeof PLAN_CONFIG) {
-//   const user = await currentUser();
-//   if (!user) {
-//     return { success: false, error: "You must be logged in to change your plan" };
-//   }
-
-//   const selectedPlan = PLAN_CONFIG[planId];
-//   if (!selectedPlan) {
-//     return { success: false, error: "Invalid plan selected" };
-//   }
-
-//   const planName = selectedPlan.name as Plan;
-//   const planInfo = planDetails[planName];
-
-//   if (!planInfo) {
-//     return { success: false, error: "Plan configuration not found" };
-//   }
-
-//   // Update membership with selected plan details
-//   await db.membership.update({
-//     where: { userId: user.id },
-//     data: {
-//       plan: planId, // ✅ store Paystack planId instead of object
-//       amount: planInfo.amount,
-//       subscriberLimit: planInfo.subscriberLimit,
-//       emailLimit: planInfo.emailLimit,
-//       campaignLimit: planInfo.campaignLimit,
-//       appIntegratedLimit: planInfo.appIntegratedLimit,
-//       blogPostLimit: planInfo.blogPostLimit,
-//       aiGenerationLimit: planInfo.aiGenerationLimit,
-//     },
-//   });
-
-//   revalidatePath("/dashboard/settings/");
-//   return { success: true };
-// }
-
-
 
 // Downgrade to Free plan
 
@@ -111,9 +69,8 @@ export async function downgradeToFreePlan(userId: string) {
         subscriptionStatus: "inactive",
         amount: 0,
         subscriberLimit: 500,
-        emailLimit: 2,
-        campaignLimit: 1,
-        appIntegratedLimit: 0,
+        emailLimit: 5,
+        campaignLimit: 3,
         blogPostLimit: 0,
         aiGenerationLimit: 0,
         nextPaymentDate: null,

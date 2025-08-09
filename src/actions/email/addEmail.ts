@@ -8,7 +8,6 @@ export const saveEmailToDatabase = async ({
   content,
   newsLetterOwnerId,
   campaignId,
-  integrationId,
   emailType,
   scheduleDate,
   scheduleTime,
@@ -24,7 +23,6 @@ export const saveEmailToDatabase = async ({
   content: string | any
   newsLetterOwnerId: string
   campaignId?: string | null
-  integrationId?: string | null
   emailType: EmailType
   scheduleDate?: Date
   scheduleTime?: string
@@ -46,15 +44,6 @@ export const saveEmailToDatabase = async ({
 
     const normalizedTitle = title.trim().toLowerCase()
 
-    // ✅ If integrationId is provided, validate its status
-    if (integrationId) {
-      const integration = await db.integration.findUnique({
-        where: { id: integrationId },
-      })
-      if (!integration || integration.status !== 'ACTIVE') {
-        return { success: false, error: 'Integration is not active' }
-      }
-    }
 
     // ✅ If campaignId is provided, validate its status
     if (campaignId) {
@@ -96,7 +85,6 @@ export const saveEmailToDatabase = async ({
           title: normalizedTitle,
           content,
           campaignId: campaignId || null,
-          integrationId: integrationId || null,
           emailType,
           scheduleDate,
           scheduleTime,
@@ -137,7 +125,6 @@ export const saveEmailToDatabase = async ({
         status: EmailStatus.SAVED,
         newsLetterOwnerId,
         campaignId: campaignId || null,
-        integrationId: integrationId || null,
         emailType,
         userId: newsLetterOwnerId, 
         scheduleDate,

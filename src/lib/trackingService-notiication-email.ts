@@ -134,7 +134,6 @@ export const NotificationEmailrecordOpen = async (
         id: true,
         openedByEmails: true,
         openCount: true,
-        integrationId: true,
         metadata: true,
       },
     });
@@ -180,15 +179,6 @@ export const NotificationEmailrecordOpen = async (
       }),
     ];
 
-    if (notification.integrationId) {
-      updates.push(
-        db.integration.update({
-          where: { id: notification.integrationId },
-          data: { openRate: { increment: 1 } },
-        })
-      );
-    }
-
     await db.$transaction(updates);
     return true;
   } catch (error) {
@@ -213,7 +203,6 @@ export const NotificationEmailrecordClick = async (
         id: true,
         clickCount: true,
         clickedByEmails: true,
-        integrationId: true,
         metadata: true,
       },
     });
@@ -266,15 +255,6 @@ export const NotificationEmailrecordClick = async (
         },
       }),
     ];
-
-    if (notification.integrationId) {
-      updates.push(
-        db.integration.update({
-          where: { id: notification.integrationId },
-          data: { clickRate: { increment: 1 } },
-        })
-      );
-    }
 
     await db.$transaction(updates);
     return true;
