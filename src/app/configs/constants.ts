@@ -93,11 +93,11 @@ export const sideBarItems: DashboardSideBarTypes[] = [
     url: "/dashboard",
     icon: ICONS.dashboard,
   },
-  {
-    title: "Websites",
-    url: "/dashboard/integration",
-    icon: ICONS.world,
-  },
+  // {
+  //   title: "Websites",
+  //   url: "/dashboard/integration",
+  //   icon: ICONS.world,
+  // },
   {
     title: "Audience",
     url: "/dashboard/subscribers",
@@ -109,7 +109,7 @@ export const sideBarItems: DashboardSideBarTypes[] = [
     icon: ICONS.blog,
   },
     {
-    title: "Write Mail",
+    title: "Mail",
     url: "/dashboard/auto-email",
     icon: ICONS.write,
   },
