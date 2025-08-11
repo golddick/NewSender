@@ -1,46 +1,4 @@
 
-// import { notFound } from "next/navigation"
-// import { getBlogPost, getRelatedPosts } from "@/actions/blog/get.blog"
-// import Read from "@/app/blog/_component/Read"
-
-// interface BlogPostPageProps {
-
-//     slug: string
-// }
-
-// export default async function BlogPostPage({ slug }: BlogPostPageProps) {
-//   // Fetch the main blog post
-//   const post = await getBlogPost(slug)
-
-//   console.log(post, 'post'  )
-//   console.log(slug, 'slug post'  )
-
-
-//   if (!post.success || !post.data) {
-//     return notFound()
-//   }
-
-//   // Fetch related posts
-//   let relatedPosts = null
-//   if (post.data) {
-//     const related = await getRelatedPosts(post.data.id)
-//     console.log(related.data, 'related'  )
-//     if (related.success) {
-//       relatedPosts = related.data
-//     }
-//   }
-
-//     return (
-//     <div>
-
-//       <Read
-//       post={post} 
-//       relatedPosts={relatedPosts || []}
-//        />
-//     </div>
-//   )
-
-// }
 
 
 'use client';

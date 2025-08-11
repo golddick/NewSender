@@ -23,6 +23,7 @@ export interface BlogMember {
   fullName: string;
   userName: string;
   author: string;
+  organization: string;
   imageUrl: string;
   createdAt: Date | string;
   updatedAt: Date | string;

@@ -189,6 +189,7 @@ export function BlogPostReader({ post, relatedPosts }: BlogPostReaderProps) {
             updatedAt: result.comment.member.updatedAt,
             fullName: result.comment.member.fullName,
             author: result.comment.member.author,
+            organization: result.comment.member.organization,
           },
           content: result.comment.content,
           createdAt: result.comment.createdAt,
@@ -421,7 +422,7 @@ const handleReportComment = async (commentId: string) => {
                     src={featuredImage}
                     alt={title}
                     fill
-                    className="object-cover transition-transform duration-300 hover:scale-105"
+                    className="object-contain transition-transform duration-300 hover:scale-105"
                     priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -531,7 +532,7 @@ const handleReportComment = async (commentId: string) => {
 
             {/* Newsletter Subscription */}
             <NewsletterSubscription 
-              blogAuthor={post.membership?.userName || author || "Author Name"}
+              blogAuthor={ author || post.membership?.userName || "Author Name"}
               blogTitle={title}
               variant='inline'
               className="mb-12"

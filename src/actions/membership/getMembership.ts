@@ -20,6 +20,7 @@ export async function getMembership() {
   return {
     id: membership.id,
     userId: membership.userId,
+    userName:membership.userName,
     plan: membership.plan,
     role: membership.role,
     subscriptionStatus: membership.subscriptionStatus,
