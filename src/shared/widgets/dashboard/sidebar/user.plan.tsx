@@ -17,12 +17,13 @@ const UserPlan = () => {
   const { data: membership, loading: membershipLoading } = useGetMembership();
 
   console.log(subscribers, 'sub data cart')
+  console.log(membership, 'membership data')
 
   const router = useRouter();
 
   const handleManageSubscription = async () => {
     if (!membership?.paystackCustomerId) { 
-      toast.error("No active subscription found"); 
+      toast.error("No active subscription found");  
       return;
     }
 

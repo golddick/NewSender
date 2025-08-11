@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Subscriber } from "@prisma/client";
+import type { Subscriber } from "@prisma/client"; 
 import { useUser } from "@clerk/nextjs";
 import { getSubscribers } from "@/actions/subscriber/get.subscribers";
 

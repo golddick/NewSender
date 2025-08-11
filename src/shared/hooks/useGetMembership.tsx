@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { getMembership } from '@/actions/membership/getMembership';
+import { useEffect, useState } from 'react';
 
 export interface MembershipTypes {
   id: string;
@@ -8,13 +9,16 @@ export interface MembershipTypes {
   plan: string;
   role: string;
   subscriptionStatus: string;
-  paystackCustomerId: string;
+  paystackCustomerId: string | null;
   email: string;
   organization?: string | null;
+  organizationURL?: string | null;
+  kycStatus:boolean;
+  senderName: string | null;
   amount: number;
   currency: string;
-  lastPaymentDate?: string;
-  nextPaymentDate?: string;
+  lastPaymentDate?: string | null;
+  nextPaymentDate?: string | null;
   subscriberLimit: number;
   emailLimit: number;
   campaignLimit: number;
@@ -24,23 +28,21 @@ export interface MembershipTypes {
 
 const useGetMembership = () => {
   const [data, setData] = useState<MembershipTypes | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleGetMembership = async () => {
       try {
-        const res = await fetch("/api/membership", { method: "GET" });
-        if (!res.ok) throw new Error("Failed to fetch membership");
-        const json = await res.json();
-        if (!json) { 
-          setError("No membership found.");
+        const membership = await getMembership();
+        if (!membership) {
+          setError('No membership found.');
         } else {
-          setData(json);
-        } 
+          setData(membership);
+        }
       } catch (err) {
-        console.error("Failed to fetch membership:", err);
-        setError("An error occurred while fetching membership.");
+        console.error('Failed to fetch membership:', err);
+        setError('An error occurred while fetching membership.');
       } finally {
         setLoading(false);
       }
@@ -53,3 +55,4 @@ const useGetMembership = () => {
 };
 
 export default useGetMembership;
+

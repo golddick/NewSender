@@ -835,11 +835,11 @@ export function BlogManagement() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6"
+        className="bg-white rounded-lg sm:rounded-xl shadow-none border-none p-4 sm:p-6 mb-4 sm:mb-6"
       >
         <div className="flex flex-col gap-4">
-          <div className="w-full">
-            <div className="relative">
+          <div className="w-full  flex items-center  justify-between gap-6">
+            <div className="relative w-full">
               {searchInput && (
                 <X 
                   onClick={clearSearch}
@@ -856,11 +856,11 @@ export function BlogManagement() {
               />
               <Search onClick={handleSearch} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2 sm:gap-3">
-            <Button onClick={handleSearch} variant="outline" size="sm" className="text-xs sm:text-sm">
+
+              <div className="flex flex-nowrap gap-2 sm:gap-3">
+            {/* <Button onClick={handleSearch} variant="outline" size="sm" className="text-xs sm:text-sm">
               Search
-            </Button>
+            </Button> */}
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[120px] sm:w-[140px] text-xs sm:text-sm">
                 <SelectValue placeholder="Status" />
@@ -902,6 +902,8 @@ export function BlogManagement() {
               </SelectContent>
             </Select>
           </div>
+          </div>
+        
         </div>
       </motion.div>
 
@@ -1003,7 +1005,7 @@ export function BlogManagement() {
             />
           )}
         </DialogContent>
-      </Dialog>
+      </Dialog> 
 
       {/* Analytics Modal */}
       <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>

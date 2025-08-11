@@ -2,15 +2,20 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/shared/libs/database";
+import { redirect } from "next/navigation";
 
 export async function GET() {
   const user = await currentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  console.log(user, 'user server memeber ')
+  console.log(user?.id)
+  const userId = user?.id;
+  if (!userId) {
+    // return NextResponse.json({ error: "Unauthorized" }, { status: 401 });'
+    redirect('/sign-in')
   }
 
-  const membership = await db.membership.findFirst({
-    where: { userId: user.id },
+  const membership = await db.membership.findUnique({
+    where: { userId: userId },
     select: {
       id: true,
       userId: true,

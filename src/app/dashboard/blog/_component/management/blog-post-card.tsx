@@ -152,56 +152,60 @@ export function BlogPostCard({
           </motion.div>
         </div>
 
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
+        <CardHeader className=" p-4">
+          <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <Badge variant="outline" className="mb-2 text-xs">
-                {post.category}
-              </Badge>
-              <h3 className="font-bold text-lg leading-tight text-gray-900 line-clamp-2 mb-2">{post.title}</h3>
+              <div className=" flex items-center w-full justify-between">
+                <Badge variant="outline" className="mb-2 text-xs">
+                  {post.category}
+                </Badge>
+
+                <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={onView}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onEdit}>
+                    <Edit3 className="h-4 w-4 mr-2" />
+                    Edit Post
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {post.status !== "ARCHIVED" && (
+                    <DropdownMenuItem onClick={onArchive}>
+                      <Archive className="h-4 w-4 mr-2" />
+                      Archive
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={onDelete} className="text-red-600">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              </div>
+              <h3 className="font-bold text-lg leading-tight text-black line-clamp-2 ">{post.title}</h3>
               {/* <p className="text-gray-600 text-sm line-clamp-2 mb-3">{post.excerpt}</p> */}
             </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={onView}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Details
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onEdit}>
-                  <Edit3 className="h-4 w-4 mr-2" />
-                  Edit Post
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {post.status !== "ARCHIVED" && (
-                  <DropdownMenuItem onClick={onArchive}>
-                    <Archive className="h-4 w-4 mr-2" />
-                    Archive
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={onDelete} className="text-red-600">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+           
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 px-4 ">
           {/* Tags */}
-          <div className="flex flex-wrap gap-1 mb-4">
+          <div className="flex flex-wrap gap-1 ">
             {post.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
+              <Badge key={tag} variant="secondary" className="text-xs capitalize">
                 #{tag}
               </Badge>
             ))}

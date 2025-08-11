@@ -128,13 +128,13 @@ export function EmailsDashboard() {
       {/* Header */}
 
      <div className="border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-black">Mail Management</h1>
               <p className="mt-2 text-gray-600">Create and Send mail to subscribers </p>
             </div>
-           <Button onClick={() => setOpen(true)} className="bg-black hover:bg-gold-600 text-white font-semibold">
+           <Button onClick={() => setOpen(true)} className="bg-black hover:bg-white hover:text-black text-white font-semibold">
                 <Plus className="w-4 h-4 mr-2" />
                 Create New Email
               </Button>
@@ -145,7 +145,7 @@ export function EmailsDashboard() {
 
       <div className=" w-full p-6">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -204,7 +204,7 @@ export function EmailsDashboard() {
         </div>
 
         {/* Filters */}
-        <Card className="mb-6">
+        <Card className="mb-6 border-none shadow-none">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
@@ -255,7 +255,7 @@ export function EmailsDashboard() {
           <CardHeader className="bg-black text-white">
             <CardTitle className="flex items-center">
               <Mail className="w-4 h-4 mr-2" />
-              Platform Saved Mails ({filteredEmails.length})
+             Mails ({filteredEmails.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -360,7 +360,7 @@ export function EmailsDashboard() {
             <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No emails found</h3>
             <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
-              <Button onClick={() => setOpen(true)} className="bg-gold-600 hover:bg-yellow-600 text-black font-semibold">
+              <Button onClick={() => setOpen(true)} className="bg-white hover:bg-black hover:text-white text-black font-semibold">
                 <Plus className="w-4 h-4 mr-2" />
                 Create New Email
               </Button>

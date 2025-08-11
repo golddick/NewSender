@@ -514,7 +514,6 @@ model MembershipUsage {
   emailsSent        Int      @default(0)
   subscribersAdded  Int      @default(0)
   campaignsCreated  Int      @default(0)
-  appIntegrated     Int      @default(0)
   blogPostsCreated  Int      @default(0) // Added for blog feature
   aiGenerationsUsed Int      @default(0) // Added for AI content generation
   createdAt         DateTime @default(now())

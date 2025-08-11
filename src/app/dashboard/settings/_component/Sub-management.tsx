@@ -30,7 +30,6 @@ type SubscriptionData = {
   subscriberLimit: number
   emailLimit: number
   campaignLimit: number
-  appIntegratedLimit: number
   blogPostLimit: number
   aiGenerationLimit: number
 }
@@ -39,7 +38,6 @@ type UsageData = {
   emailsSent: number
   subscribersAdded: number
   campaignsCreated: number
-  appIntegrated: number
   blogPostsCreated: number
   aiGenerationsUsed: number
 }
@@ -256,10 +254,6 @@ export function SubscriptionSettings() {
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-500" />
-                    {subscription.appIntegratedLimit.toLocaleString()} app integrations
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-500" />
                     {subscription.blogPostLimit.toLocaleString()} blog posts
                   </li>
                   <li className="flex items-center gap-2 text-sm">
@@ -296,8 +290,7 @@ export function SubscriptionSettings() {
                     />
                   </div>
 
-                    {
-                      usage.campaignsCreated && (
+                  
                           <div>
                     <div className="flex justify-between text-sm mb-1">
                       <span>Campaigns</span>
@@ -310,12 +303,10 @@ export function SubscriptionSettings() {
                       className="h-2" 
                     />
                   </div>
-                      )
-                    }
 
                 
 
-                    {
+                    {/* {
                       usage.appIntegrated && (
                           <div>
                   
@@ -331,7 +322,7 @@ export function SubscriptionSettings() {
                     />
                   </div>
                       )
-                    }
+                    } */}
                 
                 </div>
               </div>

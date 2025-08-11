@@ -18,8 +18,8 @@ const NewEmailPage = () => {
   const subjectTitle = subject.replace(/-/g, " ");
 
   return (
-    <div className="w-full flex bg-[#F7F7F7] max-h-screen">
-      <div className="w-full p-5 bg-white rounded-r-xl"> 
+    <div className="w-full flex bg-white min-h-screen scrollbar-hide">
+      <div className="w-full "> 
         {/* back arrow */}
         <Link
           href={"/dashboard/auto-email"}
@@ -29,7 +29,7 @@ const NewEmailPage = () => {
           <span>Exit</span>
         </Link>
         {/* email editor */}
-        <div className="my-5">
+        <div className="  ">
           <Emaileditor subjectTitle={subjectTitle} />
         </div>
       </div>

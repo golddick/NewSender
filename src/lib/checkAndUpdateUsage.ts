@@ -177,7 +177,6 @@ type ActionKey =
   | "emailsSent"
   | "subscribersAdded"
   | "campaignsCreated"
-  | "appIntegrated"
   | "blogPostsCreated"; // ✅ NEW
 
 interface UsageResult {
@@ -211,7 +210,6 @@ export async function checkUsageLimit(userId: string, action: ActionKey): Promis
       emailsSent: "emailLimit",
       subscribersAdded: "subscriberLimit",
       campaignsCreated: "campaignLimit",
-      appIntegrated: "appIntegratedLimit",
       blogPostsCreated: "blogPostLimit" // ✅ NEW
     };
 

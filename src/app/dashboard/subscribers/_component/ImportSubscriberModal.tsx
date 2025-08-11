@@ -287,7 +287,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload } from "lucide-react";
+import { Import, Upload } from "lucide-react";
 import ImportCSVBTN from "./exportCSVBTN";
 import toast from "react-hot-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -376,8 +376,8 @@ export function ImportSubscriberModal({
   if (!newsletterOwnerId) {
     return (
       <Button variant="outline" disabled>
-        <Upload className="h-4 w-4 mr-2" />
-        Import CSV/Excel
+        <Import className="h-4 w-4 mr-2" />
+        <span className=" hidden md:block">  Import CSV/Excel</span>
       </Button>
     );
   }
@@ -392,8 +392,8 @@ export function ImportSubscriberModal({
     >
       <DialogTrigger asChild>
         <Button variant="outline" className="border-gold-600 text-gold-600 hover:bg-blue-50">
-          <Upload className="h-4 w-4 mr-2" />
-          Import CSV/Excel
+         <Import className="h-4 w-4 mr-2" />
+        <span className=" hidden md:block">  Import CSV/Excel</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto">

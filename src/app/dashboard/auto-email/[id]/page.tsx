@@ -1,15 +1,3 @@
-// import React from 'react'
-// import { EmailDetails } from '../_component/email-details'
-
-// const page = ({ params }: { params: { id: string } })  => {
-//   return (
-//     <>
-//       <EmailDetails emailId={params.id}/>
-//     </>
-//   )
-// }
-
-// export default page
 
 
 // src/app/dashboard/auto-email/[id]/page.tsx
