@@ -11,8 +11,8 @@ const MyCampaigns = () => {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:3003";
-  const baseUrl =  "http://localhost:3003";
+  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:3003";
+  // const baseUrl =  "http://localhost:3003";
   const subscribeUrl = `${baseUrl}/subscribe?userId=${user?.id}`;
 
   const handleCopy = async () => {

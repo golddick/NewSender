@@ -1,233 +1,19 @@
-// 'use server';
-
-// import { checkUsageLimit, incrementUsage } from '@/lib/checkAndUpdateUsage';
-// import { db } from '@/shared/libs/database';
-// import { currentUser } from '@clerk/nextjs/server';
-// import { revalidatePath } from 'next/cache';
-// import { redirect } from 'next/navigation';
-// import { notifySubscribersAboutNewPost } from './notify';
-
-// export async function createBlogPost(formData: {
-//   title: string;
-//   subtitle?: string;
-//   authorBio: string;
-//   authorTitle: string;
-//   author: string;
-//   content: string;
-//   excerpt: string;
-//   category: string;
-//   tags: string[];
-//   isDraft: boolean;
-//   isFeatured: boolean;
-//   isPublic: boolean;
-//   featuredImage: string;
-//   featuredVideo?: string;
-//   galleryImages?: string[];
-//   seoTitle?: string;
-//   seoDescription?: string;
-//   seoScore?: number;
-//   seoKeywords?: string[];
-//   allowComments?: boolean;
-// }) { 
-//   const user = await currentUser();
-//   if (!user) {
-//     return { success: false, error: "You must be logged in to create a blog post" };
-//   }
-
-//   // Check monthly blog post usage
-//   const usageCheck = await checkUsageLimit(user.id, "blogPostsCreated");
-//   if (!usageCheck.success) {
-//     return {
-//       success: false,
-//       error: usageCheck.message ?? "You've reached your monthly blog post limit"
-//     };
-//   }
-
-//   try {
-//     // Calculate word count & read time
-//     const wordCount = formData.content.trim().split(/\s+/).length;
-//     const readTime = Math.ceil(wordCount / 200);
-
-//     const baseSlug = formData.title
-//     .toLowerCase()
-//     .replace(/[^\w\s]/g, '')       // remove punctuation
-//     .replace(/\s+/g, '-')          // replace spaces with dashes
-//     .slice(0, 60);                 // limit length
-
-//   const authorSlug = formData.author
-//     ?.toLowerCase()
-//     .replace(/[^\w\s]/g, '')       // clean up special characters
-//     .replace(/\s+/g, '-');         // convert spaces to dashes
-
-//   const slug = `${baseSlug}-by-${authorSlug}`;
-
-//     // Check if a post with this slug already exists
-//     const existingPost = await db.blogPost.findUnique({
-//       where: { slug },
-//     });
-
-//     if (existingPost) {
-//       return {
-//         success: false,
-//         error: "A post with this title already exists. Please choose a different title."
-//       };
-//     }
-
-//     const post = await db.blogPost.create({
-//       data: {
-//         title: formData.title,
-//         subtitle: formData.subtitle,
-//         authorBio: formData.authorBio,
-//         author: formData.author,
-//         authorTitle: formData.authorTitle,
-//         slug,
-//         content: formData.content,
-//         excerpt: formData.excerpt || formData.content.slice(0, 160) + '...',
-//         format: 'MARKDOWN',
-//         status: formData.isDraft ? 'DRAFT' : 'PUBLISHED',
-//         visibility: formData.isPublic ? 'PUBLIC' : 'PRIVATE',
-//         featuredImage: formData.featuredImage,
-//         featuredVideo:formData.featuredVideo || null,
-//         galleryImages: formData.galleryImages || [],
-//         isFeatured: formData.isFeatured,
-//         isPinned: false,
-//         allowComments: formData.allowComments ?? true,
-//         wordCount,
-//         characterCount: formData.content.length,
-//         readTime,
-//         seoTitle: formData.seoTitle,
-//         seoDescription: formData.seoDescription,
-//         seoScore: formData.seoScore || 0,
-//         seoKeywords: formData.seoKeywords || [],
-//         publishedAt: formData.isDraft ? null : new Date(),
-//         membership: {
-//           connect: { userId: user.id }
-//         },
-//         category: {
-//           connectOrCreate: {
-//             where: { name: formData.category },
-//             create: {
-//               name: formData.category,
-//               slug: formData.category.toLowerCase().replace(/\s+/g, '-'),
-//               description: null
-//             }
-//           }
-//         },
-//         tags: {
-//           connectOrCreate: formData.tags.map((tag) => ({
-//             where: { name: tag },
-//             create: {
-//               name: tag,
-//               slug: tag.toLowerCase().replace(/\s+/g, '-')
-//             }
-//           }))
-//         }
-//       },
-//       include: {
-//         category: true,
-//         tags: true,
-//         membership: true
-//       }
-//     });
-
-//     // Increment monthly usage only if it's a published post
-//     if (!formData.isDraft) {
-//       await incrementUsage(user.id, "blogPostsCreated", 1);
-
-//       // Notify subscribers about the new post
-
-//         const platformName = post.membership?.SenderName || post.membership?.userName || 'TheNews'
-
-//       await notifySubscribersAboutNewPost({
-//           post: post,
-//           adminEmail: user.emailAddresses[0].emailAddress, 
-//           fromApplication: platformName
-//         });
-//     }
-
-//     // Revalidate pages
-//     revalidatePath('/blog');
-//     revalidatePath(`/blog/${post.slug}`);
-
-
-//     return {
-//       success: true,
-//       post: {
-//         ...post,
-//         url: `/dashboard/blog/${post.slug}`
-//       }
-//     };
-
-//   } catch (error: any) {
-//     console.error('Error creating blog post:', error);
-
-//     // Handle specific database errors
-//     if (error.code === 'P2002') { // Prisma unique constraint violation
-//       return {
-//         success: false,
-//         error: "A post with similar details already exists. Please check your input."
-//       };
-//     }
-
-//     // Generic error handling
-//     return {
-//       success: false,
-//       error: getClientFriendlyErrorMessage(error)
-//     };
-//   }
-// }
-
-// // Helper function to transform technical errors to user-friendly messages
-// function getClientFriendlyErrorMessage(error: unknown): string {
-//   if (error instanceof Error) {
-//     // Handle specific error cases
-//     if (error.message.includes('slug') || error.message.includes('unique')) {
-//       return "A post with this title already exists. Please choose a different title.";
-//     }
-//     if (error.message.includes('connect') || error.message.includes('relation')) {
-//       return "There was an issue with the database connection. Please try again.";
-//     }
-//     return "An unexpected error occurred while creating your post. Please try again.";
-//   }
-//   return "An unknown error occurred. Please try again later.";
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 'use server';
 
 import { checkUsageLimit, incrementUsage } from '@/lib/checkAndUpdateUsage';
 import { db } from '@/shared/libs/database';
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { notifySubscribersAboutNewPost } from './notify';
+import { ensurePublishingAllowed, handlePostPublishActions } from './blogPostPublishing';
 
+type CreateBlogPostResult = {
+  success: boolean;
+  post: any | null;
+  error: string | null;
+};
+
+// CREATE BLOG POST
 export async function createBlogPost(formData: {
   title: string;
   subtitle?: string;
@@ -249,50 +35,38 @@ export async function createBlogPost(formData: {
   seoScore?: number;
   seoKeywords?: string[];
   allowComments?: boolean;
-}) {
+}): Promise<CreateBlogPostResult> {
   const user = await currentUser();
   if (!user) {
-    return { success: false, error: "You must be logged in to create a blog post" };
+    return { success: false, error: "You must be logged in to create a blog post", post: null };
   }
 
-  // Only check usage if post is NOT a draft
+  // Only check usage if publishing
   if (!formData.isDraft) {
-    const usageCheck = await checkUsageLimit(user.id, "blogPostsCreated");
-    if (!usageCheck.success) {
-      return {
-        success: false,
-        error: usageCheck.message ?? "You've reached your monthly blog post limit"
-      };
+    const limitCheck = await ensurePublishingAllowed(user.id);
+    if (!limitCheck.success) {
+      return { success: false, error: limitCheck.error ?? "Publishing limit reached", post: null };
     }
   }
 
   try {
-    // Calculate word count & read time
     const wordCount = formData.content.trim().split(/\s+/).length;
     const readTime = Math.ceil(wordCount / 200);
 
-    const baseSlug = formData.title
-      .toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .replace(/\s+/g, '-')
+    const baseSlug = formData.title.toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .replace(/\s+/g, "-")
       .slice(0, 60);
 
-    const authorSlug = formData.author
-      ?.toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .replace(/\s+/g, '-');
+    const authorSlug = formData.author?.toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .replace(/\s+/g, "-");
 
     const slug = `${baseSlug}-by-${authorSlug}`;
 
-    const existingPost = await db.blogPost.findUnique({
-      where: { slug },
-    });
-
+    const existingPost = await db.blogPost.findUnique({ where: { slug } });
     if (existingPost) {
-      return {
-        success: false,
-        error: "A post with this title already exists. Please choose a different title."
-      };
+      return { success: false, error: "A post with this title already exists", post: null };
     }
 
     const post = await db.blogPost.create({
@@ -304,10 +78,10 @@ export async function createBlogPost(formData: {
         authorTitle: formData.authorTitle,
         slug,
         content: formData.content,
-        excerpt: formData.excerpt || formData.content.slice(0, 160) + '...',
-        format: 'MARKDOWN',
-        status: formData.isDraft ? 'DRAFT' : 'PUBLISHED',
-        visibility: formData.isPublic ? 'PUBLIC' : 'PRIVATE',
+        excerpt: formData.excerpt || formData.content.slice(0, 160) + "...",
+        format: "MARKDOWN",
+        status: formData.isDraft ? "DRAFT" : "PUBLISHED",
+        visibility: formData.isPublic ? "PUBLIC" : "PRIVATE",
         featuredImage: formData.featuredImage,
         featuredVideo: formData.featuredVideo || null,
         galleryImages: formData.galleryImages || [],
@@ -322,87 +96,183 @@ export async function createBlogPost(formData: {
         seoScore: formData.seoScore || 0,
         seoKeywords: formData.seoKeywords || [],
         publishedAt: formData.isDraft ? null : new Date(),
-        membership: {
-          connect: { userId: user.id }
-        },
+        membership: { connect: { userId: user.id } },
         category: {
           connectOrCreate: {
             where: { name: formData.category },
             create: {
               name: formData.category,
-              slug: formData.category.toLowerCase().replace(/\s+/g, '-'),
-              description: null
-            }
-          }
+              slug: formData.category.toLowerCase().replace(/\s+/g, "-"),
+            },
+          },
         },
         tags: {
           connectOrCreate: formData.tags.map((tag) => ({
             where: { name: tag },
             create: {
               name: tag,
-              slug: tag.toLowerCase().replace(/\s+/g, '-')
-            }
-          }))
-        }
+              slug: tag.toLowerCase().replace(/\s+/g, "-"),
+            },
+          })),
+        },
       },
-      include: {
-        category: true,
-        tags: true,
-        membership: true
-      }
+      include: { category: true, tags: true, membership: true },
     });
 
-    // Increment usage and notify subscribers only if published
+    // Publish actions
     if (!formData.isDraft) {
-      await incrementUsage(user.id, "blogPostsCreated", 1);
-
-      const platformName = post.membership?.SenderName || post.membership?.userName || 'TheNews';
-
-      await notifySubscribersAboutNewPost({
-        post,
-        adminEmail: user.emailAddresses[0].emailAddress,
-        fromApplication: platformName
-      });
+      await handlePostPublishActions(post, user.id, user.emailAddresses[0]?.emailAddress);
     }
 
-    // Revalidate pages
-    revalidatePath('/blog');
+    revalidatePath("/blog");
     revalidatePath(`/blog/${post.slug}`);
 
     return {
       success: true,
-      post: {
-        ...post,
-        url: `/dashboard/blog/${post.slug}`
-      }
+      post: { ...post, url: `/dashboard/blog/${post.slug}` },
+      error: null
     };
-
   } catch (error: any) {
-    console.error('Error creating blog post:', error);
-
-    if (error.code === 'P2002') {
-      return {
-        success: false,
-        error: "A post with similar details already exists. Please check your input."
-      };
-    }
-
-    return {
-      success: false,
-      error: getClientFriendlyErrorMessage(error)
-    };
+    console.error("Error creating blog post:", error);
+    return { success: false, post: null, error: error.message || "Error creating blog post" };
   }
 }
 
-function getClientFriendlyErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    if (error.message.includes('slug') || error.message.includes('unique')) {
-      return "A post with this title already exists. Please choose a different title.";
-    }
-    if (error.message.includes('connect') || error.message.includes('relation')) {
-      return "There was an issue with the database connection. Please try again.";
-    }
-    return "An unexpected error occurred while creating your post. Please try again.";
-  }
-  return "An unknown error occurred. Please try again later.";
-}
+
+
+
+
+// 'use server';
+
+// import { checkUsageLimit, incrementUsage } from '@/lib/checkAndUpdateUsage';
+// import { db } from '@/shared/libs/database';
+// import { currentUser } from '@clerk/nextjs/server';
+// import { revalidatePath } from 'next/cache';
+// import { redirect } from 'next/navigation';
+// import { notifySubscribersAboutNewPost } from './notify';
+// import { ensurePublishingAllowed, handlePostPublishActions } from './blogPostPublishing';
+
+
+
+
+
+
+// // CREATE BLOG POST
+// export async function createBlogPost(formData: {
+//   title: string;
+//   subtitle?: string;
+//   authorBio: string;
+//   authorTitle: string;
+//   author: string;
+//   content: string;
+//   excerpt: string;
+//   category: string;
+//   tags: string[];
+//   isDraft: boolean;
+//   isFeatured: boolean;
+//   isPublic: boolean;
+//   featuredImage: string;
+//   featuredVideo?: string;
+//   galleryImages?: string[];
+//   seoTitle?: string;
+//   seoDescription?: string;
+//   seoScore?: number;
+//   seoKeywords?: string[];
+//   allowComments?: boolean;
+// })
+// {
+//   const user = await currentUser();
+//   if (!user) {
+//     return { success: false, error: "You must be logged in to create a blog post" };
+//   }
+
+//   // Only check usage if publishing
+//   if (!formData.isDraft) {
+//     const limitCheck = await ensurePublishingAllowed(user.id);
+//     if (!limitCheck.success) return limitCheck;
+//   }
+
+//   try {
+//     const wordCount = formData.content.trim().split(/\s+/).length;
+//     const readTime = Math.ceil(wordCount / 200);
+
+//     const baseSlug = formData.title.toLowerCase()
+//       .replace(/[^\w\s]/g, "")
+//       .replace(/\s+/g, "-")
+//       .slice(0, 60);
+
+//     const authorSlug = formData.author?.toLowerCase()
+//       .replace(/[^\w\s]/g, "")
+//       .replace(/\s+/g, "-");
+
+//     const slug = `${baseSlug}-by-${authorSlug}`;
+
+//     const existingPost = await db.blogPost.findUnique({ where: { slug } });
+//     if (existingPost) {
+//       return { success: false, error: "A post with this title already exists" };
+//     }
+
+//     const post = await db.blogPost.create({
+//       data: {
+//         title: formData.title,
+//         subtitle: formData.subtitle,
+//         authorBio: formData.authorBio,
+//         author: formData.author,
+//         authorTitle: formData.authorTitle,
+//         slug,
+//         content: formData.content,
+//         excerpt: formData.excerpt || formData.content.slice(0, 160) + "...",
+//         format: "MARKDOWN",
+//         status: formData.isDraft ? "DRAFT" : "PUBLISHED",
+//         visibility: formData.isPublic ? "PUBLIC" : "PRIVATE",
+//         featuredImage: formData.featuredImage,
+//         featuredVideo: formData.featuredVideo || null,
+//         galleryImages: formData.galleryImages || [],
+//         isFeatured: formData.isFeatured,
+//         isPinned: false,
+//         allowComments: formData.allowComments ?? true,
+//         wordCount,
+//         characterCount: formData.content.length,
+//         readTime,
+//         seoTitle: formData.seoTitle,
+//         seoDescription: formData.seoDescription,
+//         seoScore: formData.seoScore || 0,
+//         seoKeywords: formData.seoKeywords || [],
+//         publishedAt: formData.isDraft ? null : new Date(),
+//         membership: { connect: { userId: user.id } },
+//         category: {
+//           connectOrCreate: {
+//             where: { name: formData.category },
+//             create: {
+//               name: formData.category,
+//               slug: formData.category.toLowerCase().replace(/\s+/g, "-"),
+//             },
+//           },
+//         },
+//         tags: {
+//           connectOrCreate: formData.tags.map((tag) => ({
+//             where: { name: tag },
+//             create: {
+//               name: tag,
+//               slug: tag.toLowerCase().replace(/\s+/g, "-"),
+//             },
+//           })),
+//         },
+//       },
+//       include: { category: true, tags: true, membership: true },
+//     });
+
+//     // Publish actions
+//     if (!formData.isDraft) {
+//       await handlePostPublishActions(post, user.id, user.emailAddresses[0]?.emailAddress);
+//     }
+
+//     revalidatePath("/blog");
+//     revalidatePath(`/blog/${post.slug}`);
+
+//     return { success: true, post: { ...post, url: `/dashboard/blog/${post.slug}` } };
+//   } catch (error: any) {
+//     console.error("Error creating blog post:", error);
+//     return { success: false, error: error.message || "Error creating blog post" };
+//   }
+// }

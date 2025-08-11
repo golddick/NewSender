@@ -403,7 +403,7 @@ const handleReportComment = async (commentId: string) => {
                 </Avatar>
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-neutral-900 mb-1 capitalize">{author}</h3>
-                  <p className="text-blue-600 font-medium mb-3 capitalize">{authorTitle}</p>
+                  <p className="text-gold-700 font-medium mb-3 capitalize">{authorTitle}</p>
                 </div>
               </div>
               <p className="text-neutral-600 leading-relaxed capitalize">{authorBio}</p>
@@ -417,12 +417,12 @@ const handleReportComment = async (commentId: string) => {
               className="mb-12"
             >
               {featuredImage && (
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl w-full h-[300px] md:max-h-[500px]">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl w-full h-[500px] md:max-h-[500px]">
                   <Image
                     src={featuredImage}
                     alt={title}
                     fill
-                    className="object-contain transition-transform duration-300 hover:scale-105"
+                    className="object-fill transition-transform duration-300 hover:scale-105"
                     priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -534,6 +534,7 @@ const handleReportComment = async (commentId: string) => {
             <NewsletterSubscription 
               blogAuthor={ author || post.membership?.userName || "Author Name"}
               blogTitle={title}
+              ownerID={post.authorId}
               variant='inline'
               className="mb-12"
             />

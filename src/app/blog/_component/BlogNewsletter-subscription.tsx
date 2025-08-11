@@ -194,17 +194,20 @@ import { formatString } from "@/lib/utils"
 import { useSearchParams } from "next/navigation"
 import { addSubscriber } from "@/actions/subscriber/add.subscriber"
 import { getMembership } from "@/actions/membership/getMembership"
+import toast from "react-hot-toast"
 
 interface NewsletterSubscriptionProps {
   blogTitle?: string
   blogAuthor: string
   variant?: "inline" | "sidebar" | "footer"
   className?: string
+  ownerID: string
 }
 
 export function NewsletterSubscription({
   blogTitle,
   blogAuthor,
+  ownerID,
   variant = "inline",
   className = "",
 }: NewsletterSubscriptionProps) {
@@ -213,14 +216,14 @@ export function NewsletterSubscription({
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [appName, setAppName] = useState("")
-  const { toast } = useToast()
-  const searchParams = useSearchParams()
-  const userId = searchParams.get("userId")
+  // const { toast } = useToast()
+  // const searchParams = useSearchParams()
+  // const userId = searchParams.get("userId")
 
   // Fetch appName from member API using userId from URL
   useEffect(() => {
     const fetchAppName = async () => {
-      if (!userId) return
+      if (!ownerID) return
       try {
         const result = await getMembership()
         if (result?.organization) {
@@ -231,26 +234,18 @@ export function NewsletterSubscription({
       }
     }
     fetchAppName()
-  }, [userId])
+  }, [ownerID])
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!email || !name) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in both your name and email address.",
-        variant: "destructive",
-      })
+      toast.error("Missing Information! Please fill in both your name and email address.")
       return
     }
 
-    if (!userId) {
-      toast({
-        title: "User Not Found",
-        description: "Subscription link is invalid or missing user ID.",
-        variant: "destructive",
-      })
+    if (!ownerID) {
+      toast.error('Newsletter owner Not Found')
       return
     }
 
@@ -269,20 +264,13 @@ export function NewsletterSubscription({
         throw new Error(result.error)
       }
 
-      toast({
-        title: "Successfully Subscribed!",
-        description: `Welcome to ${appName || "our"} newsletter. Check your email for confirmation.`,
-      })
+      toast.success(`Welcome to ${appName || "our"} newsletter. Check your email for confirmation.`)
 
       setIsSubscribed(true)
       setEmail("")
       setName("")
     } catch (error) {
-      toast({
-        title: "Subscription Failed",
-        description: error instanceof Error ? error.message : String(error),
-        variant: "destructive",
-      })
+      toast.error(error instanceof Error ? error.message : String(error))
     } finally {
       setIsLoading(false)
     }

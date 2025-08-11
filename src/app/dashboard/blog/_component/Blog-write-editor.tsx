@@ -14,7 +14,6 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
 import {
   Eye,
   Save,
@@ -60,13 +59,15 @@ import Image from "next/image";
 import { UploadButton } from "@/shared/utils/uploadthing";
 import { parseMarkdown } from "@/shared/libs/markdown-parser";
 import Link from "next/link";
-import { getBlogPost, updateBlogPost, updateGalleryImages } from "@/actions/blog/get.blog";
+import { getBlogPost, updateGalleryImages } from "@/actions/blog/get.blog";
 import { BlogPost } from "@/app/type";
 import { PostStatus } from "@prisma/client";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 import { Hint } from "@/components/hint";
+import { updateBlogPost } from "@/actions/blog/updateBlog";
+import toast from "react-hot-toast";
 
 interface SEOAnalysis {
   score: number;
@@ -217,7 +218,6 @@ const insertMarkdown = (textarea: HTMLTextAreaElement, before: string, after = "
 export function BlogWriteEditor() {
   const searchParams = useSearchParams();
   const editSlug = searchParams.get('edit');
-  const { toast } = useToast();
   const { user } = useUser();
   const router = useRouter();
   const contentRef = useRef<HTMLTextAreaElement>(null);
@@ -341,12 +341,9 @@ export function BlogWriteEditor() {
       setCustomCategories([...customCategories, customCategory]);
       setShowCustomCategory(false);
       setCustomCategory("");
-      toast({
-        title: "Category added",
-        description: "Your custom category has been added successfully.",
-      });
+      toast.success("Custom category added successfully.");
     }
-  }, [customCategory, customCategories, toast]);
+  }, [customCategory, customCategories]);
 
   const handleRemoveGalleryImage = useCallback(async (index: number) => {
     const updatedImages = galleryImages.filter((_, i) => i !== index);
@@ -356,24 +353,16 @@ export function BlogWriteEditor() {
       const result = await updateGalleryImages(existingPost.id, updatedImages);
 
       if (result.success) {
-        toast({ title: "Successfully", description: "Gallery images updated successfully." });
+        toast.success("Gallery images updated successfully.");
       } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to update gallery.",
-          variant: "destructive",
-        });
+        toast.error("Failed to update gallery.");
       }
     }
-  }, [galleryImages, isEditMode, existingPost, toast]);
+  }, [galleryImages, isEditMode, existingPost]);
 
   const generateSubtitle = useCallback(async () => {
     if (!title && !content) {
-      toast({
-        title: "Content needed",
-        description: "Please add a title or content before generating a subtitle.",
-        variant: "destructive",
-      });
+      toast.error("Please add a title or content before generating a subtitle.");
       return;
     }
 
@@ -394,28 +383,19 @@ export function BlogWriteEditor() {
 
       setSubtitle(data.subtitle);
 
-      toast({
-        title: "Subtitle generated",
-        description: "AI has suggested a subtitle based on your content.",
-      });
+
+      toast.success("Subtitle generated successfully.");
+
     } catch (err) {
-      toast({
-        title: "Generation failed",
-        description: "Could not generate subtitle. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to generate subtitle.");
     } finally {
       setIsGeneratingSubtitle(false);
     }
-  }, [title, content, toast]);
+  }, [title, content]);
 
   const generateExcerpt = useCallback(async () => {
     if (!content) {
-      toast({
-        title: "Content needed",
-        description: "Please add some content before generating an excerpt.",
-        variant: "destructive",
-      });
+      toast.error("Failed to generate excerpt. Please add some content first.");
       return;
     }
 
@@ -431,23 +411,17 @@ export function BlogWriteEditor() {
 
       if (data.excerpt) {
         setExcerpt(data.excerpt);
-        toast({
-          title: "Excerpt generated",
-          description: "AI has suggested an excerpt based on your content.",
-        });
+        toast.success("Excerpt generated successfully.");
       } else {
         throw new Error(data.error || "Failed to generate excerpt.");
       }
     } catch (error) {
-      toast({
-        title: "Generation failed",
-        description: "Could not generate excerpt. Please try again.",
-        variant: "destructive",
-      });
+
+      toast.error("Failed to generate excerpt.");
     } finally {
       setIsGeneratingExcerpt(false);
     }
-  }, [title, content, toast]);
+  }, [title, content]);
 
   const handleKeywordClick = useCallback((keyword: string) => {
     if (contentRef.current) {
@@ -472,38 +446,23 @@ export function BlogWriteEditor() {
 
   const handleSubmit = useCallback(async (publish: boolean) => {
     if (!title.trim()) {
-      toast({
-        title: "Title required",
-        description: "Please add a title before publishing.",
-        variant: "destructive",
-      });
+      toast.error("Please add a title before publishing.");
       return;
     }
 
     if (!content.trim()) {
-      toast({
-        title: "Content required",
-        description: "Please add content before publishing.",
-        variant: "destructive",
-      });
+      toast.error("Failed to submit blog post. Please add content first.");
       return;
     }
 
     if (!featuredImage) {
-      toast({
-        title: "Image required",
-        description: "Please add a featured image before publishing.",
-        variant: "destructive",
-      });
+      toast.error("Failed to submit blog post. Please add a featured image first.");
       return;
     }
 
     if (!user?.id) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to create a blog post.",
-        variant: "destructive",
-      });
+
+      toast.error("Failed to submit blog post. Please sign in first.");
       return;
     }
 
@@ -542,34 +501,28 @@ export function BlogWriteEditor() {
       }
 
       if (result.success) {
-        toast({
-          title: publish ? "Post published!" : isEditMode ? "Post updated!" : "Draft saved",
-          description: publish 
-            ? isEditMode 
-              ? "Your blog post has been updated and published successfully." 
+
+        toast.success(
+          publish 
+           ? isEditMode 
+             ? "Your blog post has been updated and published successfully." 
               : "Your blog post has been published successfully."
             : isEditMode
-              ? "Your changes have been saved."
-              : "Your draft has been saved successfully.",
-        });
+             ? "Your changes have been saved."
+              : "Your draft has been saved successfully."
+        )
         
-        if (publish && result.post?.slug) {
-          router.push(`/blog/${result.post.slug}`);
+        if (publish && result.success) {
+          router.push(`/dashboard/blog`);
         }
       } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to save blog post",
-          variant: "destructive",
-        });
+        toast.error(
+          result.error || "Failed to save blog post"
+        )
       }
     } catch (error) {
       console.error("Error submitting blog post:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred while saving your post.",
-        variant: "destructive",
-      });
+      toast.error("Failed to save blog post")
     } finally {
       setIsSubmitting(false);
     }
@@ -673,25 +626,17 @@ export function BlogWriteEditor() {
             setAuthorBio(result.data.authorBio || "");
             setPublishDate(new Date(result.data.createdAt).toISOString().split('T')[0]);
           } else {
-            toast({
-              title: "Error loading post",
-              description: result.error || "Failed to load post data",
-              variant: "destructive",
-            });
+            toast.error("Failed to load post data");
           }
         } catch (error) {
-          console.error("Error fetching post:", error);
-          toast({
-            title: "Error",
-            description: "Failed to load post data",
-            variant: "destructive",
-          });
+
+          toast.error("Failed to load post data");
         }
       }
     };
 
     fetchPostData();
-  }, [editSlug, user, isDraft, toast]);
+  }, [editSlug, user, isDraft]);
 
   useEffect(() => {
     if (content) {
@@ -895,19 +840,13 @@ export function BlogWriteEditor() {
                       if (res && res[0]?.url) {
                         setFeaturedImage(res[0].url);
                         setIsUploading(false);
-                        toast({
-                          title: "Image uploaded",
-                          description: "Featured image has been uploaded successfully.",
-                        });
+
+                        toast.success("Image uploaded successfully!");
                       }
                     }}
                     onUploadError={(error: Error) => {
                       setIsUploading(false);
-                      toast({
-                        title: "Upload error",
-                        description: error.message,
-                        variant: "destructive",
-                      });
+                      toast.error("Failed to upload image. Please try again.");
                     }}
                     onUploadBegin={() => {
                       setIsUploading(true);
@@ -983,19 +922,12 @@ export function BlogWriteEditor() {
                         if (res && res[0]?.url) {
                           setFeaturedVideo(res[0].url);
                           setIsVideoUploading(false);
-                          toast({
-                            title: "Video uploaded",
-                            description: "Featured video has been uploaded successfully.",
-                          });
+                          toast.success("Video uploaded successfully!");
                         }
                       }}
                       onUploadError={(error: Error) => {
                         setIsVideoUploading(false);
-                        toast({
-                          title: "Upload error",
-                          description: error.message,
-                          variant: "destructive",
-                        });
+                        toast.error("Failed to upload video. Please try again.");
                       }}
                       onUploadBegin={() => {
                         setIsVideoUploading(true);
@@ -1052,19 +984,13 @@ export function BlogWriteEditor() {
                         if (res) {
                           setGalleryImages([...galleryImages, ...res.map(r => r.url)]);
                           setIsGalleryUploading(false);
-                          toast({
-                            title: "Images uploaded",
-                            description: `${res.length} images added to gallery.`,
-                          });
+
+                          toast.success(`${res.length} images added to gallery.`);
                         }
                       }}
                       onUploadError={(error: Error) => {
                         setIsGalleryUploading(false);
-                        toast({
-                          title: "Upload error",
-                          description: error.message,
-                          variant: "destructive",
-                        });
+                        toast.error("Failed to upload images. Please try again.");
                       }}
                       onUploadBegin={() => {
                         setIsGalleryUploading(true);

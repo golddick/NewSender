@@ -44,22 +44,22 @@ export default function CampaignsCard({ campaign, getStatusColor, getTypeColor }
             <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-3">
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <h3 className="text-lg sm:text-xl font-semibold text-white">{campaign.name}</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold text-white capitalize">{campaign.name}</h3>
                   <Badge className={`${getStatusColor(campaign.status)} text-xs sm:text-sm`}>
                     {campaign.status}
                   </Badge>
-                  <Badge className={`${getTypeColor(campaign.type ?? 'default')} text-xs sm:text-sm`}>
+                  <Badge className={`${getTypeColor(campaign.type ?? 'default')} text-xs sm:text-sm capitalize`}>
                     {campaign.type}
                   </Badge>
                 </div>
-                <p className="text-gray-400 text-sm sm:text-base mb-3">{campaign.description}</p>
+                <p className="text-gray-400 text-sm sm:text-base mb-3 capitalize">{campaign.description}</p>
 
             
               </div>
             </div>
 
             {/* Metrics */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4">
               {[
                 {
                   icon: <Users className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400" />,
@@ -79,7 +79,7 @@ export default function CampaignsCard({ campaign, getStatusColor, getTypeColor }
                 {
                   icon: <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400" />,
                   label: "Open Rate",
-                  value: `${campaign.openRate}%`,
+                  value: `${campaign.openRate || 0}%`,
                 },
               ].map((item, i) => (
                 <div key={i} className="bg-white border border-gray-200 rounded-lg  text-black p-2">

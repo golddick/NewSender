@@ -7,9 +7,10 @@ import { currentUser } from '@clerk/nextjs/server';
 import { BlogPost, PostStatus, Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { ensurePublishingAllowed, handlePostPublishActions } from './blogPostPublishing';
 
 // Types
-type BlogPostWithRelations = Prisma.BlogPostGetPayload<{
+export type BlogPostWithRelations = Prisma.BlogPostGetPayload<{
   include: {
     category: true;
     tags: true;
@@ -349,169 +350,7 @@ export async function getBlogTags() {
   }
 }
 
-// Update blog post
-export async function updateBlogPost(
-  postId: string,
-  authorId: string,
-  {
-    title,
-    author,
-    authorTitle,
-    authorBio,
-    subtitle,
-    content,
-    excerpt,
-    category,
-    tags,
-    status,
-    featuredImage,
-    featuredVideo,
-    galleryImages,
-    seoTitle,
-    seoDescription,
-    seoKeywords,
-    allowComments,
-    isFeatured,
-    isPublic,
-    
-  }: {
-    title: string;   
-    author: string;
-    authorTitle?: string;
-    authorBio?: string;
-    subtitle?: string;
-    content?: string;
-    excerpt?: string;
-    category?: string;
-    isFeatured: boolean;
-    isPublic: boolean;
-    tags?: string[];
-    status: PostStatus;
-    featuredImage: string ;
-    featuredVideo?: string;
-    galleryImages?: string[];
-    seoTitle?: string;
-    seoDescription?: string;
-    seoKeywords?: string[];
-    allowComments?: boolean;
-  }
-) {
-  try {
-    const existingPost = await db.blogPost.findUnique({
-      where: { id: postId , authorId:authorId },
-      include: { category: true, tags: true },
-    });
 
-    if (!existingPost) {
-      return { success: false, error: 'Post not found' };
-    }
-
-    // Calculate word count if content changed
-    const wordCount = content
-      ? content.trim().split(/\s+/).length
-      : existingPost.wordCount;
-    const readTime = Math.ceil(wordCount / 200);
-
-   const baseSlug = title
-  ?.toLowerCase()
-  .replace(/[^\w\s]/g, '')       // remove punctuation
-  .replace(/\s+/g, '-')          // replace spaces with dashes
-  .slice(0, 60);                 // limit length
-
-const authorSlug = author
-  ?.toLowerCase()
-  .replace(/[^\w\s]/g, '')       // clean up special characters
-  .replace(/\s+/g, '-');         // convert spaces to dashes
-
-// If title changed, generate a new slug; otherwise, keep the existing one
-const slug = (existingPost.title !== title && baseSlug && authorSlug)
-  ? `${baseSlug}-by-${authorSlug}`
-  : existingPost.slug;
-
-// Check slug uniqueness only if title changed
-if (existingPost.title !== title) {
-  const existingSlug = await db.blogPost.findUnique({
-    where: { slug },
-  });
-
-  if (existingSlug && existingSlug.id !== postId) {
-    return {
-      success: false,
-      error: 'A post with this slug already exists.',
-    };
-  }
-}
-
-
-    const updatedPost = await db.blogPost.update({
-      where: { id: postId, authorId: authorId },
-      data: {
-        title,
-        subtitle,
-        slug,
-        content,
-        excerpt,
-        wordCount,
-        readTime,
-        characterCount: content?.length || existingPost.characterCount,
-        seoTitle,
-        seoDescription,
-        seoKeywords,
-        featuredImage,
-        featuredVideo,
-        galleryImages,
-        isFeatured:isFeatured,
-        visibility: isPublic ? 'PUBLIC' : 'PRIVATE' ,
-        author: author,
-        authorTitle: authorTitle,
-        authorBio: authorBio,
-        status,
-        allowComments,
-        ...(category && {
-          category: {
-            connectOrCreate: {
-              where: { name: category },
-              create: {
-                name: category,
-                slug: category.toLowerCase().replace(/\s+/g, '-'),
-              },
-            },
-          },
-        }),
-        ...(tags && {
-          tags: {
-            set: [],
-            connectOrCreate: tags.map((tag) => ({
-              where: { name: tag },
-              create: {
-                name: tag,
-                slug: tag.toLowerCase().replace(/\s+/g, '-'),
-              },
-            })),
-          },
-        }),
-      },
-      include: {
-        category: true,
-        tags: true,
-      },
-    });
-
-    revalidatePath('/blog');
-    revalidatePath(`/blog/${updatedPost.slug}`);
-    return { success: true, post: updatedPost };
-  } catch (error) {
-    console.error('Error updating blog post:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to update blog post',
-    };
-  }
-}
-
-
-
-// Delete blog post
 export async function deleteBlogPost(postId: string) {
   try {
     await db.blogPost.delete({

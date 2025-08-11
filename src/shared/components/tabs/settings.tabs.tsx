@@ -50,12 +50,12 @@ const SettingsTab = () => {
       >
         <Tab 
           key="API Access" 
-          title="API Access" 
+          title={isMobile ? "API" : " API Access"} 
           className="whitespace-nowrap"
         />
         <Tab 
           key="Customize Profile" 
-          title={isMobile ? "Profile" : "Customize Profile"} 
+          title={isMobile ? "Profile" : " Profile"} 
           className="whitespace-nowrap"
         />
         <Tab 

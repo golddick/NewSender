@@ -128,10 +128,6 @@ export function NotificationCenter() {
     integrationNotifications: true,
     achievementNotifications: true
   })
-
-
-
-console.log(notifications, 'user  not man ')
   
 
   const filteredNotifications = notifications.filter((notification) => {
@@ -425,7 +421,7 @@ console.log(notifications, 'user  not man ')
 
                         <div className="flex-1 min-w-0">
                           {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-green-600"> */}
-                          <div className="flex items-center w-full justify-between lg:justify-start gap-2 ">
+                          <div className="flex items-center w-full justify-between gap-2 ">
                             <h3
                               className={`text-sm sm:text-base font-medium truncate ${
                                 !notification.read ? "text-black" : "text-gray-800"

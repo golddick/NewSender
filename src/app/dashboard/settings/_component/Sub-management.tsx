@@ -208,6 +208,8 @@ export function SubscriptionSettings() {
     return <div className="flex justify-center items-center h-64">Failed to load subscription data</div>
   }
 
+  console.log(usage, 'usage data')
+
   return (
     <div className="space-y-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mb-4">
       {/* Current Plan Overview */}
@@ -303,6 +305,18 @@ export function SubscriptionSettings() {
                       className="h-2" 
                     />
                   </div>
+                          <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Blog Post</span>
+                      <span>
+                        {usage.blogPostsCreated.toLocaleString()} / {subscription.blogPostLimit.toLocaleString()}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={(usage.blogPostsCreated / subscription.blogPostLimit) * 100} 
+                      className="h-2" 
+                    />
+                  </div>
 
                 
 
@@ -384,7 +398,7 @@ export function SubscriptionSettings() {
                   className={`w-full ${
                     subscription.plan === plan.id
                       ? "bg-gray-100 text-black cursor-not-allowed"
-                      : "bg-black text-white hover:bg-red-600"
+                      : "bg-black text-white hover:bg-white hover:text-black"
                   }`}
                   disabled={subscription.plan === plan.id || isLoading}
                   onClick={() => handlePlanChange(plan.name as "FREE" | "LAUNCH" | "SCALE", billingCycle)}

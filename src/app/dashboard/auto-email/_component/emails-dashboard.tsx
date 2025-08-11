@@ -22,12 +22,14 @@ import {
   TrendingUp,
   Bot,
   Zap,
+  MousePointerClick,
 } from "lucide-react"
 import Link from "next/link"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 import { useClerk } from "@clerk/nextjs"
 import { getAllEmails } from "@/actions/email/getEmail"
+import { EmailStatus } from "@prisma/client"
 
 
 export function EmailsDashboard() {
@@ -261,7 +263,7 @@ export function EmailsDashboard() {
           <CardContent className="p-0">
             <div className="divide-y divide-gray-200">
               {filteredEmails.map((email) => (
-                <div key={email.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div key={email.id} className="p-2 md:p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
@@ -275,28 +277,22 @@ export function EmailsDashboard() {
                       </div>
 
                       <div className="flex items-center space-x-6 text-sm text-gray-500">
-                        {
-                          email.integration && (
-                            <div className=" items-center space-x-2 hidden md:flex">
-                              <span className="text-lg">{email.integration.logo}</span>
-                              <span>{email.integration.name}</span>
-                            </div>
-                          )
-                        }
                         {email.sentDate && <div>Sent: {email.sentDate}</div>}
                       </div>
                     </div>
 
                     <div className="flex items-center space-x-2 md:space-x-6">
-                      {email.status !== "draft" && (
+                      {email.status !== EmailStatus.SENT && (
                         <div className="text-right">
-                          <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div className="grid grid-cols-3 md:grid-cols-3 gap-4 text-sm">
                             <div>
-                              <p className="text-gray-500">Recipients</p>
+                              <p className="text-gray-500 hidden md:block">Recipients</p>
+                              <Users className=" size-4 md:hidden"/>
                               <p className="font-semibold text-black">{email.recipients.toLocaleString()}</p>
                             </div>
-                            <div>
-                              <p className="text-gray-500">Open Rate</p>
+                           <div className=" ">
+                              <p className="text-gray-500 hidden md:block">Open Rate</p>
+                               <Eye className=" size-4 md:hidden"/>
                                 {email.recipients > 0 ? (
                                   <p className={`font-semibold ${getRateColor((email.openRate / email.recipients) * 100)}`}>
                                     {((email.openRate / email.recipients) * 100).toFixed(1)}%
@@ -306,8 +302,9 @@ export function EmailsDashboard() {
                                 )}
 
                             </div>
-                            <div>
-                              <p className="text-gray-500">Click Rate</p>
+                            <div className=" ">
+                              <p className="text-gray-500  hidden md:block">Click Rate</p>
+                               <MousePointerClick className=" size-4 md:hidden"/>
                                 {email.recipients > 0 ? (
                                   <p className={`font-semibold ${getRateColor((email.clickRate / email.recipients) * 100)}`}>
                                     {((email.clickRate / email.recipients) * 100).toFixed(1)}%

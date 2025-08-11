@@ -27,7 +27,6 @@ interface NotifyParams {
   };
   adminEmail: string;
   fromApplication: string;
-  integrationId?: string;
   campaignId?: string;
 }
 
@@ -35,7 +34,6 @@ export async function notifySubscribersAboutNewPost({
   post,
   adminEmail,
   fromApplication,
-  integrationId,
   campaignId,
 }: NotifyParams) {
   try {

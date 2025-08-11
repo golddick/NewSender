@@ -7,7 +7,6 @@ import { BlogPostReaderProps } from '@/app/type'
 
 const Read = ({ post, relatedPosts}:BlogPostReaderProps) => {
 
-  console.log(post, 'post from Read component')
 
   return (
     <div>
