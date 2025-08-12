@@ -3,6 +3,7 @@
 import { PLAN_CONFIG } from '@/lib/planLimit';
 import { db } from '@/shared/libs/database';
 import { currentUser } from '@clerk/nextjs/server';
+import { KYCStatus } from '@prisma/client';
 import axios from 'axios';
 
 export const paystackSubscribe = async ({
@@ -32,8 +33,8 @@ export const paystackSubscribe = async ({
 
     // 3. Verify Paystack configuration
     const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
-    // const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || 'http://localhost:3003';
-    const websiteUrl = 'http://localhost:3003';
+    const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || 'http://localhost:3003';
+    // const websiteUrl = 'http://localhost:3003';
 
     if (!paystackSecret || !websiteUrl) {
       throw new Error("Payment system configuration error");
@@ -43,6 +44,14 @@ export const paystackSubscribe = async ({
     const membership = await db.membership.findUnique({
       where: { userId },
     });
+
+    if (!membership) {
+      throw new Error("User membership not found");
+    }
+
+    if (membership.kycStatus !== KYCStatus.APPROVED) {
+      throw new Error("KYC verification is required before subscribing.");
+    }
 
     if (!membership?.paystackCustomerId) {
       throw new Error("User payment profile not set up");

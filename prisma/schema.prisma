@@ -473,6 +473,7 @@ model Invoice {
   status      String
   invoiceUrl  String
   date        DateTime @default(now())
+  externalId  String?
 
   user        Membership @relation(fields: [userId], references: [userId])
 }

@@ -74,7 +74,7 @@ export function URLSubscribeFormPage() {
       const result = await addSubscriber({
         email,
         name,
-        source: "Thenes  website url-form",
+        source: "Thenews  website url-form",
         status: "Subscribed",
         pageUrl: window.location.href,
       });

@@ -75,6 +75,10 @@ export const PLAN_CONFIG = {
     monthly: { id: "PLN_4idp8h4m8ptak6k", amount: 50000 },
     yearly: { id: "PLN_l1ck8bvf49k9nhx", amount: 1000000 },
   },
+  FREE: {
+    monthly: { id: "PLN_free_monthly_id", amount: 0 },
+    yearly: { id: "PLN_free_yearly_id", amount: 0 },
+  },
 } as const;
 
 

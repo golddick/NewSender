@@ -97,17 +97,17 @@ export const addSubscriber = async ({
       },
     })
 
-    let systemTemplate = !userTemplate
-      ? await db.systemNotification.findFirst({
-          where: {
-            category: SystemNotificationCategory.NEWSLETTER,
-            type: NotificationType.EMAIL,
-          },
-        })
-      : null
+    // let systemTemplate = !userTemplate
+    //   ? await db.systemNotification.findFirst({
+    //       where: {
+    //         category: SystemNotificationCategory.NEWSLETTER,
+    //         type: NotificationType.EMAIL,
+    //       },
+    //     })
+    //   : null
 
     // 11. Create a default template if none exists
-    if (!userTemplate && !systemTemplate) {
+    if (!userTemplate) {
       const defaultTemplate = getWelcomeTemplate({
         name: '[Name]',
         email: '[Email]',
@@ -115,18 +115,18 @@ export const addSubscriber = async ({
         platformUrl,
       })
 
-      systemTemplate = await db.systemNotification.create({
-        data: {
-          type: NotificationType.EMAIL,
-          category: SystemNotificationCategory.NEWSLETTER,
-          priority: NotificationPriority.LOW,
-          title: defaultTemplate.title,
-          content: defaultTemplate.content,
-          status: NotificationStatus.DRAFT,
-          textContent: defaultTemplate.content.text,
-          htmlContent: defaultTemplate.content.html,
-        },
-      })
+      // systemTemplate = await db.systemNotification.create({
+      //   data: {
+      //     type: NotificationType.EMAIL,
+      //     category: SystemNotificationCategory.NEWSLETTER,
+      //     priority: NotificationPriority.LOW,
+      //     title: defaultTemplate.title,
+      //     content: defaultTemplate.content,
+      //     status: NotificationStatus.DRAFT,
+      //     textContent: defaultTemplate.content.text,
+      //     htmlContent: defaultTemplate.content.html,
+      //   },
+      // })
 
       userTemplate = await db.newsletterOwnerNotification.create({
         data: {
@@ -144,7 +144,7 @@ export const addSubscriber = async ({
       })
     }
 
-    const activeTemplate = userTemplate || systemTemplate
+    const activeTemplate = userTemplate
     if (!activeTemplate) throw new Error('No email template available')
 
     // 12. Personalize content dynamically (DO NOT overwrite template in DB)
@@ -171,7 +171,7 @@ export const addSubscriber = async ({
 
     // 13. Increment recipient count for the template
     await db.newsletterOwnerNotification.update({
-      where: { id: activeTemplate.id },
+      where: { id: activeTemplate.id , userId: ownerId},
       data: {
         metadata: {
           subscriberId: subscriber.id,
