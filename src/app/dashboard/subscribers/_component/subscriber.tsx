@@ -518,12 +518,12 @@ export function SubscribersDashboard() {
                     {
                       subscriber.name && (
                       <h3 className="font-medium text-gray-900">
-                      {subscriber.name || "No Name"}
+                      {subscriber.name}
                     </h3>
                       )
                     }
                   
-                    <p className="text-gray-500 text-sm truncate max-w-[200px] ">
+                    <p className="text-gray-500 text-sm truncate max-w-[150px] ">
                       {subscriber.email}
                     </p>
                     <span className="text-xs text-gray-400">

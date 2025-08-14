@@ -282,7 +282,7 @@ export function EmailsDashboard() {
                     </div>
 
                     <div className="flex items-center space-x-2 md:space-x-6">
-                      {email.status !== EmailStatus.SENT && (
+                      {email.status !== EmailStatus.SAVED && (
                         <div className="text-right">
                           <div className="grid grid-cols-3 md:grid-cols-3 gap-4 text-sm">
                             <div>

@@ -5,37 +5,47 @@ import { Button } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { paystackSubscribe } from "@/actions/paystack/paystack.subscribe";
-import { toast } from "sonner";
 import Link from "next/link";
 import { PlanType } from "@/app/configs/types";
+import toast from "react-hot-toast";
 
 const PricingCard = ({ active }: { active: "Monthly" | "Yearly" }) => {
   const { user } = useUser();
   const history = useRouter();
 
-  const handleSubscription = async (planName: "LAUNCH" | "SCALE") => {
-    if (!user || !user.id) {
-      history.push("/sign-in");
+ const handleSubscription = async (planName: "LAUNCH" | "SCALE") => {
+  if (!user || !user.id) {
+    history.push("/sign-in");
+    return;
+  }
+
+  try {
+    const result = await paystackSubscribe({
+      planName,
+      billingCycle: active === "Monthly" ? "monthly" : "yearly",
+      userId: user.id,
+    });
+
+    // Redirect if KYC is required
+    if (result?.kycRequired) {
+      toast.error("KYC verification is required before upgrading.");
+      history.push("/dashboard/settings?tab=KYC");
       return;
     }
 
-    try {
-      const authorizationUrl = await paystackSubscribe({
-        planName,
-        billingCycle: active === "Monthly" ? "monthly" : "yearly",
-        userId: user.id,
-      });
-
-      if (authorizationUrl) {
-        window.location.href = authorizationUrl;
-      } else {
-        console.error("Invalid response from paystackSubscribe:", authorizationUrl);
-        toast.error("Failed to initiate payment");
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Payment failed");
+    // Proceed with payment if URL provided
+    if (result?.success && result?.url) {
+      toast.success("Redirecting to payment...");
+      window.location.href = result.url;
+    } else {
+      toast.error(result?.error || "Failed to initiate payment");
     }
-  };
+
+  } catch (error: any) {
+    toast.error(error.message || "Payment failed");
+  }
+};
+
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },

@@ -113,43 +113,53 @@ export function SubscriptionSettings() {
     fetchData()
   }, [])
 
-  const handlePlanChange = async (
-    plan: "FREE" | "LAUNCH" | "SCALE",
-    billingCycle: "monthly" | "yearly"
-  ) => {
-    if (!user || !user.id) {
-      history.push("/");
+const handlePlanChange = async (
+  plan: "FREE" | "LAUNCH" | "SCALE",
+  billingCycle: "monthly" | "yearly"
+) => {
+  if (!user || !user.id) {
+    history.push("/");
+    return;
+  }
+
+  try {
+    if (plan === "FREE") {
+      const response = await downgradeToFreePlan(user.id);
+      if (response.success) {
+        toast.success("You have been downgraded to the Free plan.");
+        history.refresh();
+      } else {
+        toast.error(response.error || "Failed to downgrade to Free plan");
+      }
       return;
     }
 
-    try {
-      if (plan === "FREE") {
-        const response = await downgradeToFreePlan(user.id);
-        if (response.success) {
-          toast.success("You have been downgraded to the Free plan.");
-          history.refresh()
-        } else {
-          toast.error(response.error || "Failed to downgrade to Free plan");
-        }
-        return;
-      }
+    const result = await paystackSubscribe({
+      planName: plan,
+      userId: user.id,
+      billingCycle,
+    });
 
-      const authorizationUrl = await paystackSubscribe({
-        planName: plan,
-        userId: user.id,
-        billingCycle,
-      });
-
-      if (authorizationUrl) {
-        window.location.href = authorizationUrl;
-        toast.success("Payment initiated. Please wait for your payment confirmation.");
-      } else {
-        toast.error("Failed to initiate payment");
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Payment failed");
+    // Handle KYC required case
+    if (result.kycRequired) {
+      toast.error("KYC verification is required before upgrading.");
+      history.push("/dashboard/settings?tab=KYC");
+      return;
     }
-  };
+
+    // Handle payment initiation
+    if (result.success && result.url) {
+      toast.success("Payment initiated. Please wait for confirmation.");
+      window.location.href = result.url;
+    } else {
+      toast.error(result.error || "Failed to initiate payment");
+    }
+
+  } catch (error: any) {
+    toast.error(error.message || "Payment failed");
+  }
+};
+
 
   const handleCancelSubscription = async () => {
     setIsLoading(true)
