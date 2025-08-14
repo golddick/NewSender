@@ -455,10 +455,10 @@ export function SubscribersDashboard() {
                             <div>
                               {
                                 subscriber.name && (
-                                    <div className="font-medium text-gray-900 text-xs">{subscriber.name}</div>
+                                    <div className="font-medium text-gray-900 text-xs truncate max-w-[150px]">{subscriber.name}</div>
                                 )
                               }
-                              <div className="text-gray-500 text-xs">{subscriber.email}</div>
+                              <div className="text-gray-500 text-xs truncate max-w-[150px]">{subscriber.email}</div>
                             </div>
                           </div>
                         </td>
