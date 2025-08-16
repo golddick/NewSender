@@ -37,7 +37,10 @@ export async function getMembership() {
     subscriberLimit: membership.subscriberLimit,
     emailLimit: membership.emailLimit,
     campaignLimit: membership.campaignLimit,
-    appIntegratedLimit: membership.appIntegratedLimit,
+    blogPostLimit: membership.blogPostLimit,
+    aiGenerationLimit: membership.aiGenerationLimit,
+    createdAt: membership.createdAt.toISOString(),
+    updatedAt: membership.updatedAt.toISOString(),
     termsAndConditionsAccepted: membership.termsAndConditionsAccepted,
   };
 }

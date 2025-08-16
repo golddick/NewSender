@@ -22,7 +22,8 @@ export interface MembershipTypes {
   subscriberLimit: number;
   emailLimit: number;
   campaignLimit: number;
-  appIntegratedLimit: number;
+  blogPostLimit: number;
+  aiGenerationLimit: number;
   termsAndConditionsAccepted: boolean;
 }
 
