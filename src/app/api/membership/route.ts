@@ -6,8 +6,6 @@ import { redirect } from "next/navigation";
 
 export async function GET() {
   const user = await currentUser();
-  console.log(user, 'user server memeber ')
-  console.log(user?.id)
   const userId = user?.id;
   if (!userId) {
     // return NextResponse.json({ error: "Unauthorized" }, { status: 401 });'
@@ -32,7 +30,8 @@ export async function GET() {
       subscriberLimit: true,
       emailLimit: true,
       campaignLimit: true,
-      appIntegratedLimit: true,
+      aiGenerationLimit: true,
+      blogPostLimit: true,
       termsAndConditionsAccepted: true,
     }
   });
