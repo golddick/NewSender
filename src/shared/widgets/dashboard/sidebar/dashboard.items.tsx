@@ -39,7 +39,7 @@ const DashboardItems = ({ onNavigate, bottomContent }: DashboardSideBarProps) =>
                 key={index}
                 href={item.url}
                 onClick={onNavigate}
-                className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair ${
+                className={`text-xl p-2 py-5 flex rounded-md gap-4 items-center w-full mr-2 font-playfair  mb-2 ${
                   isActive ? "bg-gold-100 text-gold-700" : "hover:bg-gray-200"
                 }`}
               >

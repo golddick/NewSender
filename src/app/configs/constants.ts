@@ -93,15 +93,17 @@ export const sideBarItems: DashboardSideBarTypes[] = [
     url: "/dashboard",
     icon: ICONS.dashboard,
   },
-  // {
-  //   title: "Websites",
-  //   url: "/dashboard/integration",
-  //   icon: ICONS.world,
-  // },
-  {
-    title: "Audience",
-    url: "/dashboard/subscribers",
-    icon: ICONS.audience,
+
+    {
+    title: "Campaigns",
+    url: "/dashboard/campaigns",
+    icon: ICONS.analytics,
+  },
+  
+   {
+    title: "Mail",
+    url: "/dashboard/auto-email",
+    icon: ICONS.write,
   },
   {
     title: "Blog",
@@ -109,20 +111,11 @@ export const sideBarItems: DashboardSideBarTypes[] = [
     icon: ICONS.blog,
   },
     {
-    title: "Mail",
-    url: "/dashboard/auto-email",
-    icon: ICONS.write,
+    title: "Audience",
+    url: "/dashboard/subscribers",
+    icon: ICONS.audience,
   },
-  //   {
-  //   title: "Write",
-  //   url: "/dashboard/write",
-  //   icon: ICONS.write,
-  // },
-  {
-    title: "Campaigns",
-    url: "/dashboard/campaigns",
-    icon: ICONS.analytics,
-  },
+
 ];
 
 export const sideBarBottomItems: DashboardSideBarTypes[] = [

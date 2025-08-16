@@ -19,8 +19,8 @@ const transporter = nodemailer.createTransport({
   maxConnections: 5,
   rateDelta: 5000,
   tls: { rejectUnauthorized: false },
-  logger: true,
-  debug: true,
+  logger: false,
+  debug: false,
 });
 
 interface SendNotificationEmailParams {

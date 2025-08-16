@@ -165,3 +165,46 @@ export async function decrementSubscriberUsage(userId: string, count: number = 1
     console.error("Failed to decrement subscriber usage:", error);
   }
 }
+
+
+export async function decrementBlogUsage(userId: string, count: number = 1) {
+  const month = getCurrentMonthKey();
+
+  try {
+    await db.membershipUsage.updateMany({
+      where: {
+        userId,
+        month
+      },
+      data: {
+        blogPostsCreated: {
+          decrement: count
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Failed to decrement blog usage:", error);
+  }
+}
+
+
+
+export async function decrementCampaignUsage(userId: string, count: number = 1) {
+  const month = getCurrentMonthKey();
+
+  try {
+    await db.membershipUsage.updateMany({
+      where: {
+        userId,
+        month
+      },
+      data: {
+        campaignsCreated: {
+          decrement: count
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Failed to decrement campaign usage:", error);
+  }
+}

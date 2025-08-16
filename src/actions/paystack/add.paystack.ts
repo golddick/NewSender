@@ -86,7 +86,7 @@ export const addPaystack = async () => {
       imageUrl:imageUrl,
       userName:userName || '',
       plan: Plan.FREE,
-      subscriptionStatus: PlanSubscriptionStatus.active,
+      subscriptionStatus: PlanSubscriptionStatus.inactive,
       subscriberLimit: 500,
       emailLimit: 5,
       campaignLimit: 3,

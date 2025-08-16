@@ -112,6 +112,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/shared/libs/database";
 import crypto from "crypto";
 import { PLAN_CONFIG } from "@/lib/planLimit";
+import { PlanSubscriptionStatus } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
@@ -185,6 +186,7 @@ export async function POST(request: Request) {
           data: {
             plan: mappedPlan,
             amount,
+            subscriptionStatus:PlanSubscriptionStatus.active
           },
         });
 
@@ -222,6 +224,7 @@ export async function POST(request: Request) {
         data: {
           plan: "FREE",
           amount: 0,
+          subscriptionStatus:PlanSubscriptionStatus.inactive
         },
       });
 

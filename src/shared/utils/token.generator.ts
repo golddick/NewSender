@@ -41,6 +41,8 @@ export const regenerateApiKey = async (): Promise<string> => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "365d" });
 };
 
+
+
 // export const verifyApiKey = (token: string | null) => {
 //   if (!token) {
 //     return { valid: false, error: "Missing API key", user: null };

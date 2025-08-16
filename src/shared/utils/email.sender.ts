@@ -394,7 +394,7 @@ export const sendEmail = async (params: SendEmailParams) => {
                 );
               }
 
-              if (trackOpens) {
+              if (trackOpens) { 
                 enhancedContent += `<img src="${domain}/api/track/open?emailId=${emailId}&email=${encodeURIComponent(
                   email
                 )}&tid=${trackingId}" width="1" height="1" style="display:none" />`;

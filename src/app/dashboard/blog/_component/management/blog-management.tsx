@@ -21,6 +21,10 @@ import { useUser } from "@clerk/nextjs"
 import { getAllCategories, getFilteredPosts } from "@/lib/sharedApi/actions"
 import Loader from "@/components/Loader"
 import { PostStatus, PostVisibility } from "@prisma/client"
+import { deleteBlogPost } from "@/actions/blog/delete.blog"
+import { decrementBlogUsage } from "@/lib/checkAndUpdateUsage"
+import { updatePostStatus } from "@/actions/blog/updateBlog"
+import toast from "react-hot-toast"
 
 interface BlogPost {
   id: string
@@ -51,7 +55,6 @@ interface BlogPost {
 
 export function BlogManagement() {
   const { user } = useUser()
-  const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
   const [searchInput, setSearchInput] = useState("") 
   const [statusFilter, setStatusFilter] = useState("all")
@@ -140,7 +143,7 @@ export function BlogManagement() {
     totalComments: posts.reduce((sum, p) => sum + p.comments, 0),
   }
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: PostStatus) => {
     switch (status) {
       case "PUBLISHED":
         return <CheckCircle className="h-4 w-4 text-green-600" />
@@ -155,40 +158,102 @@ export function BlogManagement() {
     }
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: PostStatus) => {
     switch (status) {
-      case "published":
+      case "PUBLISHED":
         return "bg-green-100 text-green-800 border-green-200"
-      case "draft":
+      case "DRAFT":
         return "bg-yellow-100 text-yellow-800 border-yellow-200"
-      case "scheduled":
+      case "SCHEDULED":
         return "bg-blue-100 text-blue-800 border-blue-200"
-      case "archived":
+      case "ARCHIVED":
         return "bg-gray-100 text-gray-800 border-gray-200"
       default:
         return "bg-red-100 text-red-800 border-red-200"
     }
   }
 
-  const handleDeletePost = (postId: string) => {
-    setPosts((posts) => posts.filter((p) => p.id !== postId))
-    toast({
-      title: "Post deleted",
-      description: "The blog post has been permanently deleted.",
-    })
-  }
 
-  const handleArchivePost = (postId: string) => {
+    const handleDeletePost = async (postId: string) => {
+    try {
+      // Call the API to delete the post
+      await deleteBlogPost(postId);
+
+      // Decrement usage for the current user
+      if (user?.id) {
+        await decrementBlogUsage(user.id, 1);
+      }
+
+      // Update UI state
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+
+      // Success toast
+      toast.success('The blog post has been permanently deleted.')
+    } catch (error) {
+      console.error("Failed to delete post:", error);
+
+      toast.error('Failed to delete post. Please try again.')
+    }
+  };
+
+
+  const handleArchivePost = async (postId: string) => {
+  try {
+    // Optimistic UI update
     setPosts((posts) =>
       posts.map((p) =>
-        p.id === postId ? { ...p, status: 'ARCHIVED' as const, updatedAt: new Date().toISOString() } : p,
-      ),
-    )
-    toast({
-      title: "Post archived",
-      description: "The blog post has been moved to archives.",
-    })
+        p.id === postId
+          ? { ...p, status: "ARCHIVED" as const, updatedAt: new Date().toISOString() }
+          : p
+      )
+    );
+
+    // Persist to DB
+    await updatePostStatus(postId, "ARCHIVED");
+    toast.success("The blog post has been moved to archives.");
+  } catch (error) {
+    console.error(error);
+    toast.error('Failed to archive post. Please try again.')
+
+    // Rollback on error
+    setPosts((posts) =>
+      posts.map((p) =>
+        p.id === postId
+          ? { ...p, status: p.status, updatedAt: p.updatedAt }
+          : p
+      )
+    );
   }
+};
+  const handlePublishePost = async (postId: string) => {
+  try {
+    // Optimistic UI update
+    setPosts((posts) =>
+      posts.map((p) =>
+        p.id === postId
+          ? { ...p, status: "PUBLISHED" as const, updatedAt: new Date().toISOString() }
+          : p
+      )
+    );
+
+    // Persist to DB
+    await updatePostStatus(postId, "PUBLISHED");
+    toast.success("The blog post has been Published.");
+  } catch (error) {
+    console.error(error);
+    toast.error('Failed to Publishe post. Please try again.')
+
+    // Rollback on error
+    setPosts((posts) =>
+      posts.map((p) =>
+        p.id === postId
+          ? { ...p, status: p.status, updatedAt: p.updatedAt }
+          : p
+      )
+    );
+  }
+};
+
 
   const handleSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -236,47 +301,47 @@ export function BlogManagement() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3 mb-4 sm:mb-6">
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <Card className="bg-white border border-gray-200 rounded-lg  text-black0">
             <CardContent className="p-2 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-700">{stats.total}</div>
-              <div className="text-xs sm:text-sm text-blue-600">Total Posts</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold ">{stats.total}</div>
+              <div className="text-xs sm:text-sm ">Total Posts</div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+          <Card className="bg-white border border-gray-200 rounded-lg  text-black">
             <CardContent className="p-2 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-700">{stats.published}</div>
-              <div className="text-xs sm:text-sm text-green-600">Published</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold ">{stats.published}</div>
+              <div className="text-xs sm:text-sm ">Published</div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200">
+          <Card className="bg-white border border-gray-200 rounded-lg  text-black">
             <CardContent className="p-2 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-700">{stats.drafts}</div>
-              <div className="text-xs sm:text-sm text-yellow-600">Drafts</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold ">{stats.drafts}</div>
+              <div className="text-xs sm:text-sm ">Drafts</div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 hidden lg:block">
+          {/* <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 hidden lg:block">
             <CardContent className="p-2 sm:p-4 text-center">
               <div className="text-lg sm:text-xl md:text-2xl font-bold text-purple-700">{stats.scheduled}</div>
               <div className="text-xs sm:text-sm text-purple-600">Scheduled</div>
             </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-r from-indigo-50 to-indigo-100 border-indigo-200 hidden md:block">
+          </Card> */}
+          <Card className="bg-white border border-gray-200 rounded-lg  text-black hidden md:block">
             <CardContent className="p-2 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-indigo-700">{stats.totalViews.toLocaleString()}</div>
-              <div className="text-xs sm:text-sm text-indigo-600">Total Views</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold ">{stats.totalViews.toLocaleString()}</div>
+              <div className="text-xs sm:text-sm ">Total Views</div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200 hidden lg:block">
+          <Card className="bg-white border border-gray-200 rounded-lg  text-black hidden lg:block">
             <CardContent className="p-2 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-red-700">{stats.totalLikes}</div>
-              <div className="text-xs sm:text-sm text-red-600">Total Likes</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold ">{stats.totalLikes}</div>
+              <div className="text-xs sm:text-sm ">Total Likes</div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-r from-teal-50 to-teal-100 border-teal-200 hidden xl:block">
+          <Card className="bg-white border border-gray-200 rounded-lg  text-black hidden xl:block">
             <CardContent className="p-2 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-teal-700">{stats.totalComments}</div>
-              <div className="text-xs sm:text-sm text-teal-600">Comments</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold ">{stats.totalComments}</div>
+              <div className="text-xs sm:text-sm ">Comments</div>
             </CardContent>
           </Card>
         </div>
@@ -289,7 +354,7 @@ export function BlogManagement() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="bg-white rounded-lg sm:rounded-xl shadow-none border-none p-4 sm:p-6 mb-4 sm:mb-6"
       >
-          <div className="w-full  flex-col md:flex-row  items-center  justify-between gap-6">
+          <div className="w-full flex   flex-col md:flex-row  items-center  justify-between gap-6">
             <div className="relative w-full">
               {searchInput && (
                 <X 
@@ -308,7 +373,7 @@ export function BlogManagement() {
               <Search onClick={handleSearch} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
             </div>
 
-              <div className="flex gap-2  mt-2">
+              <div className="flex gap-2  mt-2 md:mt-0">
 
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[130px] sm:w-[160px] text-xs sm:text-sm">
@@ -348,7 +413,7 @@ export function BlogManagement() {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4 sm:mb-6">
-          <TabsList className="grid w-full grid-cols-5 gap-1 sm:gap-2">
+          <TabsList className="grid w-full grid-cols-4 gap-1 sm:gap-2">
             <TabsTrigger value="all" className="flex items-center gap-1 text-xs sm:text-sm p-1 sm:p-2">
               <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="truncate">All ({stats.total})</span>
@@ -361,10 +426,10 @@ export function BlogManagement() {
               <Edit3 className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="truncate">Drafts ({stats.drafts})</span>
             </TabsTrigger>
-            <TabsTrigger value="scheduled" className="flex items-center gap-1 text-xs sm:text-sm p-1 sm:p-2">
+            {/* <TabsTrigger value="scheduled" className="flex items-center gap-1 text-xs sm:text-sm p-1 sm:p-2">
               <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="truncate">Sched ({stats.scheduled})</span>
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="archived" className="flex items-center gap-1 text-xs sm:text-sm p-1 sm:p-2">
               <Archive className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="truncate">Arch ({stats.archived})</span>
@@ -410,6 +475,7 @@ export function BlogManagement() {
                         }}
                         onDelete={() => handleDeletePost(post.id)}
                         onArchive={() => handleArchivePost(post.id)}
+                        onPublishe={() => handlePublishePost(post.id)}
                         getStatusIcon={getStatusIcon}
                         getStatusColor={getStatusColor}
                       />
@@ -432,6 +498,7 @@ export function BlogManagement() {
             <BlogPostDetails
               post={selectedPost}
               onClose={() => setShowDetails(false)}
+              onDelete={() => handleDeletePost(selectedPost.id)}
               onEdit={() => {
                 setShowDetails(false)
                 window.open(`/dashboard/blog/write?edit=${selectedPost.slug}`, "_blank")

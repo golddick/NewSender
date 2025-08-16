@@ -5,6 +5,7 @@ import Head from 'next/head';
 import { acceptTermsAndPrivacy } from '@/actions/acceptTerms';
 import toast from 'react-hot-toast';
 import { useUser } from '@clerk/nextjs';
+import { Button } from '@/components/ui/button';
 
 interface LegalDocument {
   title: string;
@@ -231,7 +232,7 @@ export default function LegalPage({membershipStatus}:LegalPageClientProps) {
                 )}
               </div>
             ))}
-            {activeTab === 'terms' && (
+            {/* {activeTab === 'terms' && (
               <div className="flex items-center mb-4">
                 <input
                   id="agree-terms"
@@ -258,20 +259,48 @@ export default function LegalPage({membershipStatus}:LegalPageClientProps) {
                   I have read and agree to the Privacy Policy
                 </label>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
         {/* Submit Button */}
-        <div className="mt-8 text-center">
-          <button
+        <div className="mt-8 text-center flex items-center flex-col md:flex-row gap-12">
+          <div>
+             <div className="flex items-center mb-4">
+                <input
+                  id="agree-privacy"
+                  type="checkbox"
+                  checked={agreedToPrivacy}
+                  onChange={() => setAgreedToPrivacy(!agreedToPrivacy)}
+                  className="h-4 w-4 text-gold-500 focus:ring-gold-500 border-gray-300 rounded"
+                />
+                <label htmlFor="agree-privacy" className="ml-2 block text-sm text-gray-700">
+                  I have read and agree to the Privacy Policy
+                </label>
+              </div>
+
+               <div className="flex items-center mb-4">
+                <input
+                  id="agree-terms"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={() => setAgreedToTerms(!agreedToTerms)}
+                  className="h-4 w-4 text-gold-500 focus:ring-gold-500 border-gray-300 rounded"
+                />
+                <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-700">
+                  I have read and agree to the Terms and Conditions
+                </label>
+              </div>
+
+          </div>
+          <Button
             type="button"
             onClick={handleSubmit}
             disabled={disabled}
-            className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 rounded shadow-lg transition duration-300 border-2 border-gold-700"
+            className="bg-black hover:bg-gray-800 text-white font-bold  px-8 rounded shadow-lg transition duration-300 border-2 border-gold-700"
           >
-            {isSubmitting ? "submitting..." : "Accept All Terms"}
-          </button>
+            {isSubmitting ? "submitting..." : "Continue "}
+          </Button>
         </div>
       </main>
     </div>

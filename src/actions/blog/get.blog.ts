@@ -351,25 +351,6 @@ export async function getBlogTags() {
 }
 
 
-export async function deleteBlogPost(postId: string) {
-  try {
-    await db.blogPost.delete({
-      where: { id: postId },
-    });
-
-    revalidatePath('/blog');
-    return { success: true };
-  } catch (error) {
-    console.error('Error deleting blog post:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete blog post',
-    };
-  }
-}
-
-
-
 // Get featured posts
 export async function getFeaturedPosts(limit = 3) {
   try {

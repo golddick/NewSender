@@ -10,7 +10,7 @@ export async function verifyApiKey(apiKey: string | null) {
   if (!apiKey) {
     return {
       error: NextResponse.json({ error: "Missing API Key" }, { status: 400 }),
-      userId: null,
+      userId: null, 
     };
   }
 

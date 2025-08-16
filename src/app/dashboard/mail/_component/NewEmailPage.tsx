@@ -1,0 +1,41 @@
+
+
+"use client";
+import dynamic from "next/dynamic";
+import { ICONS } from "@/shared/utils/icons";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import ViewMailPage from "./view.mail";
+// const Emaileditor = dynamic(
+//   () => import("@/shared/components/editor/email.editor"),
+//   {
+//     ssr: false,
+//   }
+// );
+
+const NewEmailPage = () => {
+  const searchParams = useSearchParams();
+  const subject: string = searchParams.get("subject")!;
+  const subjectTitle = subject.replace(/-/g, " ");
+
+  return (
+    <div className="w-full flex bg-white min-h-screen scrollbar-hide">
+      <div className="w-full "> 
+        {/* back arrow */}
+        <Link
+          href={"/dashboard/auto-email"}
+          className="opacity-[.7] w-min flex text-xl items-center"
+        >
+          <span>{ICONS.backArrow}</span>
+          <span>Exit</span>
+        </Link>
+        {/* email editor */}
+        <div className="  ">
+          <ViewMailPage subjectTitle={subjectTitle} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default NewEmailPage;

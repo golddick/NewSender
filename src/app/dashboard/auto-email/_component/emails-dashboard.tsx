@@ -285,8 +285,8 @@ export function EmailsDashboard() {
                       {email.status !== EmailStatus.SAVED && (
                         <div className="text-right">
                           <div className="grid grid-cols-3 md:grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <p className="text-gray-500 hidden md:block">Recipients</p>
+                            <div className="hidden md:block">
+                              <p className="text-gray-500 ">Recipients</p>
                               <Users className=" size-4 md:hidden"/>
                               <p className="font-semibold text-black">{email.recipients.toLocaleString()}</p>
                             </div>
@@ -318,7 +318,9 @@ export function EmailsDashboard() {
                         </div>
                       )}
 
-                      <DropdownMenu>
+                     
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                             <MoreHorizontal className="h-4 w-4" />
@@ -327,23 +329,39 @@ export function EmailsDashboard() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
                             <Link 
-                            // href={`/dashboard/auto-email/${email.id}`}
-                            href={`/dashboard/new-email?subject=${email.subject}`}
+                            href={`/dashboard/mail?subject=${email.subject}`}
                             >
                               <Eye className="w-4 h-4 mr-2" />
                               View Details
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                           {
+                            email.status !== EmailStatus.SENT && (
+                                   <div>
+                                      <DropdownMenuItem>
+                              <Link 
+                            href={`/dashboard/new-email?subject=${email.subject}`}
+                            className=" flex items-center gap-2"
+                            >
                             <Edit className="w-4 h-4 mr-2" />
                             Edit Email
+                            </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
+
+                           <DropdownMenuItem className="text-red-600">
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </DropdownMenuItem>
+                                   </div>
+                             )
+                          }
+
+                         
                         </DropdownMenuContent>
                       </DropdownMenu>
+                          </div>
+                     
+                      
                     </div>
                   </div>
                 </div>

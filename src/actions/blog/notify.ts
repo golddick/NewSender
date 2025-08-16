@@ -108,7 +108,7 @@ export async function notifySubscribersAboutNewPost({
         .replace(/\[Url\]/g, `${process.env.NEXT_PUBLIC_WEBSITE_URL}/blog/${post.slug}`)
         .replace(/\[Platform\]/g, fromApplication)
         .replace(/\[HostPlatformUrl\]/g, `${process.env.NEXT_PUBLIC_WEBSITE_URL}/blog`)
-        .replace(/\[HostPlatform\]/g, `${process.env.NEXT_PUBLIC_SOURCE}`),
+        .replace(/\[HostPlatform\]/g, `${process.env.NEXT_PUBLIC_PLATFORM || 'TheNews'}`),
       text: (templateContent.text || '')
         .replace(/\[Author\]/g, post.author)
         .replace(/\[Title\]/g, post.title),

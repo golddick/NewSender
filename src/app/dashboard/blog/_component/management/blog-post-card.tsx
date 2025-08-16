@@ -58,12 +58,13 @@ interface BlogPost {
 
 interface BlogPostCardProps {
   post: BlogPost
-  onEdit: () => void
+  onEdit: () => void 
   onView: () => void
   onDelete: () => void
+  onPublishe: () => void
   onArchive: () => void
-  getStatusIcon: (status: string) => React.ReactNode
-  getStatusColor: (status: string) => string
+  getStatusIcon: (status: PostStatus) => React.ReactNode
+  getStatusColor: (status: PostStatus) => string
 }
 
 export function BlogPostCard({
@@ -71,6 +72,7 @@ export function BlogPostCard({
   onEdit,
   onView,
   onDelete,
+  onPublishe,
   onArchive,
   getStatusIcon,
   getStatusColor,
@@ -183,7 +185,13 @@ export function BlogPostCard({
                   {post.status !== "ARCHIVED" && (
                     <DropdownMenuItem onClick={onArchive}>
                       <Archive className="h-4 w-4 mr-2" />
-                      Archive
+                      Archive Post
+                    </DropdownMenuItem>
+                  )}
+                  {post.status !== "PUBLISHED" && (
+                    <DropdownMenuItem onClick={onPublishe}>
+                      <Archive className="h-4 w-4 mr-2" />
+                      Publishe Post
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={onDelete} className="text-red-600">

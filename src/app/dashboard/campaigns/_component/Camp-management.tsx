@@ -35,7 +35,6 @@ interface CampaignStats {
 export function CampaignsDashboard() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [integrationFilter, setIntegrationFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
   const [isAddCampaignOpen, setIsAddCampaignOpen] = useState(false)
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
@@ -106,11 +105,11 @@ export function CampaignsDashboard() {
     switch (type.toLowerCase()) {
       case "newsletter":
         return "bg-blue-100 text-blue-800"
-      case "product":
+      case "launch":
         return "bg-purple-100 text-purple-800"
       case "news":
         return "bg-orange-100 text-orange-800"
-      case "educational":
+      case "new":
         return "bg-indigo-100 text-indigo-800"
       default:
         return "bg-gray-100 text-gray-800"

@@ -210,7 +210,7 @@ export function newPostNotificationTemplate({
       <p style="
         display: inline-block;
         background: #000;
-        color: #FFD700;
+        color: #B39922;
         padding: 6px 12px;
         border-radius: 16px;
         font-size: 12px;
@@ -247,7 +247,7 @@ export function newPostNotificationTemplate({
       <h2 style="
         font-size: 15px;
         color: #555;
-        font-weight: 400;
+        font-weight: 300;
         margin: 0 0 12px;
         line-height: 1.4;
       ">
@@ -283,8 +283,8 @@ export function newPostNotificationTemplate({
     }
 
     <div style="
-      background: #fefae0;
-      border-left: 4px solid #FFD700;
+      background: #FBF8E9;
+      border-left: 4px solid #B39922;
       border-radius: 4px;
       padding: 12px;
       margin-bottom: 16px;
@@ -306,7 +306,7 @@ export function newPostNotificationTemplate({
       <a href="${url}" style="
         display: inline-block;
         background: #000;
-        color: #FFD700;
+        color: #B39922;
         padding: 10px 22px;
         border-radius: 4px;
         text-decoration: none;

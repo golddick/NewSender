@@ -26,6 +26,7 @@ import {
 import { PostStatus, PostVisibility } from "@prisma/client"
 import { calculatePerformanceScore } from "@/lib/utils"
 import toast from "react-hot-toast"
+import { parseMarkdown } from "@/shared/libs/markdown-parser"
 
 interface BlogPost {
   id: string
@@ -58,9 +59,10 @@ interface BlogPostDetailsProps {
   post: BlogPost
   onClose: () => void
   onEdit: () => void
+  onDelete: () => void
 }
 
-export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps) {
+export function BlogPostDetails({ post, onClose, onEdit, onDelete }: BlogPostDetailsProps) {
   const [activeTab, setActiveTab] = useState("overview")
 
   const formatDate = (dateString: string) => {
@@ -96,18 +98,18 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
   }
 
   // Parse markdown content for preview (simplified)
-  const parseMarkdownPreview = (content: string) => {
-    return content
-      .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
-      .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold mt-6 mb-3">$1</h2>')
-      .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.*?)\*/g, "<em>$1</em>")
-      .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>')
-      .replace(/\n\n/g, '</p><p class="mb-4">')
-      .replace(/^/, '<p class="mb-4">')
-      .replace(/$/, "</p>")
-  }
+  // const parseMarkdownPreview = (content: string) => {
+  //   return content
+  //     .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
+  //     .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold mt-6 mb-3">$1</h2>')
+  //     .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
+  //     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+  //     .replace(/\*(.*?)\*/g, "<em>$1</em>")
+  //     .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>')
+  //     .replace(/\n\n/g, '</p><p class="mb-4">')
+  //     .replace(/^/, '<p class="mb-4">')
+  //     .replace(/$/, "</p>")
+  // }
 
    const score = calculatePerformanceScore(post);
 
@@ -181,7 +183,7 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
                   Basic Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="  grid grid-cols-2 gap-6">
                 <div>
                   <label className="text-sm font-medium text-gray-600">Category</label>
                   <p className="text-gray-900">{post.category}</p>
@@ -199,7 +201,7 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
                   <label className="text-sm font-medium text-gray-600">Read Time</label>
                   <p className="text-gray-900">{post.readTime} minutes</p>
                 </div>
-                <div>
+                <div className=" flex gap-4 items-center">
                   <label className="text-sm font-medium text-gray-600">SEO Score</label>
                   <Badge className={getSeoScoreColor(post.seoScore)}>{post.seoScore}%</Badge>
                 </div>
@@ -298,7 +300,7 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
               <div className="prose max-w-none">
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: parseMarkdownPreview(post.content.substring(0, 1000) + "..."),
+                    __html: parseMarkdown(post.content.substring(0, 1000) + "..."),
                   }}
                 />
                 {post.content.length > 1000 && <p className="text-gray-500 italic">... (content truncated)</p>}
@@ -309,17 +311,6 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
 
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Engagement Rate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {post.views > 0 ? (((post.likes + post.comments) / post.views) * 100).toFixed(1) : 0}%
-                </div>
-                <p className="text-gray-600">Based on likes and comments vs views</p>
-              </CardContent>
-            </Card> */}
             <Card>
             <CardHeader>
               <CardTitle>Engagement Rate</CardTitle>
@@ -395,22 +386,24 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-600">Blog URL </label>
-                <div className="flex w-full justify-between items-center ">
-                <p className="text-gray-900 font-mono text-sm bg-gray-100 p-2 rounded">{process.env.NEXT_PUBLIC_SITE_URL}/blog/post/{post.slug}</p>
-                  <button
+                <div className="flex w-full justify-between items-center gap-6  ">
+                <p className="text-gray-900 font-mono text-sm bg-gray-100 p-2 rounded">{process.env.NEXT_PUBLIC_WEBSITE_URL}/blog/post/{post.slug}</p>
+                  <Button
                   onClick={() => {
-                    const fullUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/blog/post/${post.slug}`;
+                    const fullUrl = `${process.env.NEXT_PUBLIC_WEBSITE_URL}/blog/post/${post.slug}`;
                     navigator.clipboard.writeText(fullUrl);
                     toast.success('URL copied to clipboard!');
                   }}
-                  className="text-sm w-fit text-white bg-black hover:text-black hover:bg-white flex items-center gap-1"
+                  className="text-sm w-fit text-white bg-black hover:text-black hover:bg-white flex items-center gap-1 p-2"
                 >
                   <ClipboardCopyIcon className="h-4 w-4" />
                   Copy URL
-                </button>
+                </Button>
                 </div>
               </div>
-              <div>
+
+             <div className=" flex items-start gap-10 flex-wrap">
+                   <div>
                 <label className="text-sm font-medium text-gray-600">Status</label>
                 <p className="text-gray-900">{post.status}</p>
               </div>
@@ -422,6 +415,7 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
                 <label className="text-sm font-medium text-gray-600">Featured Post</label>
                 <p className="text-gray-900">{post.isFeatured ? "Yes" : "No"}</p>
               </div>
+             </div>
             </CardContent>
           </Card>
 
@@ -435,7 +429,7 @@ export function BlogPostDetails({ post, onClose, onEdit }: BlogPostDetailsProps)
                 Edit Post
               </Button>
               <Separator />
-              <Button variant="destructive" className="w-full">
+              <Button variant="destructive" className="w-full" onClick={onDelete}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Post
               </Button>

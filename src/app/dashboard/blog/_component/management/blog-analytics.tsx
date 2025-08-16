@@ -61,35 +61,35 @@ export function BlogAnalytics({ posts }: BlogAnalyticsProps) {
     <div className="space-y-6">
       {/* Overview Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+        <Card className="bg-white border border-gray-200 rounded-lg  text-black">
           <CardContent className="p-4 text-center">
             <Eye className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-blue-700">{totalViews.toLocaleString()}</div>
-            <div className="text-sm text-blue-600">Total Views</div>
+            <div className="text-2xl font-bold ">{totalViews.toLocaleString()}</div>
+            <div className="text-sm ">Total Views</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200">
+        <Card className=" bg-white border border-gray-200 rounded-lg  text-black">
           <CardContent className="p-4 text-center">
             <Heart className="h-6 w-6 text-red-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-red-700">{totalLikes.toLocaleString()}</div>
-            <div className="text-sm text-red-600">Total Likes</div>
+            <div className="text-2xl font-bold ">{totalLikes.toLocaleString()}</div>
+            <div className="text-sm ">Total Likes</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+        <Card className="bg-white border border-gray-200 rounded-lg  text-black">
           <CardContent className="p-4 text-center">
             <MessageSquare className="h-6 w-6 text-green-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-green-700">{totalComments}</div>
-            <div className="text-sm text-green-600">Total Comments</div>
+            <div className="text-2xl font-bold ">{totalComments}</div>
+            <div className="text-sm ">Total Comments</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+        <Card className="bg-white border border-gray-200 rounded-lg  text-black">
           <CardContent className="p-4 text-center">
             <Share2 className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-purple-700">{totalShares}</div>
-            <div className="text-sm text-purple-600">Total Shares</div>
+            <div className="text-2xl font-bold ">{totalShares}</div>
+            <div className="text-sm ">Total Shares</div>
           </CardContent>
         </Card>
       </div>
