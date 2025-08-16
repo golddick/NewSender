@@ -79,8 +79,8 @@ export const transformKYCData = (kycStatus: any) => {
           issuingCountry: level2?.data?.issuingCountry || '',
           expiryDate: level2?.data?.expiryDate || '',
           occupation: level2?.data?.occupation || '',
-          placeOfBirth: level2?.data?.placeOfBirth || undefined,
-          sourceOfFunds: level2?.data?.sourceOfFunds || undefined
+          senderName: level2?.data?.senderName || '' ,
+
         },
         organizationData: undefined
       };
@@ -97,6 +97,7 @@ export const transformKYCData = (kycStatus: any) => {
           businessType: level2?.data?.businessType || '',
           industry: level2?.data?.industry || '',
           website: level2?.data?.website || '',
+          senderName: level2?.data?.senderName || '',
           description: level2?.data?.description || '',
           registeredAddress: level2?.data?.registeredAddress || '',
           operatingAddress: level2?.data?.operatingAddress || '',

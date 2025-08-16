@@ -47,7 +47,8 @@ interface KYCDetailsViewProps {
       expiryDate: string;
       placeOfBirth?: string;
       occupation?: string;
-      SenderName?: string;
+      senderName?: string;
+      website?:string;
     };
     organizationData?: {
       legalName: string;
@@ -67,7 +68,7 @@ interface KYCDetailsViewProps {
       contactPerson: string;
       contactEmail: string;
       contactPhone: string;
-      SenderName?: string;
+      senderName?: string;
     };
     livePhoto?: string;
     addressDocument?: {
@@ -92,6 +93,8 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
   const isMobile = useMediaQuery("(max-width: 640px)");
   const isTablet = useMediaQuery("(min-width: 641px) and (max-width: 1024px)");
 
+  console.log(kycData.individualData, 'kyc data view')
+
   const getStatusBadge = (status: KYCStatus) => {
     switch (status) {
       case "APPROVED":
@@ -110,7 +113,7 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
         );
       case "COMPLETED":
         return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+          <Badge className="bg-gold-100 text-gold-800 hover:bg-gold-100">
             <Eye className="h-3 w-3 mr-1" />
             Under Review
           </Badge>
@@ -139,7 +142,7 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
       case "PENDING":
         return <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />;
       case "COMPLETED":
-        return <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />;
+        return <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-gold-700" />;
       case "REJECTED":
         return <XCircle className="h-6 w-6 sm:h-8 sm:w-8 text-red-500" />;
       default:
@@ -283,22 +286,35 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
                 </div>
               </div>
               <div className="space-y-3 sm:space-y-4">
-                {kycData.individualData.placeOfBirth && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Place of Birth</p>
-                    <p className="text-sm">{kycData.individualData.placeOfBirth}</p>
-                  </div>
-                )}
                 {kycData.individualData.occupation && (
                   <div>
                     <p className="text-sm font-medium text-gray-600">Occupation</p>
                     <p className="text-sm">{kycData.individualData.occupation}</p>
                   </div>
                 )}
-                {kycData.individualData.SenderName ? (
+                 <div className="space-y-3 sm:space-y-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Website</p>
+                      <p className="text-sm">
+                        {kycData.individualData.website ? (
+                          <a
+                            href={kycData.individualData.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline break-all"
+                          >
+                            {kycData.individualData.website}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                {kycData.individualData.senderName ? (
                   <div>
                     <p className="text-sm font-medium text-gray-600">Mail Sender Name</p>
-                    <p className="text-sm">{kycData.individualData.SenderName}</p>
+                    <p className="text-sm capitalize">{kycData.individualData.senderName}</p>
                   </div>
                 ) : (
                   <div>
@@ -375,10 +391,10 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
                       </p>
                     </div>
                     <div>
-                      {kycData.organizationData.SenderName ? (
+                      {kycData.organizationData.senderName ? (
                         <div>
                           <p className="text-sm font-medium text-gray-600">Mail Sender Name</p>
-                          <p className="text-sm">{kycData.organizationData.SenderName}</p>
+                          <p className="text-sm">{kycData.organizationData.senderName}</p>
                         </div>
                       ) : (
                         <div>
@@ -511,19 +527,32 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
             <CardDescription>Proof of address document</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className={`flex ${isMobile ? "flex-col" : "flex-row"} items-start sm:items-center gap-4 p-3 border rounded-lg`}>
+            <div className={`flex ${isMobile ? "flex-col" : "flex-row"} items-start sm:items-center gap-4 p-3 border rounded-lg w-full`}>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <FileText className="h-6 w-6 text-blue-600" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{kycData.addressDocument.type.replace("_", " ").toUpperCase()}</p>
-                <p className="text-xs text-gray-600">Uploaded on {formatDate(kycData.addressDocument.uploadedAt)}</p>
-                {kycData.addressDocument.filename && (
+                <p className="text-xs text-gray-600 text-nowrap">Uploaded on {formatDate(kycData.addressDocument.uploadedAt)}</p>
+                {/* {kycData.addressDocument.filename && (
                   <p className="text-xs text-gray-500 truncate">{kycData.addressDocument.filename}</p>
-                )}
+                )} */}
               </div>
-              {kycData.addressDocument.url && (
-                <div className={`flex flex-wrap gap-2 w-full ${isMobile ? "mt-2" : ""}`}>
+
+              <div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(kycData.addressDocument?.url, "_blank")}
+                    className={`${isMobile ? "w-full" : ""}`}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Preview
+                  </Button>
+              </div>
+              
+              {/* {kycData.addressDocument.url && (
+                <div className={`flex  gap-2 w-full ${isMobile ? "mt-2" : ""}`}>
                   <Button
                     variant="outline"
                     size="sm"
@@ -552,7 +581,7 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
                     Download
                   </Button>
                 </div>
-              )}
+              )} */}
             </div>
           </CardContent>
         </Card>
