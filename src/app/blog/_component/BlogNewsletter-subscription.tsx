@@ -216,10 +216,6 @@ export function NewsletterSubscription({
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [appName, setAppName] = useState("")
-  // const { toast } = useToast()
-  // const searchParams = useSearchParams()
-  // const userId = searchParams.get("userId")
-
   // Fetch appName from member API using userId from URL
   useEffect(() => {
     const fetchAppName = async () => {
@@ -286,7 +282,7 @@ export function NewsletterSubscription({
   if (isSubscribed) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={`${className}`}>
-        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+        <Card className="bg-white ">
           <CardContent className="p-8 text-center">
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }}>
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
@@ -314,7 +310,7 @@ export function NewsletterSubscription({
       case "footer":
         return "bg-gradient-to-r from-purple-50 to-pink-50 border-none"
       default:
-        return "bg-gradient-to-br from-white via-gold-50 to-white border-gold-200"
+        return "bg-white "
     }
   }
 

@@ -572,11 +572,11 @@ const handleReportComment = async (commentId: string) => {
             </motion.div>
 
             {/* Tags */}
-            {/* <motion.div
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="bg-white rounded-2xl shadow-lg p-8 mb-12 mt-12 border border-neutral-200"
+              className="bg-white rounded-2xl p-8 mb-12 mt-12 border-none shadow-none"
             >
               <h3 className="text-xl font-bold text-neutral-900 mb-4">Tags</h3>
               <div className="flex flex-wrap gap-3">
@@ -584,13 +584,13 @@ const handleReportComment = async (commentId: string) => {
                   <Badge 
                     key={tag.name} 
                     variant="secondary" 
-                    className="px-4 py-2 text-sm hover:bg-blue-100 cursor-pointer"
+                    className="px-4 py-2 text-sm hover:bg-blue-100 cursor-pointer capitalize"
                   >
                     #{tag.name}
                   </Badge>
                 ))}
               </div>
-            </motion.div> */}
+            </motion.div>
 
             {/* Related Posts */}
             {relatedPosts && relatedPosts.length > 0 && (

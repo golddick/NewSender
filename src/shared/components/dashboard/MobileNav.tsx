@@ -86,7 +86,7 @@ export function MobileNav() {
         </SheetHeader> 
         <div className="w-full h-auto bg-gray-100">
           <DashboardItems  onNavigate={handleClose}/>
-          <UserPlan />
+          <UserPlan /> 
           <DashboardItems bottomContent={true} />
         </div>
         <SheetFooter>

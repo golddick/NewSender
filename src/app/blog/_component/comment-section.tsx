@@ -813,7 +813,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
       </div>
 
       {/* New Comment Form */}
-      <div className="mb-8 p-2 bg-gradient-to-r from-white to-gold-50 rounded-xl border-none">
+      <div className="mb-8 p-2 bg-white rounded-xl border-none">
         <h4 className="text-lg font-semibold text-neutral-900 mb-4">Join the Discussion</h4>
         <form onSubmit={handleNewCommentSubmit} className="space-y-4">
           <Textarea
@@ -834,7 +834,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
       {/* Comments List */}
       <div className="space-y-4">
         <AnimatePresence>
-          {sortedComments.length > 0 ? (
+          {sortedComments.length > 0 && (
             sortedComments.map((comment) => (
               <CommentItem
                 key={comment.id}
@@ -846,12 +846,6 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
                 onReport={onReportComment}
               />
             ))
-          ) : (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-              <MessageSquare className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-neutral-500 mb-2">No comments yet</h4>
-              <p className="text-neutral-400">Be the first to share your thoughts on this article!</p>
-            </motion.div>
           )}
         </AnimatePresence>
       </div>
