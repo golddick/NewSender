@@ -1333,6 +1333,12 @@ const EmailEditorPage = ({ subjectTitle }: { subjectTitle: string }) => {
         return;
       }
 
+      if(emailType === 'DRAFT'){
+        toast.error("Cannot send email as it's a draft");
+        setIsSending(false);
+        return;
+      }
+
       try {
         let result;
 
@@ -1494,7 +1500,7 @@ const EmailEditorPage = ({ subjectTitle }: { subjectTitle: string }) => {
               <select
                 value={selectedCampaign}
                 onChange={(e) => setSelectedCampaign(e.target.value)}
-                className={`w-full rounded-md border border-gray-300 p-2 ${isMobile ? 'text-xs' : 'text-sm'}`}
+                className={`w-full rounded-md border border-gray-300 p-2 ${isMobile ? 'text-xs w-[90%]'  : 'text-sm'}`}
                 disabled={campaignsLoading}
               >
                 <option value="" className=" p-2">Select Campaign</option>
