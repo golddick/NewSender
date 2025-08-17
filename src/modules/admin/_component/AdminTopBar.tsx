@@ -5,12 +5,13 @@ const AdminTopBar = () => {
   return (
     <nav className="bg-black text-white p-4 fixed w-full z-10">
         <div className=" flex justify-between items-center">
-          <div className="flex items-center space-x-2">
+          s
+          {/* <div className="flex items-center space-x-2">
             <Newspaper className="text-gold-700" />
             <span className="font-bold text-xl">TheNews Analytics</span>
           </div>
           
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="flex items-center space-x-6">
             <div className="relative">
               <input 
                 type="text" 
@@ -30,7 +31,7 @@ const AdminTopBar = () => {
           
           <button className="md:hidden">
             <Menu size={24} />
-          </button>
+          </button> */}
         </div>
       </nav>
   )

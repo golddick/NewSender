@@ -1,7 +1,7 @@
 'use client'
 
 
-import { AdminsideBarBottomItems, AdminsideBarItems, sideBarBottomItems, sideBarItems } from "@/app/configs/constants";
+import { AdminsideBarBottomItems, AdminsideBarItems,  } from "@/app/configs/constants";
 import { DashboardSideBarTypes } from "@/app/configs/types";
 import useRouteChange from "@/shared/hooks/useRouteChange";
 import { ICONS } from "@/shared/utils/icons";

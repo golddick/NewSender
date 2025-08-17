@@ -8,6 +8,7 @@ import { BlogPost, PostStatus, Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ensurePublishingAllowed, handlePostPublishActions } from './blogPostPublishing';
+import { calculatePerformanceScore, PostPerformanceMetrics } from '@/lib/utils';
 
 // Types
 export type BlogPostWithRelations = Prisma.BlogPostGetPayload<{
@@ -132,12 +133,15 @@ export async function getBlogPosts({
 }
 
 // Get single blog post by slug
+
+// Get single blog post by slug
 export async function getBlogPost(
   slug: string,
   includeDraft = false
 ): Promise<SingleBlogPostResponse> {
   const user = await currentUser();
   const userId = user?.id || null;
+
   try {
     const post = await db.blogPost.findUnique({
       where: {
@@ -172,13 +176,39 @@ export async function getBlogPost(
       };
     }
 
+    // Only count views for published posts (and not for author)
+    if (post.status === 'PUBLISHED' ) {
+      if (userId) {
+        // Logged-in user: check if they already viewed this post
+        const alreadyViewed = await db.blogPostView.findUnique({
+          where: {
+            postId_userId: {
+              postId: post.id,
+              userId,
+            },
+          },
+        });
 
-    // Increment view count if published post
-    if (post.status === 'PUBLISHED' && userId !== post.authorId) {
-      await db.blogPost.update({
-        where: { id: post.id },
-        data: { views: { increment: 1 } },
-      });
+        if (!alreadyViewed) {
+          await db.blogPostView.create({
+            data: {
+              postId: post.id,
+              userId,
+            },
+          });
+
+          await db.blogPost.update({
+            where: { id: post.id },
+            data: { views: { increment: 1 } },
+          });
+        }
+      } else {
+        // Guest user: count each view
+        await db.blogPost.update({
+          where: { id: post.id },
+          data: { views: { increment: 1 } },
+        });
+      }
     }
 
     return {
@@ -194,8 +224,6 @@ export async function getBlogPost(
   }
 }
 
-
-// Get blog posts by newsletter owner 
 
 export async function getBlogPostsByAuthor({
   page = 1,
@@ -352,31 +380,79 @@ export async function getBlogTags() {
 
 
 // Get featured posts
-export async function getFeaturedPosts(limit = 3) {
+
+interface FeaturedPost {
+  id: string
+  title: string
+  slug: string
+  excerpt?: string | null
+  featuredImage: string
+  publishedAt: Date // Non-nullable
+  readTime?: number | null
+  category?: { name: string } | null
+  tags?: { name: string }[]
+}
+
+interface GetFeaturedPostsResponse {
+  success: boolean
+  data?: FeaturedPost[]
+  error?: string
+}
+
+export async function getFeaturedPosts(limit = 4): Promise<GetFeaturedPostsResponse> {
   try {
     const posts = await db.blogPost.findMany({
       where: {
         status: 'PUBLISHED',
         isFeatured: true,
+        publishedAt: { not: null } // Only include posts with publishedAt
       },
       take: limit,
       orderBy: {
         publishedAt: 'desc',
       },
-      include: {
-        category: true,
-        tags: true,
-        membership: true,
-      },
-    });
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        featuredImage: true,
+        publishedAt: true,
+        readTime: true,
+        category: {
+          select: {
+            name: true
+          }
+        },
+        tags: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
 
-    return { success: true, data: posts };
+    // Filter out any posts that somehow got through without publishedAt
+    // and transform the data
+    const transformedPosts = posts
+      .filter(post => post.publishedAt !== null)
+      .map(post => ({
+        ...post,
+        publishedAt: post.publishedAt as Date, // We've filtered out nulls
+        category: post.category ? { name: post.category.name } : null,
+        tags: post.tags.map(tag => ({ name: tag.name }))
+      }))
+
+    return { 
+      success: true, 
+      data: transformedPosts 
+    }
   } catch (error) {
-    console.error('Error fetching featured posts:', error);
+    console.error('Error fetching featured posts:', error)
     return {
       success: false,
-      error: 'Failed to fetch featured posts',
-    };
+      error: error instanceof Error ? error.message : 'Failed to fetch featured posts',
+    }
   }
 }
 
@@ -443,6 +519,107 @@ export async function updateGalleryImages(postId: string, newGalleryImages: stri
     return { success: false, error: "Failed to update gallery images" };
   }
 }
+
+
+
+export async function getCategories() {
+  try {
+    return await db.blogCategory.findMany({
+      include: {
+          _count: {
+          select: {
+            posts: {
+              where: { status: 'PUBLISHED' },
+            },
+          },
+        },
+      },
+      orderBy: { name: 'asc' }
+    })
+  } catch (error) {
+    console.error("Failed to fetch categories:", error)
+    return []
+  }
+}
+
+
+export async function getTags() {
+  try {
+    return await db.blogTag.findMany({
+        select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            posts: {
+              where: { status: 'PUBLISHED' },
+            },
+          },
+        },
+      },
+      orderBy: { name: 'asc' }
+    })
+  } catch (error) {
+    console.error("Failed to fetch tags:", error)
+    return []
+  }
+}
+
+
+export async function getPopularPosts() {
+  try {
+    const posts = await db.blogPost.findMany({
+      where: {
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        publishedAt: { lte: new Date() },
+      },
+      orderBy: {
+        views: "desc",
+      },
+      take: 4,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        featuredImage: true,
+        publishedAt: true,
+        _count: {
+          select: { comments: true },
+        },
+        views: true,
+        likes: true,
+        shares: true,
+        seoScore: true,
+      },
+    });
+
+    return posts.map(post => {
+      const metrics = {
+        views: post.views,
+        likes: post.likes,
+        shares: post.shares,
+        comments: post._count.comments,
+        seoScore: post.seoScore,
+      };
+
+      return {
+        id: post.id,
+        title: post.title,
+        slug: post.slug,
+        featuredImage: post.featuredImage,
+        publishedAt: post.publishedAt ? new Date(post.publishedAt) : null,
+        performanceScore: calculatePerformanceScore(metrics),
+        commentsCount: post._count.comments,
+      };
+    });
+  } catch (error) {
+    console.error("Failed to fetch popular posts:", error);
+    return [];
+  }
+}
+
+
 
 
 

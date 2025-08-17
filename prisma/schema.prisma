@@ -196,6 +196,7 @@ model Membership {
   notificationSettings      NotificationSettings[]
   kyc                       KYC[]
   invoices                  Invoice[]
+  postViews                BlogPostView[]
  
 
   @@index([paystackCustomerId])
@@ -264,6 +265,8 @@ model MembershipUsage {
   @@index([month])
 }
 
+
+
 model BlogPost {
   id               String         @id @default(uuid())
   title            String
@@ -305,6 +308,8 @@ model BlogPost {
   generatedById    String?        // Reference to AI generation if applicable
   membership       Membership     @relation(fields: [authorId], references: [userId])
   category         BlogCategory?      @relation(fields: [categoryId], references: [id])
+  viewsCount       BlogPostView[]
+
 
   @@index([authorId])
   @@index([status])
@@ -312,6 +317,18 @@ model BlogPost {
   @@index([publishedAt])
   @@index([slug])
 }
+
+model BlogPostView {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  member Membership @relation(fields: [userId], references: [userId])
+  post      BlogPost @relation(fields: [postId], references: [id])
+
+  @@unique([postId, userId])
+}
+
 
 model BlogCategory {
   id          String     @id @default(uuid())

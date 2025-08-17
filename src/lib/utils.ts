@@ -42,6 +42,18 @@ export const calculatePercentage = (
 };
 
 
+export function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return "—"; // fallback when null/undefined
+  const d = typeof date === "string" ? new Date(date) : date;
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+
+
 
 
 
@@ -65,9 +77,9 @@ export interface PostPerformanceMetrics {
 export const calculatePerformanceScore = (post: PostPerformanceMetrics): number => {
   // Weights for different metrics (adjust as needed)
   const WEIGHTS = {
-    seo: 0.35,
-    engagement: 0.40,
-    reach: 0.25
+    seo: 0.20,
+    engagement: 0.30,
+    reach: 0.10
   };
 
   // Calculate individual components (0-100 scale)
@@ -77,8 +89,8 @@ export const calculatePerformanceScore = (post: PostPerformanceMetrics): number 
   const engagementComponent = Math.min(
     100,
     ((post.likes || 0) * 0.5 + 
-     (post.comments || 0) * 1.5 + 
-     (post.shares || 0) * 2) / 
+     (post.comments || 0) * 1 + 
+     (post.shares || 0) * 1.5) / 
     (post.views && post.views > 0 ? post.views : 1) * 1000
   );
 

@@ -4,12 +4,12 @@ import { motion } from "framer-motion"
 
 export function BlogHeader() {
   return (
-    <section className="relative py-16 md:py-20 bg-dark-800 text-white overflow-hidden">
+    <section className="relative py-16 md:py-20 bg-black text-white overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full">
           {/* Grid pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_40%,transparent_100%)]"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_2px,transparent_2px),linear-gradient(to_bottom,#111_2px,transparent_2px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_40%,transparent_100%)]"></div>
         </div>
 
         {/* Gradient orbs */}
@@ -60,10 +60,11 @@ export function BlogHeader() {
             className="text-4xl md:text-5xl font-bold mb-6 font-heading"
           >
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300">
-              Insights on Email Marketing and
-            </span>{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-gold-300 to-gold-500">
-              Newsletter Strategies
+              Share Your Story with the World 
+              <br/> and
+            </span><br/>{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-gold-300 to-gold-500 mt-2">
+              Get Featured
             </span>
           </motion.h1>
 
@@ -73,8 +74,8 @@ export function BlogHeader() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-lg text-neutral-300 max-w-3xl mx-auto"
           >
-            Expert tips, industry trends, and success stories to help you create newsletters that engage your audience
-            and drive results.
+            TheNews Blog is where creators, professionals, and storytellers share their work.
+             Publish instantly, and if your post is featured, it reaches our entire community spotlight.
           </motion.p>
         </div>
       </div>
