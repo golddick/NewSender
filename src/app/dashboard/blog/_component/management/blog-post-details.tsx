@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
+import { motion } from "framer-motion"
 import {
   Edit3,
   Calendar,
@@ -22,11 +23,60 @@ import {
   Settings,
   Trash2,
   ClipboardCopyIcon,
+  AlertTriangle,
+  Flag,
+  User,
 } from "lucide-react"
 import { PostStatus, PostVisibility } from "@prisma/client"
-import { calculatePerformanceScore } from "@/lib/utils"
+import { calculatePerformanceScore, formatDate } from "@/lib/utils"
 import toast from "react-hot-toast"
 import { parseMarkdown } from "@/shared/libs/markdown-parser"
+
+// interface BlogPost {
+//   id: string
+//   title: string
+//   excerpt: string
+//   content: string
+//   featuredImage: string | null
+//   category: string
+//   tags: string[]
+//   author: string
+//   authorTitle: string
+//   status: PostStatus,
+//   visibility: PostVisibility
+//   createdAt: string
+//   updatedAt: string
+//   publishedAt: string | null
+//   scheduledAt: string | null
+//   wordCount: number
+//   readTime: number
+//   views: number
+//   likes: number
+//   comments: number
+//   shares: number
+//   seoScore: number
+//   isFeatured: boolean
+//   slug: string
+// }
+
+type BlogMember = {
+  userId: string;
+  fullName: string;
+  imageUrl?: string | null;
+
+}
+
+type BlogPostFlag = {
+    id: string;
+    reason: string;
+    comment:string;
+    flaggedBy:string;
+    status: string;
+    createdAt: Date;
+    reviewedAt: Date | null;
+    postId: string;
+    userId: string;
+}
 
 interface BlogPost {
   id: string
@@ -38,8 +88,8 @@ interface BlogPost {
   tags: string[]
   author: string
   authorTitle: string
-  status: PostStatus,
-  visibility: PostVisibility
+  status: PostStatus
+  visibility: PostVisibility   
   createdAt: string
   updatedAt: string
   publishedAt: string | null
@@ -53,6 +103,11 @@ interface BlogPost {
   seoScore: number
   isFeatured: boolean
   slug: string
+  flaggedAt?: Date | string | null;
+  flagReason: string | null
+  isFlagged: boolean
+  flaggedPosts:BlogPostFlag[]
+  members: BlogMember
 }
 
 interface BlogPostDetailsProps {
@@ -65,21 +120,26 @@ interface BlogPostDetailsProps {
 export function BlogPostDetails({ post, onClose, onEdit, onDelete }: BlogPostDetailsProps) {
   const [activeTab, setActiveTab] = useState("overview")
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
 
   const getSeoScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600 bg-green-100 border-green-200"
     if (score >= 60) return "text-yellow-600 bg-yellow-100 border-yellow-200"
     return "text-red-600 bg-red-100 border-red-200"
+  }
+
+    const getFlagReasonColor = (reason: string) => {
+    switch (reason.toLowerCase()) {
+      case "inappropriate content":
+        return "bg-red-100 text-red-800 border-red-200"
+      case "copyright violation":
+        return "bg-orange-100 text-orange-800 border-orange-200"
+      case "spam content":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      case "misinformation":
+        return "bg-purple-100 text-purple-800 border-purple-200"
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200"
+    }
   }
 
   const getStatusColor = (status: string) => {
@@ -97,19 +157,6 @@ export function BlogPostDetails({ post, onClose, onEdit, onDelete }: BlogPostDet
     }
   }
 
-  // Parse markdown content for preview (simplified)
-  // const parseMarkdownPreview = (content: string) => {
-  //   return content
-  //     .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
-  //     .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold mt-6 mb-3">$1</h2>')
-  //     .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
-  //     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-  //     .replace(/\*(.*?)\*/g, "<em>$1</em>")
-  //     .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>')
-  //     .replace(/\n\n/g, '</p><p class="mb-4">')
-  //     .replace(/^/, '<p class="mb-4">')
-  //     .replace(/$/, "</p>")
-  // }
 
    const score = calculatePerformanceScore(post);
 
@@ -156,6 +203,56 @@ export function BlogPostDetails({ post, onClose, onEdit, onDelete }: BlogPostDet
           </Button>
         </div>
       </div>
+
+      {post.isFlagged && (
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <Card className="border-red-200 bg-red-50">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <CardTitle className="text-lg text-red-800">Content Flagged by Administrator</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-red-700 mb-1">Flag Reason:</p>
+                  <Badge className={`${getFlagReasonColor(post.flagReason || "")} font-medium`}>
+                    <Flag className="h-3 w-3 mr-1" />
+                    {post.flagReason}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-red-700 mb-1">Flagged Date:</p>
+                  <p className="text-sm text-red-600">{formatDate (post.flaggedAt)}</p>
+                </div>
+              </div>
+
+              {post.flagReason && (
+                <div>
+                  <p className="text-sm font-medium text-red-700 mb-2">Administrator Message:</p>
+                  <div className="bg-white border border-red-200 rounded-lg p-4">
+                    <p className="text-sm text-gray-700 leading-relaxed">{post.flaggedPosts[0].comment}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 text-sm text-red-600">
+                <User className="h-4 w-4" />
+                <span>Flagged by: TheNews Team</span>
+              </div>
+
+              <div className="bg-red-100 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-700">
+                  <strong>Note:</strong> This content has been flagged by an administrator. Please review the feedback
+                  and make necessary changes before republishing.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
 
       {/* Featured Image */}
       {post.featuredImage && (

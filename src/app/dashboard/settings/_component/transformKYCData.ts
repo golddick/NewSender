@@ -61,9 +61,10 @@ export const transformKYCData = (kycStatus: any) => {
       accountType: kycStatus.accountType as KYCAccountType,
       status,
       submittedAt: safeDate(kycStatus.createdAt) || new Date().toISOString(),
-      reviewedAt: safeDate(kycStatus.updatedAt),
-      reviewedBy: kycStatus.reviewedBy || "TheNews Team",
+      reviewedAt: safeDate(kycStatus.reviewedTime),
+      reviewedBy: kycStatus.reviewedBy || undefined,
       rejectionReason: kycStatus.rejectionReason || undefined,
+      comments: kycStatus.comments,
       livePhoto: kycStatus.livePhoto || undefined,
       addressDocument: documents.find(d => d.type.toLowerCase().includes('address')) || undefined,
       documents
@@ -80,6 +81,7 @@ export const transformKYCData = (kycStatus: any) => {
           expiryDate: level2?.data?.expiryDate || '',
           occupation: level2?.data?.occupation || '',
           senderName: level2?.data?.senderName || '' ,
+          website: level2?.data?.website || '',
 
         },
         organizationData: undefined

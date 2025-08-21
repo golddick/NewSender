@@ -5,10 +5,9 @@ const AdminTopBar = () => {
   return (
     <nav className="bg-black text-white p-4 fixed w-full z-10">
         <div className=" flex justify-between items-center">
-          s
-          {/* <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <Newspaper className="text-gold-700" />
-            <span className="font-bold text-xl">TheNews Analytics</span>
+            <span className="font-bold text-xl hidden md:block">TheNews Super Admin</span>
           </div>
           
           <div className="flex items-center space-x-6">
@@ -24,14 +23,14 @@ const AdminTopBar = () => {
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 bg-gold-400 text-black rounded-full w-4 h-4 flex items-center justify-center text-xs">3</span>
             </button>
-            <div className="w-8 h-8 bg-gold-400 rounded-full flex items-center justify-center text-black font-bold">
+            <div className="w-8 h-8 bg-gold-300 rounded-full flex items-center justify-center text-black font-bold">
               A
             </div>
           </div>
           
           <button className="md:hidden">
             <Menu size={24} />
-          </button> */}
+          </button>
         </div>
       </nav>
   )

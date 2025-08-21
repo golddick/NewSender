@@ -40,8 +40,8 @@ export function nestComments(
   for (const comment of flatComments) {
     commentMap.set(comment.id, {
       id: comment.id,
-      author: comment.member.author || comment.member.userName,
-      authorAvatar: comment.member.imageUrl,
+      author: comment.member.userName || comment.member.userName,
+      authorAvatar: comment.member.imageUrl ||"",
       date: formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true }),
       content: comment.content,
       likes: comment.likes,

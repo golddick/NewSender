@@ -121,6 +121,10 @@ enum PostStatus {
   ARCHIVED
   SCHEDULED
 }
+enum FlagStatus {
+  FLAGGED
+  RESOLVED
+}
 
 enum PostVisibility {
   PUBLIC
@@ -197,6 +201,9 @@ model Membership {
   kyc                       KYC[]
   invoices                  Invoice[]
   postViews                BlogPostView[]
+
+  
+  flagedPosts               BlogPostFlag[]
  
 
   @@index([paystackCustomerId])
@@ -295,12 +302,15 @@ model BlogPost {
   characterCount   Int            @default(0)
   likes            Int            @default(0)
   views            Int            @default(0)
+  flagReason       String?
   comments         BlogComment[]
   tags             BlogTag[]
+  isFlagged       Boolean        @default(false)
   isFeatured       Boolean        @default(false)
   isPinned         Boolean        @default(false)
   allowComments    Boolean        @default(true)
   publishedAt      DateTime?
+  flaggedAt        DateTime?
   scheduledAt      DateTime?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
@@ -309,6 +319,8 @@ model BlogPost {
   membership       Membership     @relation(fields: [authorId], references: [userId])
   category         BlogCategory?      @relation(fields: [categoryId], references: [id])
   viewsCount       BlogPostView[]
+  flaggedPosts       BlogPostFlag[]
+
 
 
   @@index([authorId])
@@ -316,6 +328,20 @@ model BlogPost {
   @@index([visibility])
   @@index([publishedAt])
   @@index([slug])
+}
+
+model BlogPostFlag {
+  id        String   @id @default(cuid())
+  reason    String
+  comment  String
+  flaggedBy  String
+  status    FlagStatus  @default(FLAGGED) 
+  createdAt DateTime @default(now())
+  reviewedAt DateTime?
+  postId    String
+  userId    String
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      Membership     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
 model BlogPostView {

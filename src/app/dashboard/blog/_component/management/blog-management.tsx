@@ -25,6 +25,26 @@ import { deleteBlogPost } from "@/actions/blog/delete.blog"
 import { decrementBlogUsage } from "@/lib/checkAndUpdateUsage"
 import { updatePostStatus } from "@/actions/blog/updateBlog"
 import toast from "react-hot-toast"
+// import { BlogPost, BlogPostFlag } from "@/app/type"
+
+ type BlogMember = {
+  userId: string;
+  fullName: string;
+  imageUrl?: string | null;
+
+}
+
+type BlogPostFlag = {
+    id: string;
+    reason: string;
+    comment:string;
+    flaggedBy:string;
+    status: string;
+    createdAt: Date;
+    reviewedAt: Date | null;
+    postId: string;
+    userId: string;
+}
 
 interface BlogPost {
   id: string
@@ -51,6 +71,11 @@ interface BlogPost {
   seoScore: number
   isFeatured: boolean
   slug: string
+  flaggedAt?: Date | string | null;
+  flagReason: string | null
+  isFlagged: boolean
+  flaggedPosts:BlogPostFlag[]
+  members: BlogMember
 }
 
 export function BlogManagement() {
@@ -89,6 +114,9 @@ export function BlogManagement() {
   if (posts.length === 0 && categories.length === 0) {
     return <Loader />
   }
+
+  // console.log(filteredPosts, 'filteredPosts')
+  console.log(posts, 'posts')
 
   // Filter and sort posts
   const filteredPosts = posts
@@ -136,7 +164,7 @@ export function BlogManagement() {
     total: posts.length,
     published: posts.filter((p) => p.status === 'PUBLISHED').length,
     drafts: posts.filter((p) => p.status === "DRAFT").length,
-    scheduled: posts.filter((p) => p.status === "SCHEDULED").length,
+    flagged: posts.filter((p) => p.isFlagged).length,
     archived: posts.filter((p) => p.status === "SCHEDULED").length,
     totalViews: posts.reduce((sum, p) => sum + p.views, 0),
     totalLikes: posts.reduce((sum, p) => sum + p.likes, 0),
@@ -314,18 +342,18 @@ export function BlogManagement() {
               <div className="text-xs sm:text-sm ">Published</div>
             </CardContent>
           </Card>
-          <Card className="bg-white border border-gray-200 rounded-lg  text-black">
+          {/* <Card className="bg-white border border-gray-200 rounded-lg  text-black">
             <CardContent className="p-2 sm:p-4 text-center">
               <div className="text-lg sm:text-xl md:text-2xl font-bold ">{stats.drafts}</div>
               <div className="text-xs sm:text-sm ">Drafts</div>
             </CardContent>
-          </Card>
-          {/* <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 hidden lg:block">
-            <CardContent className="p-2 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-purple-700">{stats.scheduled}</div>
-              <div className="text-xs sm:text-sm text-purple-600">Scheduled</div>
-            </CardContent>
           </Card> */}
+             <Card className="bg-white border border-gray-200 rounded-lg  text-black hidden md:block">
+            <CardContent className="p-2 sm:p-4 text-center">
+              <div className="text-lg sm:text-xl md:text-2xl font-bold ">{stats.flagged}</div>
+              <div className="text-xs sm:text-sm ">Flagged Post</div>
+            </CardContent>
+          </Card>
           <Card className="bg-white border border-gray-200 rounded-lg  text-black hidden md:block">
             <CardContent className="p-2 sm:p-4 text-center">
               <div className="text-lg sm:text-xl md:text-2xl font-bold ">{stats.totalViews.toLocaleString()}</div>

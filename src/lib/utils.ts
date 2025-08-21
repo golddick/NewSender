@@ -1,3 +1,5 @@
+import { KycApplication } from "@/app/type";
+import { db } from "@/shared/libs/database";
 import { Subscriber } from "@prisma/client";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -53,6 +55,37 @@ export function formatDate(date: Date | string | null | undefined): string {
 }
 
 
+
+
+export async function requireSuperAdmin(userId: string) {
+  const membership = await db.membership.findUnique({
+    where: { userId },
+    select: { role: true },
+  });
+
+//   if (!membership || membership.role !== "THENEWSADMIN") {
+//     throw new Error("Unauthorized: Super Admins only");
+//   }
+}
+
+
+/**
+ * Helper: Calculate KYC completion
+ */
+export function calculateKycCompletion(kyc: KycApplication): number {
+  const levels = [kyc.levels.level1, kyc.levels.level2, kyc.levels.level3];
+  const completed = levels.filter((l) => l.status === "COMPLETED").length;
+
+  if (completed === 3 && kyc.status !== "APPROVED") {
+    return 95;
+  }
+
+  if (kyc.status === "APPROVED") {
+    return 100;
+  }
+
+  return Math.round((completed / 3) * 100);
+}
 
 
 

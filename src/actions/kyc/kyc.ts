@@ -8,7 +8,6 @@
 "use server";
 
 
-import { KYCStatusResponse } from "@/app/configs/types";
 import { db } from "@/shared/libs/database";
 import { currentUser } from "@clerk/nextjs/server";
 import { KYCAccountType, KYCStatus } from "@prisma/client";
@@ -34,7 +33,7 @@ export async function startKYCProcess(accountType: KYCAccountType, userId: strin
       where: { userId: userId },
       data: {
         accountType,
-        status: KYCStatus.PENDING,
+        status: KYCStatus.IN_PROGRESS,
         levels: {
           level1: { status: KYCStatus.COMPLETED, completedAt: new Date() },
           level2: { status: KYCStatus.IN_PROGRESS },
@@ -56,7 +55,7 @@ export async function startKYCProcess(accountType: KYCAccountType, userId: strin
     data: {
       userId: userId,
       accountType,
-      status: KYCStatus.PENDING,
+      status: KYCStatus.IN_PROGRESS,
      levels: {
           level1: { status: KYCStatus.COMPLETED, completedAt: new Date() },
           level2: { status: KYCStatus.IN_PROGRESS },
@@ -73,11 +72,6 @@ export async function submitKYCLevel2(formData: FormData, accountType: KYCAccoun
   const user = await currentUser();
   if (!user) return { success: false, error: "You must be logged in" };
 
-  const idFrontUrl = formData.get("idFrontUrl") as string;
-  const idFrontKey = formData.get("idFrontKey") as string;
-  const idBackUrl = formData.get("idBackUrl") as string;
-  const idBackKey = formData.get("idBackKey") as string;
-
   const kyc = await db.kYC.findUnique({ where: { userId: user.id } });
   if (!kyc) return { success: false, error: "KYC not started" };
 
@@ -92,6 +86,7 @@ export async function submitKYCLevel2(formData: FormData, accountType: KYCAccoun
           expiryDate: formData.get("expiryDate") as string,
           occupation: formData.get("occupation") as string,
           senderName: formData.get("senderName") as string,
+          website: formData.get("website") as string,
         }
       : {
           legalName: formData.get("legalName") as string,
@@ -124,46 +119,44 @@ export async function submitKYCLevel2(formData: FormData, accountType: KYCAccoun
     },
   };
 
-  // Delete previous documents before creating new ones
-  await db.kYCDocument.deleteMany({
-    where: { kycId: kyc.id }
-  });
+  // Delete previous documents
+  await db.kYCDocument.deleteMany({ where: { kycId: kyc.id } });
 
+  // Prepare documents dynamically based on account type
+  const documents: { type: string; url: string; key: string }[] =
+    accountType === KYCAccountType.INDIVIDUAL
+      ? [
+          { type: "id_front", url: formData.get("idFrontUrl") as string, key: formData.get("idFrontKey") as string },
+          { type: "id_back", url: formData.get("idBackUrl") as string, key: formData.get("idBackKey") as string },
+        ]
+      : [
+          { type: "registration_doc", url: formData.get("registrationDocUrl") as string, key: formData.get("registrationDocKey") as string },
+          { type: "license_doc", url: formData.get("licenseDocUrl") as string, key: formData.get("licenseDocKey") as string },
+        ];
+
+  // Create documents
   await db.kYC.update({
     where: { userId: user.id },
     data: {
-      accountType, // Update account type if changed
+      accountType,
       levels: updatedLevels,
-      kycDocuments: {
-        createMany: {
-          data: [
-            { type: "id_front", url: idFrontUrl, key: idFrontKey },
-            { type: "id_back", url: idBackUrl, key: idBackKey },
-          ],
-        },
-      },
+      kycDocuments: { createMany: { data: documents } },
     },
   });
 
-  // ✅ Use `level2Data` instead of stale `kyc.levels`
   await db.membership.update({
     where: { userId: user.id },
     data: {
       kycStatus: KYCStatus.IN_PROGRESS,
-      organization:
-        accountType === KYCAccountType.INDIVIDUAL
-          ? ""
-          : `${level2Data.legalName || ""}`,
-      organizationUrl:
-        accountType === KYCAccountType.INDIVIDUAL
-          ? ""
-          : `${level2Data.website || ""}`,
-          SenderName: level2Data.senderName || "",
+      organization: accountType === KYCAccountType.INDIVIDUAL ? "" : `${level2Data.legalName || ""}`,
+      organizationUrl: accountType === KYCAccountType.INDIVIDUAL ? "" : `${level2Data.website || ""}`,
+      SenderName: level2Data.senderName || "",
     },
   });
 
   return { success: true };
 }
+
 
 export async function submitKYCLevel3(
   livePhoto: string,
@@ -286,6 +279,7 @@ export async function getKYCStatus() {
       levels: kyc.levels,
       livePhoto: kyc.livePhoto,
       documents: kyc.kycDocuments,
+      comments:kyc.comments,
     },
   };
 }

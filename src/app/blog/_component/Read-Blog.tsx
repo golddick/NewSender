@@ -188,7 +188,7 @@ export function BlogPostReader({ post, relatedPosts }: BlogPostReaderProps) {
             createdAt: result.comment.member.createdAt,
             updatedAt: result.comment.member.updatedAt,
             fullName: result.comment.member.fullName,
-            author: result.comment.member.author,
+            author: result.comment.member.userName,
             organization: result.comment.member.organization,
           },
           content: result.comment.content,
@@ -356,7 +356,7 @@ const handleReportComment = async (commentId: string) => {
           <div className="relative w-full px-4 py-10">
             <div className="w-full text-center">
               <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-                <Badge className="mb-4 bg-white/20 text-white border-white/30 hover:bg-white/30 capitalize">{category.name}</Badge>
+                <Badge className="mb-4 bg-white/20 text-white border-white/30 hover:bg-white/30 capitalize">{category?.name}</Badge>
                 <h1 className="text-2xl lg:text-4xl font-bold mb-4 leading-tight capitalize">{title}</h1>
                 <p className="text-xl md:text-2xl text-blue-100 mb-2 md:mb-4 leading-relaxed capitalize">{subtitle}</p>
                 <div className="flex flex-wrap items-center justify-center gap-6 text-blue-100">
@@ -393,9 +393,9 @@ const handleReportComment = async (commentId: string) => {
             >
               <div className="flex items-center gap-6">
                 <Avatar className="h-10 w-10 ring-4 ring-gold-100">
-                  <AvatarImage src={post.membership?.imageUrl} alt={author} />
+                  <AvatarImage src={post.member?.imageUrl || '/2logo.jpeg'} alt={author} />
                   <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                    {post.membership?.userName 
+                    {post.member?.userName 
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
@@ -532,7 +532,7 @@ const handleReportComment = async (commentId: string) => {
 
             {/* Newsletter Subscription */}
             <NewsletterSubscription 
-              blogAuthor={ author || post.membership?.userName || "Author Name"}
+              blogAuthor={ author || post.member?.userName || "Author Name"}
               blogTitle={title}
               ownerID={post.authorId}
               variant='inline'

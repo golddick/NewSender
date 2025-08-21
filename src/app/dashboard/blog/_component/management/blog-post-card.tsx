@@ -35,34 +35,100 @@ import {
   Edit,
   ExternalLink,
   MessageCircle,
+  Flag,
+  AlertTriangle,
 } from "lucide-react"
 import { PostStatus, PostVisibility } from "@prisma/client"
 import { BiWorld } from "react-icons/bi"
+import { boolean } from "zod"
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { formatDate } from "@/lib/utils"
+
+// interface BlogPost {
+//   id: string
+//   title: string
+//   excerpt: string
+//   featuredImage: string | null
+//   category: string
+//   tags: string[]
+//   author: string
+//   status: PostStatus
+//   visibility:PostVisibility
+//   createdAt: string
+//   updatedAt: string
+//   publishedAt: string | null
+//   wordCount: number
+//   readTime: number
+//   views: number
+//   likes: number
+//   comments: number
+//   seoScore: number
+//   isFeatured: boolean
+
+//    flaggedAt: string | null,
+//     flagReason?: string | null,
+//     isFlagged: boolean,
+
+
+//   flagMessage?: string
+//   flaggedBy?: string
+//   flaggedDate?: string
+// }
+
+type BlogMember = {
+  userId: string;
+  fullName: string;
+  imageUrl?: string | null;
+
+}
+
+type BlogPostFlag = {
+    id: string;
+    reason: string;
+    comment:string;
+    flaggedBy:string;
+    status: string;
+    createdAt: Date;
+    reviewedAt: Date | null;
+    postId: string;
+    userId: string;
+}
 
 interface BlogPost {
   id: string
   title: string
   excerpt: string
+  content: string
   featuredImage: string | null
   category: string
   tags: string[]
   author: string
+  authorTitle: string
   status: PostStatus
-  visibility:PostVisibility
+  visibility: PostVisibility   
   createdAt: string
   updatedAt: string
   publishedAt: string | null
+  scheduledAt: string | null
   wordCount: number
   readTime: number
   views: number
   likes: number
   comments: number
+  shares: number
   seoScore: number
   isFeatured: boolean
+  slug: string
+  flaggedAt?: Date | string | null;
+  flagReason: string | null
+  isFlagged: boolean
+  flaggedPosts:BlogPostFlag[]
+  members: BlogMember
 }
 
 interface BlogPostCardProps {
-  post: BlogPost
+  post: BlogPost 
   onEdit: () => void 
   onView: () => void
   onDelete: () => void
@@ -84,13 +150,7 @@ export function BlogPostCard({
 }: BlogPostCardProps) {
   const [isHovered, setIsHovered] = useState(false)
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
-  }
+
 
   const getSeoScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600 bg-green-100"
@@ -100,185 +160,6 @@ export function BlogPostCard({
 
   return (
     <motion.div whileHover={{ y: -2 }} onHoverStart={() => setIsHovered(true)} onHoverEnd={() => setIsHovered(false)}>
-      {/* <Card className="h-full overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300">
-        Featured Image
-        <div className="relative h-48 overflow-hidden">
-          {post.featuredImage ? (
-            <Image
-              src={post.featuredImage}
-              alt={post.title}
-              fill
-              className="object-cover transition-transform duration-300 hover:scale-105"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-              <div className="text-gray-400 text-center">
-                <div className="text-4xl mb-2">📝</div>
-                <div className="text-sm">No Image</div>
-              </div>
-            </div>
-          )}
-
-          Status Badge
-          <div className="absolute top-3 left-3">
-            <Badge className={`${getStatusColor(post.status)} border flex items-center gap-1`}>
-              {getStatusIcon(post.status)}
-              {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
-            </Badge>
-          </div>
-
-          Visibility Badge
-          <div className="absolute top-3 right-3">
-            <Badge variant="secondary" className="bg-white/90 text-gray-700">
-              {post.visibility === "PUBLIC" ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-            </Badge>
-          </div>
-
-          Featured Star
-          {post.isFeatured && (
-            <div className="absolute bottom-3 left-3">
-              <Badge className="bg-yellow-500 text-white border-yellow-600">
-                <Star className="h-3 w-3 mr-1 fill-current" />
-                Featured
-              </Badge>
-            </div>
-          )}
-
-          Actions Overlay
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2"
-          >
-            <Button size="sm" variant="secondary" onClick={onView}>
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="secondary" onClick={onEdit}>
-              <Edit3 className="h-4 w-4" />
-            </Button>
-          </motion.div>
-        </div>
-
-        <CardHeader className=" p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <div className=" flex items-center w-full justify-between">
-                <Badge variant="outline" className="mb-2 text-xs">
-                  {post.category}
-                </Badge>
-
-                <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={onView}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Details
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onEdit}>
-                    <Edit3 className="h-4 w-4 mr-2" />
-                    Edit Post
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {post.status !== "ARCHIVED" && (
-                    <DropdownMenuItem onClick={onArchive}>
-                      <Archive className="h-4 w-4 mr-2" />
-                      Archive Post
-                    </DropdownMenuItem>
-                  )}
-                  {post.status !== "PUBLISHED" && (
-                    <DropdownMenuItem onClick={onPublishe}>
-                      <Archive className="h-4 w-4 mr-2" />
-                      Publishe Post
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onClick={onDelete} className="text-red-600">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              </div>
-              <h3 className="font-bold text-lg leading-tight text-black line-clamp-2 ">{post.title}</h3>
-              <p className="text-gray-600 text-sm line-clamp-2 mb-3">{post.excerpt}</p>
-            </div>
-
-           
-          </div>
-        </CardHeader>
-
-        <CardContent className="pt-0 px-4 ">
-          Tags
-          <div className="flex flex-wrap gap-1 ">
-            {post.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs capitalize">
-                #{tag}
-              </Badge>
-            ))}
-            {post.tags.length > 3 && (
-              <Badge variant="secondary" className="text-xs">
-                +{post.tags.length - 3}
-              </Badge>
-            )}
-          </div>
-
-          Metrics
-          <div className="flex flex-col gap-4 mb-4 text-sm  w-full text-gray-600">
-            <div className=" flex items-center justify-between w-full">
-                     <div className="flex items-center gap-1">
-                    <Eye className="h-3 w-3" />
-                    <span>{post.views.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                    <Heart className="h-3 w-3" />
-                    <span>{post.likes}</span>
-                    </div>
-            </div>
-
-            <div className=" flex items-center justify-between w-full">
-                     <div className="flex items-center gap-1">
-                    <MessageSquare className="h-3 w-3" />
-                    <span>{post.comments}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    <span>{post.readTime} min read</span>
-                    </div>
-            </div>
-       
-           
-          </div>
-
-          SEO Score
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-600">SEO Score:</span>
-            <Badge className={`${getSeoScoreColor(post.seoScore)} border-0`}>{post.seoScore}%</Badge>
-          </div>
-
-          Footer
-          <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span>
-                {post.status === "PUBLISHED" && post.publishedAt
-                  ? `Published ${formatDate(post.publishedAt)}`
-                  : `Updated ${formatDate(post.updatedAt)}`}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              <span>{post.wordCount.toLocaleString()} words</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card> */}
        <Card className="group hover:shadow-lg transition-all duration-200 border-gray-200">
       <CardHeader className="p-0">
         <div className="relative w-full h-48">
@@ -299,6 +180,14 @@ export function BlogPostCard({
               </Badge>
             )}
           </div>
+           {post.isFlagged && (
+                    <div className="absolute bottom-2 right-2">
+                      <Badge variant="destructive" className="shadow-lg">
+                        <Flag className="h-3 w-3 mr-1" />
+                        Flagged
+                      </Badge>
+                    </div>
+                  )}
           <div className="absolute top-3 right-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -400,6 +289,89 @@ export function BlogPostCard({
         </div>
       </CardContent>
     </Card>
+
+
+
+
+    {/* <motion.div
+            key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+          >
+
+            <Card
+              className={`cursor-pointer hover:shadow-lg transition-all duration-200 ${
+                post.isFlagged ? "border-red-200 bg-red-50" : ""
+              }`}
+              onClick={() => setSelectedPost(post)}
+            >
+              <CardContent className="p-0">
+                <div className="relative">
+                  <img
+                    src={post.featuredImage || "/placeholder.svg"}
+                    alt={post.title}
+                    className="w-full h-48 object-cover rounded-t-lg"
+                  />
+                  {post.isFlagged && (
+                    <div className="absolute top-2 right-2">
+                      <Badge variant="destructive" className="shadow-lg">
+                        <Flag className="h-3 w-3 mr-1" />
+                        Flagged
+                      </Badge>
+                    </div>
+                  )}
+                  <Badge className={`absolute top-2 left-2 ${getStatusColor(post.status)}`}>
+                    {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                  </Badge>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={post.members.imageUrl || "/2logo.jpeg"} alt={post.author} />
+                      <AvatarFallback>{post.author || 'author'.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{post.author}</p>
+                      <p className="text-xs text-gray-500">{formatDate (post.createdAt)}</p>
+                    </div>
+                  </div>
+
+                  <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2">{post.title}</h3>
+
+                  {post.isFlagged && (
+                    <div className="mb-3 p-2 bg-red-100 border border-red-200 rounded-lg">
+                      <div className="flex items-center gap-1 mb-1">
+                        <AlertTriangle className="h-3 w-3 text-red-600" />
+                        <span className="text-xs font-medium text-red-700">Admin Message</span>
+                      </div>
+                      <p className="text-xs text-red-600 line-clamp-2">{post.flagReason}</p>
+                    </div>
+                  )}
+
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{post.excerpt}</p>
+
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-4 w-4" />
+                        <span>{post.views}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Heart className="h-4 w-4" />
+                        <span>{post.likes}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>{post.comments}</span>
+                      </div>
+                    </div>
+                    <span>{post.readTime}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+    </motion.div> */}
     </motion.div>
   )
 }

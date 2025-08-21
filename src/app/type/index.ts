@@ -1,5 +1,7 @@
 // types/blog.ts
 
+import {  KYCAccountType, KYCStatus, PostStatus, PostVisibility } from "@prisma/client";
+
 export interface BlogCategory {
   id: string;
   name: string;
@@ -21,10 +23,11 @@ export interface BlogMember {
   id: string;
   userId: string;
   fullName: string;
-  userName: string;
-  author: string;
-  organization: string;
-  imageUrl: string;
+  userName: string; 
+  email?: string | null;
+  organization?: string | null;
+  organizationUrl?: string | null;
+  imageUrl?: string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -69,6 +72,18 @@ export interface BlogCommentBase {
   parentId: string | null;
 }
 
+ export type BlogPostFlag = {
+    id: string;
+    reason: string;
+    comment:string;
+    flaggedBy:string;
+    status: string;
+    createdAt: Date;
+    reviewedAt: Date | null;
+    postId: string;
+    userId: string;
+}
+
 export interface BlogCommentWithMember extends BlogCommentBase {
   member: BlogMember;
   replies: BlogCommentWithMember[];
@@ -90,8 +105,8 @@ export interface BlogPost {
   readTime: number;
   views: number;
   likes: number;
-  status: "DRAFT" | "PUBLISHED" | "ARCHIVED" | "SCHEDULED";
-  visibility: "PUBLIC" | "PRIVATE" | "MEMBERS_ONLY";
+  status: PostStatus;
+  visibility: PostVisibility;
   allowComments: boolean;
   isFeatured: boolean;
   isPinned: boolean;
@@ -99,6 +114,12 @@ export interface BlogPost {
   updatedAt: Date | string;
   publishedAt?: Date | string | null;
   scheduledAt?: Date | string | null;
+  flaggedAt?: Date | string | null;
+  flagReason: string | null
+  isFlagged: boolean
+
+  
+  
 
   // SEO fields
   seoTitle?: string | null;
@@ -113,11 +134,12 @@ export interface BlogPost {
   author?: string;
 
   // Relationships
-  category: BlogCategory;
-  categoryId: string;
+  category: BlogCategory | null;
+  categoryId: string | null;
   tags: BlogTag[];
   comments: BlogComment[];
-  membership?: BlogMember | null;
+  flaggedPosts: BlogPostFlag[]
+  member?: BlogMember | null;
   generatedById?: string | null;
 }
 
@@ -167,74 +189,51 @@ export interface BlogPostReaderProps {
 
 
 
-
-interface Notification {
+export interface KycDocument {
   id: string;
-  type: "EMAIL" | "SYSTEM" | "PUSH" | "SMS";
-  category: 
-    | "WELCOME" 
-    | "NEWSLETTER" 
-    | "BLOG_APPROVAL"
-    | "KYC_APPROVAL"
-    | "PAYMENT_SUCCESS"
-    | "CAMPAIGN_ALERT"
-    | "SECURITY_ALERT"
-    | "INTEGRATION_SUCCESS"
-    | "SUBSCRIPTION_REMINDER"
-    | "ACHIEVEMENT";
-  title: string;
-  content: string;
-  textContent?: string;
-  status: "SENT" | "DELIVERED" | "SCHEDULED" | "DRAFT" | "FAILED" | "PENDING";
-  priority: "HIGH" | "MEDIUM" | "LOW";
-  userId: string;
-  recipient: number;
-  
-  // Email specific fields
-  emailsSent?: number;
-  openCount?: number;
-  clickCount?: number;
-  recipients?: number;
-  bounceCount?: number;
-  lastOpened?: string;
-  lastClicked?: string;
-  
-  // System notification metadata
-  metadata?: Record<string, any>;
-  
-  // Integration info
-  integration?: {
-    name: string;
-    logo: string;
-  };
-  
-  // Timestamps
-  sentAt: string;
-  createdAt: string;
-  updatedAt: string;
-  
-  // Read status
-  read: boolean;
+  kycId: string;
+  type: string;
+  url: string;
+  key: string;
+  uploadedAt: Date;
 }
 
-interface NotificationSettings {
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  smsNotifications: boolean;
-  weeklyDigest: boolean;
-  instantAlerts: boolean;
-  marketingEmails: boolean;
-  securityAlerts: boolean;
-  productUpdates: boolean;
-  newsletterReminders: boolean;
-  campaignReports: boolean;
-  lowEngagementAlerts: boolean;
-  highEngagementAlerts: boolean;
-  bounceAlerts: boolean;
-  unsubscribeAlerts: boolean;
-  blogApprovalNotifications: boolean;
-  kycNotifications: boolean;
-  paymentNotifications: boolean;
-  integrationNotifications: boolean;
-  achievementNotifications: boolean;
+export interface KycLevels {
+  level1: {
+    status: KYCStatus
+    completedAt?: Date | null;
+  };
+  level2: {
+    status: KYCStatus;
+    completedAt?: Date | null;
+  };
+  level3: {
+    status: KYCStatus;
+    completedAt?: Date | null;
+  };
 }
+
+export interface KycUser {
+  userId: string;
+  fullName: string;
+  email: string;
+}
+
+export interface KycApplication {
+  id: string;
+  userId: string;
+  accountType:KYCAccountType;
+  status: KYCStatus;
+  comments: string | null;
+  livePhoto: string | null;
+  rejectedResponse: string | null;
+  reviewedBy: string | null;
+  reviewedTime: Date | null;
+  documents: any[];
+  kycDocuments: KycDocument[];
+  levels: KycLevels;
+  user: KycUser;
+  createdAt: Date;
+  updatedAt: Date;
+}
+

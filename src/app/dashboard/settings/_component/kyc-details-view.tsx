@@ -19,6 +19,7 @@ import {
   Eye,
   Edit,
   RefreshCw,
+  CircleAlert,
 } from "lucide-react";
 import {
   Dialog,
@@ -31,6 +32,7 @@ import {
 import { KYCAccountType, KYCStatus } from "@prisma/client";
 import Image from "next/image";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { formatDate } from "@/lib/utils";
 
 interface KYCDetailsViewProps {
   kycData: {
@@ -40,6 +42,7 @@ interface KYCDetailsViewProps {
     reviewedAt?: string;
     reviewedBy?: string;
     rejectionReason?: string;
+    comments?: string;
     individualData?: {
       idType: string;
       idNumber: string;
@@ -86,14 +89,15 @@ interface KYCDetailsViewProps {
   };
   onEdit: () => void;
   onResubmit: () => void;
+  isUpLoading: boolean;
 }
 
-export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewProps) {
+export function KYCDetailsView({ kycData, onEdit, onResubmit, isUpLoading }: KYCDetailsViewProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const isMobile = useMediaQuery("(max-width: 640px)");
   const isTablet = useMediaQuery("(min-width: 641px) and (max-width: 1024px)");
 
-  console.log(kycData.individualData, 'kyc data view')
+  console.log(kycData, 'kyc data c')
 
   const getStatusBadge = (status: KYCStatus) => {
     switch (status) {
@@ -150,15 +154,15 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // const formatDate = (dateString: string) => {
+  //   return new Date(dateString).toLocaleDateString("en-US", {
+  //     year: "numeric",
+  //     month: "long",
+  //     day: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //   });
+  // };
 
   const maskSensitiveData = (data: string, visibleChars = 4) => {
     if (!data || data.length <= visibleChars) return data;
@@ -190,8 +194,19 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
                   size="sm"
                   className={`${isMobile ? "w-full" : ""} bg-red-500 hover:bg-red-600 text-white`}
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Resubmit
+                 {
+                  isUpLoading ? (
+                  <div className="flex items-center gap-2">
+                         <RefreshCw className="h-4 w-4 mr-2" />
+                    Resubmitting...
+                  </div>
+                  ):(
+                     <div className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Resubmit
+                     </div>
+                  )
+                 }
                 </Button>
               )}
               {(kycData.status === "PENDING" || kycData.status === "COMPLETED") && (
@@ -220,21 +235,27 @@ export function KYCDetailsView({ kycData, onEdit, onResubmit }: KYCDetailsViewPr
                 <p className="text-sm">{formatDate(kycData.reviewedAt)}</p>
               </div>
             )}
-            {kycData.reviewedBy && (
+            {kycData.reviewedBy ? (
               <div className="space-y-1">
                 <p className="text-sm font-medium text-gray-600">Reviewed By</p>
                 <p className="text-sm">{kycData.reviewedBy}</p>
               </div>
+            ): (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-600">Reviewed By</p>
+                <p className="text-sm">Not reviewed yet</p>
+                </div>
+              
             )}
           </div>
 
-          {kycData.status === "REJECTED" && kycData.rejectionReason && (
+          {kycData.status === "REJECTED" && kycData.comments && (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-start gap-2">
                 <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <h4 className="font-medium text-red-900">Rejection Reason</h4>
-                  <p className="text-sm text-red-800 mt-1">{kycData.rejectionReason}</p>
+                  <p className="text-sm text-red-800 mt-1 capitalize">{kycData.comments}</p>
                 </div>
               </div>
             </div>

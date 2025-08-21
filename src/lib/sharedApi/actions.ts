@@ -133,6 +133,7 @@
 "use server"
 
 import { db } from "@/shared/libs/database"
+import { FlagStatus } from "@prisma/client";
 
 export async function getAllCategories() {
   return await db.blogCategory.findMany({ orderBy: { name: "asc" } })
@@ -177,9 +178,38 @@ export async function getFilteredPosts({
       })
     },
     include: {
-      category: true,
+      category: {
+        select:{
+          id: true,
+          name: true,
+          slug: true,
+          
+        }
+      },
       tags: true,
-      membership: true,
+      flaggedPosts: {
+        where: { status: FlagStatus.FLAGGED },
+        select:{
+          id: true,
+          comment:true,
+          status:true,
+          reason: true,
+          reviewedAt: true,
+          flaggedBy: true,
+          createdAt: true,
+          postId: true,
+          userId: true,
+        },
+        
+      },
+      membership: {
+        select: {
+          fullName: true,
+          userId: true,
+          email: true,
+          imageUrl: true,
+        }
+      },
       _count: {
         select: {
           comments: true
@@ -192,122 +222,77 @@ export async function getFilteredPosts({
   });
 
   // Rest of your transformation code remains the same...
+
   return posts.map(post => ({
-    id: post.id,
-    title: post.title,
-    subtitle: post.subtitle || "",
-    excerpt: post.excerpt || "",
-    content: post.content,
-    featuredImage: post.featuredImage,
-    featuredVideo: post.featuredVideo || null,
-    galleryImages: post.galleryImages || [],
-    category: post.category?.name || "Uncategorized",
-    tags: post.tags.map(tag => tag.name),
-    author: post.author|| post.membership.fullName || "Unknown Author",
-    authorTitle: post.authorTitle || "",
-    status: post.status as "DRAFT" | "PUBLISHED" | "ARCHIVED" | "SCHEDULED",
-    visibility: post.visibility as "PUBLIC" | "PRIVATE" | "MEMBERS_ONLY",
-    createdAt: post.createdAt.toISOString(),
-    updatedAt: post.updatedAt.toISOString(),
-    publishedAt: post.publishedAt?.toISOString() || null,
-    scheduledAt: post.scheduledAt?.toISOString() || null,
-    wordCount: post.wordCount || 0,
-    readTime: post.readTime || 0,
-    views: post.views || 0,
-    likes: post.likes || 0,
-    comments: post._count?.comments || 0,
-    shares: post.shares || 0,
-    seoScore: post.seoScore || 0,
-    isFeatured: post.isFeatured || false,
-    slug: post.slug
-  }));
+  id: post.id,
+  title: post.title,
+  subtitle: post.subtitle || "",
+  excerpt: post.excerpt || "",
+  content: post.content,
+  featuredImage: post.featuredImage,
+  featuredVideo: post.featuredVideo || null,
+  galleryImages: post.galleryImages || [],
+
+  // Relations
+  category: post.category?.name || "Uncategorized",
+  tags: post.tags.map(tag => tag.name),
+  author: post.author || post.membership?.fullName || "Unknown Author",
+  authorTitle: post.authorTitle || "",
+  authorImg: post.membership?.imageUrl || null,
+
+  // Status/visibility
+  status: post.status as "DRAFT" | "PUBLISHED" | "ARCHIVED" | "SCHEDULED",
+  visibility: post.visibility as "PUBLIC" | "PRIVATE" | "MEMBERS_ONLY",
+
+  // Dates
+  createdAt: post.createdAt.toISOString(),
+  updatedAt: post.updatedAt.toISOString(),
+  publishedAt: post.publishedAt?.toISOString() || null,
+  scheduledAt: post.scheduledAt?.toISOString() || null,
+
+  // Stats
+  wordCount: post.wordCount || 0,
+  readTime: post.readTime || 0,
+  characterCount: post.characterCount || 0,   // ✅ Added
+  views: post.views || 0,
+  likes: post.likes || 0,
+  comments: post._count?.comments || 0,
+  shares: post.shares || 0,
+  seoScore: post.seoScore || 0,
+
+  // Flags / Features
+  isFeatured: post.isFeatured || false,
+  allowComments: post.allowComments ?? true,   // ✅ Added
+  format: post.format || "MARKDOWN",           // ✅ Added
+  slug: post.slug,
+  flaggedAt: post.flaggedAt || null,
+  flagReason: post.flagReason || null,
+  isFlagged: post.isFlagged || false,
+
+  // Flags relation
+  flaggedPosts: post.flaggedPosts.map(flaggedPost => ({
+    id: flaggedPost.id,
+    reason: flaggedPost.reason,
+    comment: flaggedPost.comment,
+    createdAt: flaggedPost.createdAt,
+    reviewedAt: flaggedPost.reviewedAt,
+    flaggedBy: flaggedPost.flaggedBy,
+    status: flaggedPost.status as FlagStatus,
+    postId: flaggedPost.postId,
+    userId: flaggedPost.userId,
+
+  })),
+  isPinned:post.isPinned || false,
+  seoKeywords: post.seoKeywords || "",   
+  seoTitle: post.seoTitle || "",
+  seoDescription: post.seoDescription || "",
+  authorId: post.authorId,
+  authorBio: post.authorBio || "",
+  categoryId: post.categoryId,
+  members:post.membership
+}));
+
+
+
+
 }
-
-// export async function getFilteredPosts({
-//   authorId,
-//   category,
-//   search,
-//   sort,
-//   order
-// }: {
-//   authorId: string;
-//   category?: string;
-//   search?: string;
-//   sort?: string;
-//   order?: "asc" | "desc";
-// }) {
-//   const posts = await db.blogPost.findMany({
-//     where: {
-//       authorId,
-//       ...(category && { category: { slug: category } }),
-//       ...(search && {
-//         OR: [
-//           { title: { contains: search, mode: "insensitive" } },
-//           { content: { contains: search, mode: "insensitive" } },
-//           { tags: { some: { name: { contains: search, mode: "insensitive" } } } }
-//         ]
-//       })
-//     },
-//     include: {
-//       category: true,
-//       tags: true,
-//       membership: true,
-//       _count: {
-//         select: {
-//           comments: true
-//         }
-//       }
-//     },
-//     orderBy: {
-//       [sort || "updatedAt"]: order || "desc"
-//     }
-//   });
-
-//   // Transform to match exact BlogPost type
-//   return posts.map(post => ({
-//     id: post.id,
-//     title: post.title,
-//     excerpt: post.excerpt || "", // Ensure excerpt is never null
-//     content: post.content,
-//     featuredImage: post.featuredImage,
-//     category: post.category?.name || "Uncategorized",
-//     tags: post.tags.map(tag => tag.name),
-//     author: post.membership?.fullName || "Unknown Author",
-//     authorTitle: post.membership?.userName || "",
-//     status: mapStatus(post.status), // Convert status to match interface
-//     visibility: mapVisibility(post.visibility), // Convert visibility
-//     createdAt: post.createdAt.toISOString(),
-//     updatedAt: post.updatedAt.toISOString(),
-//     publishedAt: post.publishedAt?.toISOString() || null,
-//     scheduledAt: post.scheduledAt?.toISOString() || null,
-//     wordCount: post.wordCount || 0,
-//     readTime: post.readTime || 0,
-//     views: post.views || 0,
-//     likes: post.likes || 0,
-//     comments: post._count?.comments || 0,
-//     shares:  0,
-//     seoScore: calculateSeoScore(post), // You'll need to implement this
-//     isFeatured: post.isFeatured || false,
-//     slug: post.slug
-//   }));
-// }
-
-// Helper functions to map status and visibility
-// function mapStatus(status: string): "draft" | "published" | "scheduled" | "archived" {
-//   switch (status) {
-//     case "DRAFT": return "draft";
-//     case "PUBLISHED": return "published";
-//     case "SCHEDULED": return "scheduled";
-//     case "ARCHIVED": return "archived";
-//     default: return "draft";
-//   }
-// }
-
-// function mapVisibility(visibility: string): "public" | "private" | "unlisted" {
-//   switch (visibility) {
-//     case "PUBLIC": return "public";
-//     case "PRIVATE": return "private";
-//     case "MEMBERS_ONLY": return "unlisted";
-//     default: return "public";
-//   }
-// }

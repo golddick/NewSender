@@ -1,3 +1,4 @@
+import { KycResponse } from "../type";
 
 type NavItems = {
   title: String;
@@ -58,26 +59,7 @@ export type SubscriberWithCampaign = {
 };
 
 
-// First, define a type for the KYC levels
-type KYCLevel = {
-  status: "not_started" | "in_progress" | "completed" | "pending";
-  completedAt?: Date;
-  data?: Record<string, unknown>;
-};
 
-// Then define the full response type
-type KYCStatusResponse = {
-  id: string;
-  accountType: "INDIVIDUAL" | "ORGANIZATION";
-  status: string;
-  levels: {
-    level1: string; // JSON string that will be parsed to KYCLevel
-    level2: string;
-    level3: string;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-} | null;
 
 type PlanType = {
   id: string;
@@ -133,3 +115,22 @@ export interface Notification extends CreateNotificationInput {
   updatedAt: Date;
   read: boolean;
 }
+
+
+type TopNewsletter = {
+  name: string;
+  owner: string;
+  subscribers: number;
+  openRate: string;
+  email: number
+};
+
+// Then your NewsletterStats type
+type NewsletterStats = {
+  totalOwners: number;
+  activeOwners: number;
+  premiumOwners: number;
+  totalSubscribers: number;
+  avgSubscribersPerNewsletter: number;
+  topPerformingNewsletters: TopNewsletter[];
+};

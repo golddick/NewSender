@@ -393,7 +393,7 @@ const ViewMailPage = ({ subjectTitle }: { subjectTitle: string }) => {
               <select
                 value={selectedCampaign}
                 onChange={(e) => setSelectedCampaign(e.target.value)}
-                className={`w-full rounded-md border border-gray-300 p-2 ${isMobile ? 'text-xs w-[90%]' : 'text-sm'}`}
+                className={`w-full rounded-md border border-gray-300 p-2 ${isMobile ? 'text-xs w-[80%] mx-auto' : 'text-sm'}`}
                 disabled={campaignsLoading}
               >
                 <option value="" className=" p-2">Select Campaign</option>

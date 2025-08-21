@@ -1323,75 +1323,173 @@ const EmailEditorPage = ({ subjectTitle }: { subjectTitle: string }) => {
   };
 
   const sendEmailToSubscribers = async () => {
-    setIsSending(true);
-    emailEditorRef.current?.editor?.exportHtml(async ({ design, html }) => {
-      setJsonData(design);
+  setIsSending(true);
 
-      if (allSubscribers.length === 0) {
-        toast.error("No subscribers found");
-        setIsSending(false);
-        return;
-      }
+  emailEditorRef.current?.editor?.exportHtml(async ({ design, html }) => {
+    setJsonData(design);
 
-      if(emailType === 'DRAFT'){
+    if (allSubscribers.length === 0) {
+      toast.error("No subscribers found");
+      setIsSending(false);
+      return;
+    }
+
+          if(emailType === 'DRAFT'){
         toast.error("Cannot send email as it's a draft");
         setIsSending(false);
         return;
       }
 
-      try {
-        let result;
+    try {
+      let result;
 
-        if (emailType === "INSTANT") {
-          result = await sendInstantEmail({
-            userEmails: allSubscribers.map((s) => s.email),
-            subject: subject,
-            htmlContent: html,
-            content: design,
-            emailTemplateId: emailId,
-            newsLetterOwnerId: user?.id!,
-            campaignId: selectedCampaign,
-            adminEmail: adminEmail || "",
-          });
-        } else if (emailType === "SCHEDULE" && scheduleDate) {
-          const res = await saveEmailToDatabase({
-            title: subject,
-            content: JSON.stringify(design),
-            emailId: emailId,
-            textContent: html,
-            emailSubject: subject,
-            template: campaigns.find((c) => c.id === selectedCampaign)?.type || "",
-            newsLetterOwnerId: user?.id!,
-            campaignId: selectedCampaign,
-            emailType: emailType,
-            scheduleDate: scheduleDate,
-            scheduleTime: scheduleTime,
-            adminEmail: adminEmail || "",
-          });
+      // 🚀 Case 1: Sending instantly
+      if (emailType === "INSTANT") {
+        // Always save/update the email in DB first (in case it was draft before)
+        const saveRes = await saveEmailToDatabase({
+          title: subject,
+          content: JSON.stringify(design),
+          emailId: emailId,
+          textContent: html,
+          emailSubject: subject,
+          template: campaigns.find((c) => c.id === selectedCampaign)?.type || "",
+          newsLetterOwnerId: user?.id!,
+          campaignId: selectedCampaign,
+          emailType: "INSTANT", // 👈 force update to INSTANT
+          adminEmail: adminEmail || "",
+        });
 
-          if (!res.success) {
-            throw new Error(res.error || "Failed to schedule email");
-          }
+        if (!saveRes.success) {
+          throw new Error(saveRes.error || "Failed to save instant email");
         }
 
-        if (!result?.success && emailType === "INSTANT") {
+        // Now actually send the email
+        result = await sendInstantEmail({
+          userEmails: allSubscribers.map((s) => s.email),
+          subject,
+          htmlContent: html,
+          content: design,
+          emailTemplateId: emailId,
+          newsLetterOwnerId: user?.id!,
+          campaignId: selectedCampaign,
+          adminEmail: adminEmail || "",
+        });
+
+        if (!result?.success) {
           throw new Error(result?.error || "Email failed to send");
         }
-
-        toast.success(
-          emailType === "SCHEDULE"
-            ? `Email scheduled for ${scheduleDate?.toLocaleString()}`
-            : `Email sent to ${allSubscribers.length} subscribers`
-        );
-        router.push("/dashboard/auto-email");
-      } catch (err: any) {
-        console.error("Send email error:", err);
-        toast.error(err.message || "Failed to send email");
-      } finally {
-        setIsSending(false);
       }
-    });
-  };
+
+      // 📅 Case 2: Scheduling email
+      else if (emailType === "SCHEDULE" && scheduleDate) {
+        const res = await saveEmailToDatabase({
+          title: subject,
+          content: JSON.stringify(design),
+          emailId: emailId,
+          textContent: html,
+          emailSubject: subject,
+          template: campaigns.find((c) => c.id === selectedCampaign)?.type || "",
+          newsLetterOwnerId: user?.id!,
+          campaignId: selectedCampaign,
+          emailType: "SCHEDULE",
+          scheduleDate,
+          scheduleTime,
+          adminEmail: adminEmail || "",
+        });
+
+        if (!res.success) {
+          throw new Error(res.error || "Failed to schedule email");
+        }
+      }
+
+      // 🎉 Success toast
+      toast.success(
+        emailType === "SCHEDULE"
+          ? `Email scheduled for ${scheduleDate?.toLocaleString()}`
+          : `Email sent to ${allSubscribers.length} subscribers`
+      );
+
+      router.push("/dashboard/auto-email");
+    } catch (err: any) {
+      console.error("Send email error:", err);
+      toast.error(err.message || "Failed to send email");
+    } finally {
+      setIsSending(false);
+    }
+  });
+};
+
+
+  // const sendEmailToSubscribers = async () => {
+  //   setIsSending(true);
+  //   emailEditorRef.current?.editor?.exportHtml(async ({ design, html }) => {
+  //     setJsonData(design);
+
+  //     if (allSubscribers.length === 0) {
+  //       toast.error("No subscribers found");
+  //       setIsSending(false);
+  //       return;
+  //     }
+
+      // if(emailType === 'DRAFT'){
+      //   toast.error("Cannot send email as it's a draft");
+      //   setIsSending(false);
+      //   return;
+      // }
+
+  //     try {
+  //       let result;
+
+  //       if (emailType === "INSTANT") {
+  //         result = await sendInstantEmail({
+  //           userEmails: allSubscribers.map((s) => s.email),
+  //           subject: subject,
+  //           htmlContent: html,
+  //           content: design,
+  //           emailTemplateId: emailId,
+  //           newsLetterOwnerId: user?.id!,
+  //           campaignId: selectedCampaign,
+  //           adminEmail: adminEmail || "",
+  //         });
+  //       } else if (emailType === "SCHEDULE" && scheduleDate) {
+  //         const res = await saveEmailToDatabase({
+  //           title: subject,
+  //           content: JSON.stringify(design),
+  //           emailId: emailId,
+  //           textContent: html,
+  //           emailSubject: subject,
+  //           template: campaigns.find((c) => c.id === selectedCampaign)?.type || "",
+  //           newsLetterOwnerId: user?.id!,
+  //           campaignId: selectedCampaign,
+  //           emailType: emailType,
+  //           scheduleDate: scheduleDate,
+  //           scheduleTime: scheduleTime,
+  //           adminEmail: adminEmail || "",
+  //         });
+
+  //         if (!res.success) {
+  //           throw new Error(res.error || "Failed to schedule email");
+  //         }
+  //       }
+
+  //       if (!result?.success && emailType === "INSTANT") {
+  //         throw new Error(result?.error || "Email failed to send");
+  //       }
+
+  //       toast.success(
+  //         emailType === "SCHEDULE"
+  //           ? `Email scheduled for ${scheduleDate?.toLocaleString()}`
+  //           : `Email sent to ${allSubscribers.length} subscribers`
+  //       );
+  //       router.push("/dashboard/auto-email");
+  //     } catch (err: any) {
+  //       console.error("Send email error:", err);
+  //       toast.error(err.message || "Failed to send email");
+  //     } finally {
+  //       setIsSending(false);
+  //     }
+  //   });
+  // };
 
   if (loading) {
     return <Loader />;
@@ -1500,7 +1598,7 @@ const EmailEditorPage = ({ subjectTitle }: { subjectTitle: string }) => {
               <select
                 value={selectedCampaign}
                 onChange={(e) => setSelectedCampaign(e.target.value)}
-                className={`w-full rounded-md border border-gray-300 p-2 ${isMobile ? 'text-xs w-[90%]'  : 'text-sm'}`}
+                className={`w-full rounded-md border border-gray-300 p-2 ${isMobile ? 'text-xs w-[80%] mx-auto'   : 'text-sm'}`}
                 disabled={campaignsLoading}
               >
                 <option value="" className=" p-2">Select Campaign</option>

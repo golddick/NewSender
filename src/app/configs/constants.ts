@@ -136,7 +136,7 @@ export const sideBarBottomItems: DashboardSideBarTypes[] = [
 export const AdminsideBarItems: DashboardSideBarTypes[] = [
   {
     title: "Dashboard",
-    url: "/xontrol",
+    url: "/xontrol/dashboard",
     icon: ICONS.dashboard,
   },
   {
@@ -151,7 +151,7 @@ export const AdminsideBarItems: DashboardSideBarTypes[] = [
   },
   {
     title: "Blog",
-    url: "/xontrol/Blog",
+    url: "/xontrol/blog",
     icon: ICONS.blog,
   },
 ];

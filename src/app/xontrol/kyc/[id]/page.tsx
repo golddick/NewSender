@@ -1,10 +1,10 @@
 import React from 'react'
-import { KycDashboard } from './_component/kyc'
+import KycAdminReview from '../_component'
 
 const page = () => {
   return (
     <div>
-      <KycDashboard/>
+      <KycAdminReview />
     </div>
   )
 }

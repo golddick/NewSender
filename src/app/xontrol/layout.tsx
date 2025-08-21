@@ -11,12 +11,12 @@ export default function AuthLayout({
 }) {
   return (
     <>
-        <div className=" flex min-h-screen w-full  gap-3 bg-[#f3dcdc1a]">
+        <div className=" flex min-h-screen w-full ">
         <AdminSideBar />
-        <div className="    p-2 w-full  lg:ml-[230px]">
+        <div className=" w-full  ">
         <AdminTopBar/>
-        <div className="flex flex-col ">
-        {children}
+        <div className="flex flex-col mt-[50px]  lg:ml-[230px] p-4">
+        {children} 
         </div>
         </div>
       </div>
