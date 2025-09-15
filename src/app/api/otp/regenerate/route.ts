@@ -15,29 +15,29 @@ function generateOtp(length = 6): string {
   return Math.floor(100000 + Math.random() * 900000).toString().slice(0, length);
 }
 
-export async function OPTIONS() {
-  return corsOptions();
+export async function OPTIONS(req: NextRequest) {
+  return corsOptions(req);
 }
 
 export async function POST(req: NextRequest) {
   try {
     const apiKey = req.headers.get("xypher-api-key");
-    if (!apiKey) return withCors({ error: "Missing API key", code: "NO_API_KEY" }, 401);
+    if (!apiKey) return withCors({ error: "Missing API key", code: "NO_API_KEY" },req, 401);
 
     const { userId, error } = await verifyApiKey(apiKey);
-    if (error || !userId) return withCors({ error: error || "Unauthorized", code: "INVALID_API_KEY" }, 403);
+    if (error || !userId) return withCors({ error: error || "Unauthorized", code: "INVALID_API_KEY" },req, 403);
 
     
     const safeUserId = userId ?? undefined;
 
     const membership = await db.membership.findUnique({ where: { userId: safeUserId } });
     if (!membership || membership.subscriptionStatus !== "active") {
-      return withCors({ error: "User does not have an active subscription", code: "SUBSCRIPTION_INVALID" }, 403);
+      return withCors({ error: "User does not have an active subscription", code: "SUBSCRIPTION_INVALID" },req, 403);
     }
 
     const body = await req.json();
     const parsed = schema.safeParse(body);
-    if (!parsed.success) return withCors({ error: parsed.error.format(), code: "VALIDATION_ERROR" }, 400);
+    if (!parsed.success) return withCors({ error: parsed.error.format(), code: "VALIDATION_ERROR" },req, 400);
 
     const { email, appName } = parsed.data;
     const otp = generateOtp();
@@ -64,11 +64,11 @@ export async function POST(req: NextRequest) {
     `;
 
     const result = await sendEmail(email, "Your Verification Code", html, appName);
-    if (!result.success) return withCors({ error: "Failed to send email", code: "EMAIL_FAILED" }, 500);
+    if (!result.success) return withCors({ error: "Failed to send email", code: "EMAIL_FAILED" },req, 500);
 
-    return withCors({ success: true, email, expiresAt, message: "OTP regenerated" }, 201);
+    return withCors({ success: true, email, expiresAt, message: "OTP regenerated" },req, 201);
   } catch (err: any) {
     console.error("[OTP_REGENERATE_ERROR]", err);
-    return withCors({ error: "Internal server error", code: "SERVER_ERROR" }, 500);
+    return withCors({ error: "Internal server error", code: "SERVER_ERROR" }, req, 500);
   }
 }

@@ -4,23 +4,23 @@ import { db } from "@/shared/libs/database";
 import { verifyApiKey } from "@/lib/sharedApi/auth";
 import { withCors, corsOptions } from "@/lib/cors";
 
-export async function OPTIONS() {
-  return corsOptions();
+export async function OPTIONS(req: NextRequest) {
+  return corsOptions(req);
 }
 
 export async function GET(req: NextRequest) {
   try {
     const apiKey = req.headers.get("xypher-api-key");
-    if (!apiKey) return withCors({ error: "Missing API key" }, 401);
+    if (!apiKey) return withCors({ error: "Missing API key" }, req, 401);
 
     const { userId, error } = await verifyApiKey(apiKey);
-    if (error || !userId) return withCors({ error: error || "Unauthorized", code: "INVALID_API_KEY" }, 403);
+    if (error || !userId) return withCors({ error: error || "Unauthorized", code: "INVALID_API_KEY" }, req, 403);
 
     const safeUserId = userId ?? undefined;
 
     const membership = await db.membership.findUnique({ where: { userId: safeUserId } });
     if (!membership || membership.subscriptionStatus !== "active") {
-      return withCors({ error: "User does not have an active subscription", code: "SUBSCRIPTION_INVALID" }, 403);
+      return withCors({ error: "User does not have an active subscription", code: "SUBSCRIPTION_INVALID" },req, 403);
     }
 
     const { searchParams } = new URL(req.url);
@@ -56,9 +56,9 @@ export async function GET(req: NextRequest) {
       success: true,
       data: subscribers,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-    });
+    }, req, 200);
   } catch (err: any) {
     console.error("GET /subscribers error:", err);
-    return withCors({ error: "Internal Server Error", code: "SERVER_ERROR" }, 500);
+    return withCors({ error: "Internal Server Error", code: "SERVER_ERROR" },req, 500);
   }
 }
