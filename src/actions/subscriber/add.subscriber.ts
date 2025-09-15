@@ -108,7 +108,7 @@ export const addSubscriber = async ({
 
     // 11. Create a default template if none exists
     if (!userTemplate) {
-      const defaultTemplate = getWelcomeTemplate({
+      const defaultTemplate = getWelcomeTemplate({ 
         name: '[Name]',
         email: '[Email]',
         platformName: '[Platform]',

@@ -83,6 +83,9 @@ enum NewsletterOwnerNotificationCategory {
   WELCOME
   NEWSLETTER
   NEW_BLOG
+  KYC_APPROVAL
+  FLAGGED
+  FLAGGED_RESOLVED
 }
 enum SystemNotificationCategory {
   WELCOME
@@ -90,6 +93,8 @@ enum SystemNotificationCategory {
   NEW_BLOG
   BLOG_APPROVAL
   BLOG_POST_ENAGEMENT
+  FLAGGED
+  FLAGGED_RESOLVED
   NEW_KYC
   KYC_APPROVAL
   PAYMENT_SUCCESS
@@ -202,7 +207,7 @@ model Membership {
   invoices                  Invoice[]
   postViews                BlogPostView[]
 
-  
+  apiKeys                 ApiKey[]
   flagedPosts               BlogPostFlag[]
  
 
@@ -221,6 +226,24 @@ model Invoice {
   externalId  String?
 
   user        Membership @relation(fields: [userId], references: [userId])
+}
+
+model ThirdPartyOTP {
+  email     String @id
+  code      String
+  expiresAt DateTime
+  createdBy String   // which API consumer triggered
+  createdAt DateTime @default(now())
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  keyHash   String    @unique // hashed xapi key
+  jwt       String   // signed JWT with claims
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      Membership     @relation(fields: [userId], references: [userId])
 }
 
 

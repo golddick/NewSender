@@ -85,6 +85,9 @@ export async function recordClick(emailId: string, url: string, recipientEmail: 
     if (!email) {
       throw new Error("Email not found");
     }
+    if (!url) {
+      throw new Error("url not found");
+    }
 
     // 1. Update the email with new click info
     await tx.email.update({

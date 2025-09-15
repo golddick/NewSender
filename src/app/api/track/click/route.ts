@@ -6,8 +6,9 @@ export async function GET(req: NextRequest) {
   const emailId = searchParams.get('emailId');
   const rawUrl = searchParams.get('url');
   const email = searchParams.get('email');
+  const trackingId = searchParams.get("tid"); 
 
-  if (!emailId || !rawUrl || !email) {
+  if (!emailId || !rawUrl || !email || !trackingId) { 
     return new NextResponse("Missing parameters", { status: 400 });
   }
 

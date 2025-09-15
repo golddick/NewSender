@@ -311,7 +311,7 @@ interface SendEmailParams {
   newsLetterOwnerId: string;
   contentJson: string;
   adminEmail: string;
-  trackOpens?: boolean;
+  trackOpens?: boolean; 
   trackClicks?: boolean;
   fromApplication: string;
 }

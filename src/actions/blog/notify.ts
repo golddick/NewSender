@@ -146,7 +146,7 @@ export async function notifySubscribersAboutNewPost({
 
     // 6. Update status
     await db.newsletterOwnerNotification.update({
-      where: { id: notificationTemplate.id },
+      where: { id: notificationTemplate.id }, 
       data: {
         status: result.success ? NotificationStatus.SENT : NotificationStatus.FAILED,
         sentAt: new Date(),

@@ -190,7 +190,7 @@ export const NotificationEmailrecordOpen = async (
 /**
  * Record click event for a newsletter notification email
  */
-export const NotificationEmailrecordClick = async (
+export const NotificationEmailrecordClick = async ( 
   notificationId: string,
   url: string,
   recipientEmail: string,

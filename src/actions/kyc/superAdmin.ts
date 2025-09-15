@@ -3,6 +3,7 @@
 import { computeCompletion } from "@/lib/kyc";
 import { db } from "@/shared/libs/database";
 import {  currentUser } from "@clerk/nextjs/server"; // or your auth lib
+import { notifyUserAboutKycStatus } from "./notify";
 
 // ✅ Utility: restrict to super admin
 async function requireSuperAdmin(userId: string) {
@@ -108,6 +109,51 @@ export async function updateKycStatus(
   const userId = user.id;
 
   try {
+
+     // Get KYC application with user details
+    const kycApplication = await db.kYC.findUnique({
+      where: { id: kycId },
+      select: {
+        id: true,
+        userId: true,
+        status: true,
+        reviewedBy: true,
+        reviewedTime: true,
+        rejectedResponse: true,
+        user: {
+          select: {
+            email: true,
+            fullName: true,
+            imageUrl: true,
+          }
+          
+        }
+        
+
+      }
+      // include: {
+        
+      //   user: {
+      //     select: {
+      //       id: true,
+      //       email: true,
+      //       userId: true,
+      //       fullName: true,
+      //       imageUrl: true,
+      //     }
+      //   }
+      // }
+      
+       
+
+    })
+
+    if (!kycApplication) {
+      return { success: false, error: "KYC application not found" }
+    }
+
+
+
     const updated = await db.kYC.update({
       where: { id: kycId },
       data: {
@@ -118,6 +164,21 @@ export async function updateKycStatus(
       },
     });
 
+        // Send notification for both APPROVED and REJECTED statuses
+    const notificationResult = await notifyUserAboutKycStatus({
+      kycApplication: {
+        ...updated,
+        user: kycApplication.user
+      },
+      adminEmail: user.emailAddresses[0]?.emailAddress || '',
+      fromApplication: "TheNews Team",
+    })
+
+    if (!notificationResult.success) {
+      console.warn('KYC notification failed:', notificationResult.error)
+      // Continue even if notification fails
+    }
+ 
     return { success: true, data: updated };
   } catch (error) {
     console.error(error);

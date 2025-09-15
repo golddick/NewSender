@@ -88,6 +88,10 @@ export function calculateKycCompletion(kyc: KycApplication): number {
 }
 
 
+export function maskKey(key: string) {
+  return key.slice(0, 4) + "..." + key.slice(-4);
+}
+
 
 
 
