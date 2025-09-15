@@ -18,7 +18,7 @@ function generateOtp(length = 6): string {
 export async function POST(req: NextRequest) {
   try {
     // 🔑 API key check
-    const apiKey = req.headers.get("TheNews-api-key");
+    const apiKey = req.headers.get("xypher-api-key");
     if (!apiKey) {
       return NextResponse.json(
         { error: "Missing API key", code: "NO_API_KEY" },

@@ -1,34 +1,42 @@
-import jwt from "jsonwebtoken";
-import { NextResponse } from "next/server";
+// lib/sharedApi/auth.ts
+import { db } from "@/shared/libs/database";
+import { decryptKey } from "@/shared/libs/key/apiKey";
 
-const JWT_SECRET = process.env.JWT_SECRET_KEY as string;
-if (!JWT_SECRET) {
-  throw new Error("Missing JWT_SECRET_KEY in environment");
-}
 
-export async function verifyApiKey(apiKey: string | null) {
-  if (!apiKey) {
-    return {
-      error: NextResponse.json({ error: "Missing API Key" }, { status: 400 }),
-      userId: null, 
-    };
-  }
-
+/**
+ * Verify API key against database
+ */
+export const verifyApiKey = async (providedKey: string) => {
   try {
-    const decoded = jwt.verify(apiKey, JWT_SECRET) as any;
+    // 1. Fetch all API keys (you can optimize with index if you hash key instead)
+    const records = await db.apiKey.findMany();
 
-    return {
-      userId: decoded.id || decoded.user?.id || null,
-      payload: decoded,
-      error: null,
-    };
+    if (!records.length) {
+      return { error: "No API keys found", userId: null };
+    }
+
+    // 2. Try to match decrypted stored key with provided one
+    for (const record of records) {
+      try {
+        const rawKey = decryptKey(record.keyHash);
+
+        if (rawKey === providedKey) {
+          // 3. Expiration check
+          if (record.expiresAt && record.expiresAt < new Date()) {
+            return { error: "API key expired", userId: null };
+          }
+
+          return { error: null, userId: record.userId };
+        }
+      } catch (err) {
+        // Skip corrupted key
+        continue;
+      }
+    }
+
+    return { error: "Invalid API key", userId: null };
   } catch (err) {
-    return {
-      error: NextResponse.json(
-        { error: "Invalid API Key", details: err instanceof Error ? err.message : "Verification failed" },
-        { status: 401 }
-      ),
-      userId: null,
-    };
+    console.error("[VERIFY_API_KEY_ERROR]", err);
+    return { error: "Server error", userId: null };
   }
-}
+};

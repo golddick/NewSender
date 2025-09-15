@@ -1,26 +1,3 @@
-// // src/app/api/api-key/route.ts
-
-// import { createApiKey, regenerateApiKey } from "@/shared/libs/key/apiKey";
-// import { NextRequest, NextResponse } from "next/server";
-
-
-// export async function GET(req: NextRequest) {
-//   const searchParams = req.nextUrl.searchParams;
-//   const regenerate = searchParams.get("regenerate") === "true";
-
-//   try {
-//     const key = regenerate
-//       ? await regenerateApiKey()
-//       : await createApiKey();
-
-//     return NextResponse.json({ apiKey: key });
-//   } catch (err) {
-//     return NextResponse.json(
-//       { error: err instanceof Error ? err.message : "Failed to generate key" },
-//       { status: 500 }
-//     );
-//   }
-// }
 
 
 import { NextResponse } from "next/server";
