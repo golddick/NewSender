@@ -1,3 +1,4 @@
+// src/app/api/otp/regenerate/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/shared/libs/database";
@@ -17,7 +18,7 @@ function generateOtp(length = 6): string {
 
 export async function POST(req: NextRequest) {
   try {
-    // 🔑 API key check
+    // 🔑 Verify API key
     const apiKey = req.headers.get("xypher-api-key");
     if (!apiKey) {
       return NextResponse.json(
@@ -37,7 +38,6 @@ export async function POST(req: NextRequest) {
     // ✅ Validate input
     const body = await req.json();
     const parsed = schema.safeParse(body);
-
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.format(), code: "VALIDATION_ERROR" },
@@ -47,20 +47,19 @@ export async function POST(req: NextRequest) {
 
     const { email, appName } = parsed.data;
 
-    // 🔑 Generate OTP
+    // 🔑 Generate new OTP
     const otp = generateOtp();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    // 💾 Save/Update OTP in DB
+    // 💾 Upsert OTP in DB (create or update)
     await db.thirdPartyOTP.upsert({
       where: { email },
       update: { code: otp, expiresAt, createdBy: userId, createdAt: new Date() },
       create: { email, code: otp, expiresAt, createdBy: userId },
     });
 
-    // 📩 Send Email
-
-    const html = `
+    // 📩 Send email with new OTP
+     const html = `
   <div style="text-align:center;font-family:Arial, sans-serif;padding:20px;">
     <h2 style="text-transform: capitalize;">${appName} Verification Code</h2>
     <p>Use this OTP to verify your email:</p>
@@ -78,22 +77,7 @@ export async function POST(req: NextRequest) {
   </div>
 `;
 
-
-    // const html = `
-    //   <h2 style="text-transform: capitalize;">${appName} Verification Code</h2>
-    //   <p>Use this OTP to verify your email:</p>
-    //   <h1 style="font-size: 24px; letter-spacing: 3px;">${otp}</h1>
-    //   <p>This code will expire in 10 minutes.</p>
-    // `;
-    
-
-    const result = await sendEmail(
-      email,
-      "Your Verification Code",
-      html,
-      appName
-    );
-
+    const result = await sendEmail(email, "Your Verification Code", html, appName);
     if (!result.success) {
       return NextResponse.json(
         { error: "Failed to send email", code: "EMAIL_FAILED" },
@@ -102,11 +86,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: true, email, otp, expiresAt },
+      { success: true, email, otp, expiresAt, message: "OTP regenerated and sent successfully." },
       { status: 201 }
     );
   } catch (err: any) {
-    console.error("[OTP_SEND_ERROR]", err);
+    console.error("[OTP_REGENERATE_ERROR]", err);
     return NextResponse.json(
       { error: "Internal server error", code: "SERVER_ERROR" },
       { status: 500 }
