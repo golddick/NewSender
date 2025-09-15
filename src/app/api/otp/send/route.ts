@@ -8,7 +8,7 @@ import { withCors, corsOptions } from "@/lib/cors";
 
 const schema = z.object({
   email: z.string().email("Invalid email"),
-  appName: z.string().default("TheNews"),
+  appName: z.string().default("xypher"),
 });
 
 function generateOtp(length = 6): string {

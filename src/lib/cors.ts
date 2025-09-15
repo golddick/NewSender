@@ -1,71 +1,71 @@
+// // lib/cors.ts - Minimalist universal CORS
+// import { NextRequest, NextResponse } from "next/server";
 
-
-// import { NextResponse } from "next/server";
-
-// export function withCors(json: any, req?: Request, status = 200) {
+// // Universal CORS that works with any domain
+// export function withCors(json: any, status = 200) {
 //   const res = NextResponse.json(json, { status });
-
-//   // Grab the Origin header from the request
-//   const origin = req?.headers.get("origin") || "*";
-
-//   res.headers.set("Access-Control-Allow-Origin", origin);
-//   res.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-//   res.headers.set("Access-Control-Allow-Headers", "Content-Type, xypher-api-key");
-//   res.headers.set("Access-Control-Allow-Credentials", "true"); // optional
+  
+//   // Allow all origins
+//   res.headers.set("Access-Control-Allow-Origin", "*");
+//   res.headers.set("Access-Control-Allow-Methods", "*");
+//   res.headers.set("Access-Control-Allow-Headers", "*");
+//   res.headers.set("Access-Control-Max-Age", "86400");
+  
 //   return res;
 // }
 
-// // Preflight OPTIONS response
-// export function corsOptions(req?: Request) {
-//   return withCors({}, req, 200);
+// // Preflight OPTIONS response for any domain
+// export function corsOptions() {
+//   const res = new NextResponse(null, { status: 200 });
+  
+//   res.headers.set("Access-Control-Allow-Origin", "*");
+//   res.headers.set("Access-Control-Allow-Methods", "*");
+//   res.headers.set("Access-Control-Allow-Headers", "*");
+//   res.headers.set("Access-Control-Max-Age", "86400");
+  
+//   return res;
 // }
-
 
 
 // lib/cors.ts
 import { NextRequest, NextResponse } from "next/server";
 
-// Dynamic CORS that allows any origin but validates via API key
+// Dynamic CORS that allows any origin
 export function withCors(json: any, req: NextRequest, status = 200) {
   const res = NextResponse.json(json, { status });
   
   // Get the origin from the request
   const origin = req.headers.get("origin");
   
-  // Allow any origin - security is handled by API key validation
+  // Allow any origin
+  res.headers.set("Access-Control-Allow-Origin", origin || "*");
+  
   if (origin) {
-    res.headers.set("Access-Control-Allow-Origin", origin);
     res.headers.set("Vary", "Origin");
-  } else {
-    res.headers.set("Access-Control-Allow-Origin", "*");
   }
   
   res.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   res.headers.set("Access-Control-Allow-Headers", "Content-Type, xypher-api-key, Authorization");
   res.headers.set("Access-Control-Max-Age", "86400");
-  res.headers.set("Access-Control-Allow-Credentials", "true");
   
   return res;
 }
 
-// Preflight OPTIONS response
+// Preflight OPTIONS response - FIXED VERSION
 export function corsOptions(req: NextRequest) {
-  const res = new NextResponse(null, { status: 200 });
+  const response = new NextResponse(null, { status: 200 });
   
   const origin = req.headers.get("origin");
   
   // Allow any origin for preflight
+  response.headers.set("Access-Control-Allow-Origin", origin || "*");
+  response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type, xypher-api-key, Authorization");
+  response.headers.set("Access-Control-Max-Age", "86400");
+  
   if (origin) {
-    res.headers.set("Access-Control-Allow-Origin", origin);
-    res.headers.set("Vary", "Origin");
-  } else {
-    res.headers.set("Access-Control-Allow-Origin", "*");
+    response.headers.set("Vary", "Origin");
   }
   
-  res.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-  res.headers.set("Access-Control-Allow-Headers", "Content-Type, xypher-api-key, Authorization");
-  res.headers.set("Access-Control-Max-Age", "86400");
-  res.headers.set("Access-Control-Allow-Credentials", "true");
-  
-  return res;
+  return response;
 }
