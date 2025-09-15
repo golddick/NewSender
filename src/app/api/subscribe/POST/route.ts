@@ -1,18 +1,13 @@
-
-
-
-
-
 // app/api/subscriber/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { verifyApiKey } from "@/lib/sharedApi/auth";
 import { SubscriptionStatus } from "@prisma/client";
 import { addSubscriber } from "@/actions/subscriber/add.subscriber";
 import { db } from "@/shared/libs/database";
 import { z } from "zod";
 import { rateLimiter } from "@/lib/rateLimiter";
+import { withCors, corsOptions } from "@/lib/cors";
 
-// ✅ Input validation schema
 const subscriberSchema = z.object({
   email: z.string().email("Invalid email address"),
   name: z.string().optional(),
@@ -21,85 +16,41 @@ const subscriberSchema = z.object({
   pageUrl: z.string().url("Invalid URL").optional(),
 });
 
+export async function OPTIONS() {
+  return corsOptions();
+}
+
 export async function POST(req: NextRequest) {
   try {
-    // ✅ Validate API key
     const apiKey = req.headers.get("xypher-api-key");
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "Missing API key", code: "NO_API_KEY" },
-        { status: 401 }
-      );
-    }
+    if (!apiKey) return withCors({ error: "Missing API key", code: "NO_API_KEY" }, 401);
 
     const { userId, error } = await verifyApiKey(apiKey);
-    if (error || !userId) {
-      return NextResponse.json(
-        { error: error || "Unauthorized", code: "INVALID_API_KEY" },
-        { status: 403 }
-      );
-    }
+    if (error || !userId) return withCors({ error: error || "Unauthorized", code: "INVALID_API_KEY" }, 403);
 
-    // ✅ Call shared rate limiter
+    // Rate limiting
     const { success, limit, remaining, reset } = await rateLimiter.limit(apiKey);
-
     if (!success) {
-      const res = NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          code: "RATE_LIMITED",
-        },
-        { status: 429 }
-      );
-
-      // ✅ Add standard headers
+      const res = withCors({ error: "Rate limit exceeded", code: "RATE_LIMITED" }, 429);
       res.headers.set("X-RateLimit-Limit", limit.toString());
       res.headers.set("X-RateLimit-Remaining", remaining.toString());
       res.headers.set("X-RateLimit-Reset", reset.toString());
-
       return res;
     }
 
-    // ✅ Check subscription validity
-    const membership = await db.membership.findUnique({
-      where: { userId },
-      select: { plan: true, currentPeriodEnd: true },
-    });
-
-    if (!membership) {
-      return NextResponse.json(
-        { error: "No active subscription found", code: "NO_SUBSCRIPTION" },
-        { status: 403 }
-      );
+    // Check subscription
+    const membership = await db.membership.findUnique({ where: { userId } });
+    if (!membership || membership.subscriptionStatus !== "active") {
+      return withCors({ error: "No active subscription", code: "SUBSCRIPTION_INVALID" }, 403);
     }
 
-    if (
-      membership.plan === "FREE" ||
-      (membership.currentPeriodEnd && membership.currentPeriodEnd < new Date())
-    ) {
-      return NextResponse.json(
-        {
-          error: "Subscription expired or plan restricted",
-          code: "SUBSCRIPTION_INVALID",
-        },
-        { status: 403 }
-      );
-    }
-
-    // ✅ Parse and validate request body
+    // Validate request body
     const body = await req.json();
     const parsed = subscriberSchema.safeParse(body);
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: parsed.error.format(), code: "VALIDATION_ERROR" },
-        { status: 400 }
-      );
-    }
+    if (!parsed.success) return withCors({ error: parsed.error.format(), code: "VALIDATION_ERROR" }, 400);
 
     const { email, name, campaignId, source, pageUrl } = parsed.data;
 
-    // ✅ Add subscriber
     const result = await addSubscriber({
       email,
       name,
@@ -109,36 +60,15 @@ export async function POST(req: NextRequest) {
       pageUrl,
     });
 
-    if (result.error) {
-      return NextResponse.json(
-        { error: result.error, code: "SUBSCRIBE_FAILED" },
-        { status: 400 }
-      );
-    }
+    if (result.error) return withCors({ error: result.error, code: "SUBSCRIBE_FAILED" }, 400);
 
-    // ✅ Success response with rate-limit headers
-    const res = NextResponse.json(
-      { success: true, subscriber: result.subscriber },
-      { status: 201 }
-    );
+    const res = withCors({ success: true, subscriber: result.subscriber }, 201);
     res.headers.set("X-RateLimit-Limit", limit.toString());
     res.headers.set("X-RateLimit-Remaining", remaining.toString());
     res.headers.set("X-RateLimit-Reset", reset.toString());
-
     return res;
   } catch (err: any) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("[SUBSCRIBER_API_ERROR]", err);
-    }
-
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details:
-          process.env.NODE_ENV === "development" ? err.message : undefined,
-        code: "SERVER_ERROR",
-      },
-      { status: 500 }
-    );
+    console.error("[SUBSCRIBER_API_ERROR]", err);
+    return withCors({ error: "Internal server error", code: "SERVER_ERROR" }, 500);
   }
 }
