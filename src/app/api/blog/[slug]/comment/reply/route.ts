@@ -22,8 +22,11 @@ export async function POST(
     if (error || !userId) return withCors({ error: "Invalid API key" }, req, 403);
 
     const membership = await db.membership.findUnique({ where: { userId } });
-    if (!membership || membership.subscriptionStatus !== "active") {
-      return withCors({ error: "Inactive subscription" }, req, 403);
+     if (!membership ) {
+      return withCors({ 
+        error: "No User", 
+        code: "USER_NOT_FOUND" 
+      }, req, 403);
     }
 
     const { success, limit, remaining, reset } = await rateLimiter.limit(apiKey);
