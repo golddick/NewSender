@@ -403,8 +403,10 @@ model BlogComment {
   content   String
   authorId  String
   postId    String
-  userId    String
+  userId    String?
   parentId  String?
+  externalName String?
+  externalAvatar String?
   likes     Int      @default(0)
   status    String   @default("approved") // approved, pending, spam, trash
   createdAt DateTime @default(now())

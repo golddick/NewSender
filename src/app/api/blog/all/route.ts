@@ -149,10 +149,10 @@ export async function GET(req: NextRequest) {
       where: { userId: safeUserId } 
     });
     
-    if (!membership || membership.subscriptionStatus !== "active") {
+     if (!membership ) {
       return withCors({ 
-        error: "User does not have an active subscription", 
-        code: "SUBSCRIPTION_INVALID" 
+        error: "No User", 
+        code: "USER_NOT_FOUND" 
       }, req, 403);
     }
 
